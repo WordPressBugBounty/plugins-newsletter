@@ -501,6 +501,13 @@ function tnp_describe_table($table) {
                         </td>
                     </tr>
                     <tr>
+                        <td><code>newsletter_is_multilanguage</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_is_multilanguage') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_is_multilanguage') ?>
+                        </td>
+                    </tr>
+                    <tr>
                         <td><code>newsletter_languages</code></td>
                         <td>
                             <?php echo has_filter('newsletter_languages') ? '' : '-' ?>
@@ -512,6 +519,13 @@ function tnp_describe_table($table) {
                         <td>
                             <?php echo has_filter('newsletter_send_user') ? '' : '-' ?>
                             <?php echo $this->get_hook_functions('newsletter_send_user') ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_enqueue_style</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_enqueue_style') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_enqueue_style') ?>
                         </td>
                     </tr>
                 </tbody>

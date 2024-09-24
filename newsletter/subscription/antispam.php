@@ -78,13 +78,10 @@ if ($controls->is_action()) {
                     <table class="form-table">
                         <tr>
                             <th>
-                                <?php $controls->label(__('Disable antibot', 'newsletter'), '/subscription/antiflood') ?>
+                                <?php $controls->label(__('Disable', 'newsletter'), '/subscription/antiflood') ?>
                             </th>
                             <td>
                                 <?php $controls->yesno('disabled'); ?>
-                                <p class="description">
-                                    <?php esc_html_e('Disable for ajax form submission', 'newsletter'); ?>
-                                </p>
                             </td>
                         </tr>
 
@@ -150,6 +147,17 @@ if ($controls->is_action()) {
 
                 <div id="tabs-blacklists">
                     <table class="form-table">
+
+                        <tr>
+                            <th>
+                                <?php $controls->label(__('Address blacklist', 'newsletter'), '/subscription/antiflood/#email-blacklist') ?>
+                            </th>
+                            <td>
+                                <?php $controls->textarea('address_blacklist'); ?>
+                                <p class="description"><?php esc_html_e('One per line', 'newsletter') ?></p>
+                            </td>
+                        </tr>
+
                         <tr>
                             <th>
                                 <?php $controls->label(__('IP blacklist', 'newsletter'), '/subscription/antiflood/#ip-blacklist') ?>
@@ -165,15 +173,6 @@ if ($controls->is_action()) {
                                     IPv4 (aaa.bbb.ccc.ddd) supported. IPv6 supported. CIDR supported only for IPv4. Lines starting with # are
                                     considered comments.
                                 </p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                <?php $controls->label(__('Address blacklist', 'newsletter'), '/subscription/antiflood/#email-blacklist') ?>
-                            </th>
-                            <td>
-                                <?php $controls->textarea('address_blacklist'); ?>
-                                <p class="description"><?php esc_html_e('One per line', 'newsletter') ?></p>
                             </td>
                         </tr>
                     </table>

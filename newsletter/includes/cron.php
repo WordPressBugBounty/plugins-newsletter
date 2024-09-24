@@ -34,3 +34,11 @@ add_filter('cron_schedules', function ($schedules) {
     ];
     return $schedules;
 }, 1000);
+
+add_action('cron_reschedule_event_error', function ($result, $hook, $v ) {
+    \Newsletter\Logs::add('cron', 'Reschedule error: ' . $hook, 0, $result);
+}, 1, 3);
+
+add_action('cron_unschedule_event_error', function ($result, $hook, $v ) {
+    \Newsletter\Logs::add('cron', 'Unschedule error: ' . $hook, 0, $result);
+}, 1, 3);

@@ -2004,6 +2004,11 @@ span.tnp-user-status {
     vertical-align: top;
 }
 
+#tnp-body .form-table td pre{
+    border: 1px solid #ccc;
+    padding: 1em;
+}
+
 /* Default text container for customizable texts */
 #tnp-body .form-table .tnpc-default-text {
     border:1px dashed var(--tnp-gray-light);

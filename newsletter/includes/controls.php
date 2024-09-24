@@ -2457,6 +2457,16 @@ tnp_controls_init();
         $this->select2($name . '_off', $lists, null, true, null, __('None', 'newsletter'));
     }
 
+    function lists_on($name) {
+        $lists = $this->get_list_options();
+        $this->select2($name . '_on', $lists, null, true, null, __('None', 'newsletter'));
+    }
+
+    function lists_off($name) {
+        $lists = $this->get_list_options();
+        $this->select2($name . '_off', $lists, null, true, null, __('None', 'newsletter'));
+    }
+
     function autoresponder($name = 'autoresponder') {
         if (!class_exists('NewsletterAutoresponder')) {
             echo 'Autoresponder Addon required';

@@ -118,6 +118,12 @@ class NewsletterAddon {
         if (!$this->logger) {
             $this->logger = new NewsletterLogger($this->name);
         }
+        $this->setup_options();
+        if (!empty($this->options['log_level'])) {
+            if ($this->options['log_level'] > $logger->level) {
+                $logger->level = $this->options['log_level'];
+            }
+        }
         return $this->logger;
     }
 

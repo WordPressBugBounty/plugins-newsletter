@@ -40,6 +40,7 @@ if ($controls->is_action('delete_logs')) {
             <div class="tnp-tabs">
                 <ul>
                     <li><a href="#tabs-logs"><?php _e('Logs', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-cron"><?php _e('Scheduler', 'newsletter') ?></a></li>
                 </ul>
 
                 <div id="tabs-logs">
@@ -53,6 +54,10 @@ if ($controls->is_action('delete_logs')) {
                         }
                         ?>
                     </ul>
+                </div>
+
+                <div id="tabs-cron">
+                    <?php $controls->logs('cron'); ?>
                 </div>
             </div>
 

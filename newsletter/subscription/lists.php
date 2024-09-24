@@ -76,7 +76,10 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
         </p>
         <p>
             List wide operations on subscribers (delete, move, add, ...) can be performed
-            on the <a href="?page=newsletter_users_massive" target="_blank">Subscribers Maintenance page</a>.
+            on the Subscribers Maintenance page</a>.
+        </p>
+        <p>
+            Need more lists? <a href="https://www.thenewsletterplugin.com/documentation/subscription/newsletter-lists/#adding-more" target="_blank">Read here</a>.
         </p>
 
         <form method="post" action="">
