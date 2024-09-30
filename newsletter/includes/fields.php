@@ -379,7 +379,8 @@ class NewsletterFields {
                     'family_default' => false,
                     'size_default' => false,
                     'weight_default' => false,
-                    'align' => false
+                    'align' => false,
+                    'description' => ''
         ]);
 
         $this->_open('tnpf-button');
@@ -419,6 +420,7 @@ class NewsletterFields {
         ]);
         $this->controls->color($name . '_background');
         $this->controls->color($name . '_border_color');
+        $this->_description($attrs);
         $this->_close();
     }
 

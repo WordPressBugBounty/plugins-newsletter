@@ -118,12 +118,12 @@ class NewsletterAddon {
         if (!$this->logger) {
             $this->logger = new NewsletterLogger($this->name);
         }
-        $this->setup_options();
-        if (!empty($this->options['log_level'])) {
-            if ($this->options['log_level'] > $logger->level) {
-                $logger->level = $this->options['log_level'];
-            }
-        }
+//        $this->setup_options();
+//        if (!empty($this->options['log_level'])) {
+//            if ($this->options['log_level'] > $logger->level) {
+//                $logger->level = $this->options['log_level'];
+//            }
+//        }
         return $this->logger;
     }
 
@@ -289,6 +289,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
     var $dir = '';
     var $index_page = null;
     var $logs_page = null;
+    var $webhook_logger = null;
 
     function __construct($name, $version = '0.0.0', $dir = '') {
         parent::__construct($name, $version, $dir);
@@ -463,6 +464,53 @@ class NewsletterMailerAddon extends NewsletterAddon {
     function save_options($options, $language = '') {
         parent::save_options($options, $language);
         $this->enabled = !empty($options['enabled']);
+    }
+
+    /**
+     * @since 8.5.2
+     */
+    function get_webhook_url() {
+        return admin_url('admin-ajax.php') . '?action=newsletter-' . $this->name;
+    }
+
+    /**
+     * The logger (on file) for tracking the webhook activity.
+     *
+     * @since 8.5.2
+     */
+    function get_webhook_logger() {
+        if (!$this->webhook_logger) {
+            $this->webhook_logger = new NewsletterLogger($this->name . '-webhook');
+        }
+        return $this->webhook_logger;
+    }
+
+    /**
+     * Add a log for a received webhook event then shown on the addon's log page.
+     *
+     * @since 8.5.2
+     */
+    function webhook_log($description, $data = null) {
+        Newsletter\Logs::add($this->name . '-webhook', $description, 0, $data);
+    }
+
+    /**
+     * The function to be implemented to managed the webhook event.
+     *
+     * @since 8.5.2
+     */
+    function webhook_callback() {
+        $logger = $this->get_webhook_logger();
+        // ...
+    }
+
+    /**
+     * Return the webhooks in the delivery service custom format.
+     *
+     * @return array|WP_Error
+     */
+    function get_webhooks() {
+        return [];
     }
 
     /**
