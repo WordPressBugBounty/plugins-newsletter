@@ -285,9 +285,10 @@ class TNP_Composer {
 
         $email->editor = NewsletterEmails::EDITOR_COMPOSER;
         //add_filter('wp_kses_allowed_html', [self::class, 'hook_wp_kses_allowed_html'], 9999, 2);
-        add_filter('safe_style_css', [self::class, 'hook_safe_style_css'], 9999);
-        $message = wp_kses_post($controls->data['message']);
-        remove_filter('safe_style_css', [self::class, 'hook_safe_style_css']);
+        //add_filter('safe_style_css', [self::class, 'hook_safe_style_css'], 9999);
+        //$message = wp_kses_post($controls->data['message']);
+        $message = $controls->data['message'];
+        //remove_filter('safe_style_css', [self::class, 'hook_safe_style_css']);
         //remove_filter('wp_kses_allowed_html', [self::class, 'hook_wp_kses_allowed_html']);
 
         $email->message = self::get_html_open($email) . self::get_main_wrapper_open($email) .
