@@ -1,22 +1,32 @@
 <?php
 /*
  * @var $options array contains all the options the current block we're ediging contains
- * @var $controls NewsletterControls 
+ * @var $controls NewsletterControls
  */
 ?>
-<?php $fields->text('q', __('Search')) ?>
 
-<div style="clear: both; max-height: 300px; overflow: scroll; margin-bottom: 15px" id="tnp-giphy-results"></div>
+<div class="tnp-accordion">
+    <h3>GIF</h3>
+    <div>
+        <?php $fields->text('q', __('Search')) ?>
 
-<?php $controls->hidden('giphy_url') ?>
-<div id="giphy-preview">
-    <?php if (!empty($controls->data['giphy_url'])) { ?>
-        <img src="<?php echo esc_attr($controls->data['giphy_url']) ?>" style="max-width: 300px">
-    <?php } ?>
+        <div style="clear: both; max-height: 300px; overflow: scroll; margin-bottom: 15px" id="tnp-giphy-results"></div>
+
+        <?php $controls->hidden('giphy_url') ?>
+        <div id="giphy-preview">
+            <?php if (!empty($controls->data['giphy_url'])) { ?>
+                <img src="<?php echo esc_attr($controls->data['giphy_url']) ?>" style="max-width: 300px">
+            <?php } ?>
+        </div>
+
+
+    </div>
+
+    <h3><?php esc_html_e('Commons', 'newsletter'); ?></h3>
+    <div>
+        <?php $fields->block_commons() ?>
+    </div>
 </div>
-
-
-<?php $fields->block_commons() ?>
 
 <script type="text/javascript">
 

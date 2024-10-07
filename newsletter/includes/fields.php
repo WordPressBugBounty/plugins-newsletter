@@ -290,6 +290,32 @@ class NewsletterFields {
         $this->_close();
     }
 
+    public function block_style($label = '', $options = [], $attrs = []) {
+        $attrs = $this->_merge_attrs($attrs, ['reload' => false, 'after-rendering' => 'reload', 'class' => '']);
+        $this->_open('tnpf-field-block-style');
+        $this->_label($label);
+
+        foreach ($options as $key => $text) {
+            echo '<label class="tnpf-style"><input type="radio" style="width: auto" name="', $this->_name('block_style'), '" value="', esc_attr($key), '"';
+            echo ' data-after-rendering="reload"';
+            echo '>', esc_html($text), '</label>';
+        }
+
+        $this->_description($attrs);
+        $this->_close();
+    }
+
+    public function block_width($label = '', $attrs = []) {
+        $attrs = $this->_merge_attrs($attrs, ['full' => false]);
+        if ($attrs['full']) {
+            $this->select('block_width', $label,
+                    ['600' => '600', '650' => '650', '700' => '700', '750' => '750', 'full' => __('Full', 'newsletter')]);
+        } else {
+            $this->select('block_width', $label,
+                    ['600' => '600', '650' => '650', '700' => '700', '750' => '750']);
+        }
+    }
+
     public function align($name = 'align') {
         $this->select($name,
                 __('Align', 'newsletter'),
@@ -343,7 +369,7 @@ class NewsletterFields {
         $value = $this->controls->get_value($name);
         echo '<input id="', $this->_id($name), '" placeholder="', esc_attr($attrs['placeholder']), '" name="', $this->_name($name), '" type="text"';
         if (!empty($attrs['size'])) {
-            echo ' style="width: ', ((int)$attrs['size']), 'px"';
+            echo ' style="width: ', ((int) $attrs['size']), 'px"';
         }
         echo ' value="', esc_attr($value), '">', wp_kses_post($attrs['label_after']);
         $this->_description($attrs);
@@ -794,18 +820,41 @@ class NewsletterFields {
         $this->padding('block_padding', __('Padding', 'newsletter'));
     }
 
-    public function block_commons() {
+    public function block_commons($attrs = []) {
+
         $this->_open('tnp-block-commons');
-        $this->_label('Padding and background');
+
+        echo '<div class="tnp-field-row">';
+        echo '<div class="tnp-field-col-3">';
+        $this->_label('Background');
         $this->controls->color('block_background');
 
         echo '&nbsp;&rarr;&nbsp;';
         $this->controls->checkbox('block_background_gradient');
         $this->controls->color('block_background_2');
+        echo '</div>';
 
-        echo '&nbsp;&nbsp;&nbsp;';
+        echo '<div class="tnp-field-col-3">';
+        $this->_label('Full width');
+        $this->yesno('block_background_wide', '');
+        echo '</div>';
+
+        echo '<div class="tnp-field-col-3">';
+        $this->_label('Border');
+        $this->controls->color('block_border_color');
+        echo $this->controls->text('block_border_radius', ['width' => 40]), '<span style="font-size: 20px">⌀</span>';
+        echo '</div>';
+
+        echo '<div style="clear: both"></div>';
+        echo '<div class="tnpf-description">Borders and gradients are not widely supported</div>';
+        echo '</div>';
+
+        $this->_close();
+
+        $this->_open('tnp-block-commons');
+        $this->_label('Padding');
         $this->padding('block_padding', '', ['field_only' => true]);
-        echo '<div class="tnpf-description">Gradients are displayed only by few clients</div>';
+
         $this->_close();
     }
 }

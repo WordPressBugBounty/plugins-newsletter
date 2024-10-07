@@ -36,6 +36,10 @@ $defaults = array(
     'categories' => '',
     'tags' => '',
     'layout' => 'one',
+
+    'show_image' => 1,
+    'show_date' => 1,
+
     'language' => '',
     'button_label' => __('Read more...', 'newsletter'),
     'button_background' => '',
@@ -62,12 +66,47 @@ $defaults = array(
     'show_read_more_button' => true,
 );
 
+$styles = [
+    'default' => [
+        'block_background' => '',
+        'block_background2' => '',
+        'font_color' => '',
+        'font_family' => '',
+        'font_size' => '',
+        'font_weight' => '',
+        'title_font_color' => '',
+        'title_font_weight' => '',
+        'title_font_family' => '',
+        'title_font_size' => '',
+        'block_border_radius' => 0,
+        'block_border_color' => ''
+    ],
+    'inverted' => [
+        'block_background' => '#000000',
+        'font_color' => '#cccccc',
+        'title_font_color' => '#ffffff',
+        'title_font_weight' => 'bold',
+        'block_border_radius' => 0,
+        'block_border_color' => ''
+    ],
+    'boxed' => [
+        'block_background' => '#eeeeee',
+        'font_color' => '#333333',
+        'title_font_color' => '#333333',
+        'title_font_weight' => 'bold',
+        'block_border_radius' => 15,
+        'block_border_color' => '#dddddd'
+    ]
+];
+
 // Backward compatibility
 if (isset($options['automated_required'])) {
     $defaults['automated'] = '1';
 }
 
 $options = array_merge($defaults, $options);
+$block_style = $options['block_style'] ?? '';
+$options = array_merge($options, $styles[$block_style] ?? []);
 
 $filters = array();
 
@@ -169,7 +208,7 @@ $button_options['button_font_color'] = empty($options['button_font_color']) ? $g
 $button_options['button_font_weight'] = empty($options['button_font_weight']) ? $global_button_font_weight : $options['button_font_weight'];
 $button_options['button_background'] = empty($options['button_background']) ? $global_button_background_color : $options['button_background'];
 
-$show_read_more_button = (bool) $options['show_read_more_button'];
+$show_read_more_button = (bool) $options['show_read_more_button'] && !empty($options['button_label']);
 
 Newsletter::instance()->switch_language($options['language']);
 

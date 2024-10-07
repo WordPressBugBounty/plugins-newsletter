@@ -168,6 +168,7 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
         // Styles and scripts only for our admin pages
         if (self::is_admin_page()) {
             wp_enqueue_script('jquery-ui-tabs');
+            wp_enqueue_script('jquery-ui-accordion');
             wp_enqueue_script('jquery-ui-tooltip');
             wp_enqueue_script('jquery-ui-draggable');
             wp_enqueue_media();

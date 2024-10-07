@@ -1892,7 +1892,17 @@ span.tnp-user-status {
 
 
 
+#tnp-body .tnp-accordion h3.ui-state-active {
+    background-color: #bbb;
+    border-color: #aaa;
+    margin: 0;
+}
 
+#tnp-body .ui-accordion .ui-accordion-content {
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-bottom: 16px;
+}
 
 /* Classes used by controls. Should be prefixed with "tnpc-" */
 
@@ -2457,6 +2467,20 @@ html {
 
 .tnpf-field.tnp-categories {
 
+}
+
+.tnpf-field-block-style input[type=radio] {
+    display: none;
+}
+
+.tnpf-field-block-style label.tnpf-style {
+    display: inline-block;
+    background-color: #eee;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border-color: transparent;
+    margin-right: 10px;
 }
 
 /* The label for each category checkbox (should override the generic label appearance) */

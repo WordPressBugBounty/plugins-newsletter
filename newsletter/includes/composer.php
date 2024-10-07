@@ -269,13 +269,13 @@ class TNP_Composer {
      */
     static function update_email($email, $controls) {
         if (isset($controls->data['subject'])) {
-            $email->subject = $controls->data['subject'];
+            $email->subject = wp_strip_all_tags($controls->data['subject']);
         }
 
         // They should be only composer options
         foreach ($controls->data as $name => $value) {
             if (strpos($name, 'options_') === 0) {
-                $email->options[substr($name, 8)] = $value;
+                $email->options[substr($name, 8)] = wp_strip_all_tags($value);
             }
         }
 
@@ -284,10 +284,27 @@ class TNP_Composer {
         //}
 
         $email->editor = NewsletterEmails::EDITOR_COMPOSER;
+        //add_filter('wp_kses_allowed_html', [self::class, 'hook_wp_kses_allowed_html'], 9999, 2);
+        add_filter('safe_style_css', [self::class, 'hook_safe_style_css'], 9999);
+        $message = wp_kses_post($controls->data['message']);
+        remove_filter('safe_style_css', [self::class, 'hook_safe_style_css']);
+        //remove_filter('wp_kses_allowed_html', [self::class, 'hook_wp_kses_allowed_html']);
 
         $email->message = self::get_html_open($email) . self::get_main_wrapper_open($email) .
-                $controls->data['message'] . self::get_main_wrapper_close($email) . self::get_html_close($email);
+                $message . self::get_main_wrapper_close($email) . self::get_html_close($email);
     }
+
+    static function hook_safe_style_css($rules) {
+        $rules[] = 'display';
+        return $rules;
+    }
+
+//    static function hook_wp_kses_allowed_html($allowedposttags, $context) {
+//        $allowedposttags['table'][] = 'role';
+//        $allowedposttags['table'][] = 'style';
+//        $allowedposttags['table'][] = 'inline-class';
+//        $allowedposttags['td'][] = 'inline-class';
+//    }
 
     /**
      * Prepares a controls object injecting the relevant fields from an email
@@ -440,6 +457,10 @@ class TNP_Composer {
      * @return string
      */
     static function image($media, $attr = []) {
+
+        if (!$media) {
+            return '';
+        }
 
         $default_attrs = [
             'style' => 'display: inline-block; max-width: 100%!important; height: auto; padding: 0; border: 0; font-size: 12px',
@@ -631,7 +652,7 @@ class TNP_Composer {
      */
     static function grid($items = [], $attrs = []) {
         $attrs = wp_parse_args($attrs, ['width' => 600, 'columns' => 2, 'widths' => [], 'padding' => 10, 'responsive' => true]);
-        $width = (int) $attrs['width'];
+        $width = (int) $attrs['width'] - 2; // To compensate the border
         $columns = (int) $attrs['columns'];
         $padding = (int) $attrs['padding'];
 

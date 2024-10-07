@@ -30,6 +30,10 @@
     max-width: 100%!important;
 }
 
+#tnpb-content.tnp-view-mobile .p-0 {
+    padding: 0 !important;
+}
+
 #tnpb-content.tnp-view-mobile .pt-1 {
     padding-top: 15px!important;
 }

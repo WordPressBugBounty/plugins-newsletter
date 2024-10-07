@@ -976,6 +976,9 @@ class NewsletterControls {
         $attrs = array_merge(['placeholder' => '', 'size' => 40, 'required' => false, 'visible' => true], $attrs);
         $value = $this->get_value($name);
         $style = '';
+        if (isset($attrs['width'])) {
+            $style = 'width: ' . ((int)$attrs['width']) . 'px;';
+        }
         if (!$attrs['visible']) {
             $style .= 'display: none;';
         }
@@ -1001,6 +1004,7 @@ class NewsletterControls {
         if ($attrs['required']) {
             echo ' required';
         }
+
         echo '>';
     }
 
@@ -1935,6 +1939,7 @@ tnp_controls_init();
         }
       });
       jQuery(".tnp-tabs").tabs({});
+      jQuery(".tnp-accordion").accordion({collapsible: true, heightStyle: "content"});
 
     });
     function newsletter_media(name) {
@@ -2118,7 +2123,8 @@ tnp_controls_init();
             $fonts[''] = 'Default';
         }
 
-        $fonts = array_merge($fonts, ['Helvetica, Arial, sans-serif' => 'Helvetica, Arial',
+        $fonts = [
+            'Helvetica, Arial, sans-serif' => 'Helvetica, Arial',
             'Arial Black, Gadget, sans-serif' => 'Arial Black, Gadget',
             'Garamond, serif' => 'Garamond',
             'Courier, monospace' => 'Courier',
@@ -2126,16 +2132,49 @@ tnp_controls_init();
             'Impact, Charcoal, sans-serif' => 'Impact, Charcoal',
             'Tahoma, Geneva, sans-serif' => 'Tahoma, Geneva',
             'Times New Roman, Times, serif' => 'Times New Roman',
-            'Verdana, Geneva, sans-serif' => 'Verdana, Geneva']);
+            'Verdana, Geneva, sans-serif' => 'Verdana, Geneva',
+            'Lucida Sans Unicode, sans-serif' => 'Lucida Sans Unicode'];
+
+        $unsafe_fonts = [
+            'Palatino Linotype, serif' => 'Palatino Linotype',
+            'Calibri, sans-serif' => 'Calibri',
+            'Arial Narrow, sans-serif' => 'Arial Narrow',
+            'Book Antiqua, serif' => 'Book Antiqua',
+            'Century Gothic, sans-serif' => 'Century Gothic',
+
+        ];
 
         echo '<select class="tnpf-font-family" id="options-', esc_attr($name), '" name="options[', esc_attr($name), ']">';
+
+        if ($show_empty_option) {
+            echo '<option value="">', esc_html('Default', 'newsletter');
+        }
+
+        echo '<optgroup label="', esc_attr__('Email safe fonts', 'newsletter'), '">';
         foreach ($fonts as $font => $label) {
-            echo '<option value="', esc_attr($font), '"';
+
+            echo '<option value="', esc_attr($font), '" style="font-family: ', esc_attr($font), '"';
             if ($value == $font) {
                 echo ' selected';
             }
             echo '>', esc_html($label), '</option>';
+
         }
+        echo '</optgroup>';
+
+        echo '<optgroup label="', esc_attr__('Less email safe fonts', 'newsletter'), '">';
+        foreach ($unsafe_fonts as $font => $label) {
+
+            echo '<option value="', esc_attr($font), '" style="font-family: ', esc_attr($font), '"';
+            if ($value == $font) {
+                echo ' selected';
+            }
+            echo '>', esc_html($label), '</option>';
+
+        }
+        echo '</optgroup>';
+
+
         echo '</select>';
     }
 

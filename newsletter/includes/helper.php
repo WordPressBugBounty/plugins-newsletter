@@ -237,6 +237,9 @@ function _tnp_get_default_media($media_id, $size) {
 }
 
 function tnp_get_media($media_id, $size) {
+    if (!$media_id) {
+        return null;
+    }
     $src = wp_get_attachment_image_src($media_id, $size);
     if (!$src) {
         return null;

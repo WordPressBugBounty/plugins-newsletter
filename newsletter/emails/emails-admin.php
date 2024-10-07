@@ -106,36 +106,39 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         return $editor_type;
     }
 
+    /**
+     * Loads the options.php file of a block and outputs the generated form.
+     *
+     * @global wpdb $wpdb
+     */
     function ajax_tnpc_options() {
         global $wpdb;
-
-        $block = NewsletterComposer::instance()->get_block($_REQUEST['id']);
+        $block_id = sanitize_key($_REQUEST['id']);
+        $block = NewsletterComposer::instance()->get_block($block_id);
         if (!$block) {
-            die('Block not found with id ' . esc_html($_REQUEST['id']));
+            die('Block not found with id ' . $block_id);
         }
 
         if (!class_exists('NewsletterControls')) {
             include NEWSLETTER_INCLUDES_DIR . '/controls.php';
         }
-
-        $options = NewsletterComposer::options_decode(stripslashes_deep($_REQUEST['options']));
-        $composer = isset($_POST['composer']) ? $_POST['composer'] : [];
+        $encoded_options = wp_unslash($_REQUEST['options']);
+        $options = NewsletterComposer::options_decode($encoded_options);
+        $composer = wp_unslash($_POST['composer'] ?? []);
 
         if (empty($composer['width'])) {
             $composer['width'] = 600;
         }
 
-        $context = array('type' => '');
-        if (isset($_REQUEST['context_type'])) {
-            $context['type'] = $_REQUEST['context_type'];
-        }
+        $context = ['type' => sanitize_key($_REQUEST['context_type'] ?? '')];
 
+        // Used by the options.php script
         $controls = new NewsletterControls($options);
         $fields = new NewsletterFields($controls);
 
         $controls->init();
         echo '<input type="hidden" name="action" value="tnpc_render">';
-        echo '<input type="hidden" name="id" value="' . esc_attr($_REQUEST['id']) . '">';
+        echo '<input type="hidden" name="id" value="' . esc_attr($block_id) . '">';
         echo '<input type="hidden" name="context_type" value="' . esc_attr($context['type']) . '">';
         $inline_edits = '';
         if (isset($controls->data['inline_edits'])) {
@@ -201,11 +204,11 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
             wp_die('Invalid nonce', 403);
         }
 
-        $block_id = $_POST['id'];
+        $block_id = sanitize_key($_POST['id']);
         $wrapper = isset($_POST['full']);
         $options = $this->restore_options_from_request();
-
-        NewsletterComposer::instance()->render_block($block_id, $wrapper, $options, [], $_POST['composer']);
+        $composer = wp_unslash($_POST['composer'] ?? []);
+        NewsletterComposer::instance()->render_block($block_id, $wrapper, $options, [], $composer);
         die();
     }
 

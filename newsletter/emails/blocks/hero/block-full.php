@@ -26,7 +26,7 @@
 
 </style>
 
-<table width="100%" class="responsive" border="0" cellspacing="0" cellpadding="0">
+<table width="100%" class="responsive" border="0" cellspacing="0" cellpadding="0" role="presentation">
     <?php if ($media) { ?>
         <tr>
             <td align="center" inline-class="image">
@@ -35,7 +35,7 @@
         </tr>
     <?php } ?>
 
-    <?php if (empty($order)) { ?>    
+    <?php if (empty($order)) { ?>
         <tr>
             <td align="center" inline-class="title">
                 <?php echo $options['title'] ?>

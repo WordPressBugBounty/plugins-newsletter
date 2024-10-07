@@ -1686,6 +1686,10 @@ class NewsletterSubscription extends NewsletterModule {
             return;
         }
 
+        if (empty($this->get_main_option('notify_email'))) {
+            return;
+        }
+
         $message = $this->generate_admin_notification_message($user);
         $email = trim($this->get_main_option('notify_email'));
         $subject = $this->generate_admin_notification_subject('New subscription');

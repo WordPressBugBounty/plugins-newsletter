@@ -28,7 +28,7 @@ $items = [];
 ob_start();
 ?>
 
-<table align="left" class="responsive" border="0" cellspacing="0" cellpadding="0">
+<table align="left" class="responsive" border="0" cellspacing="0" cellpadding="0" role="presentation">
     <?php if (empty($order)) { ?>
         <tr>
             <td inline-class="title">

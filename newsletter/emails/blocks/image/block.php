@@ -24,9 +24,11 @@ $defaults = array(
 
 $options = array_merge($defaults, $options);
 
+// Migration
 if (isset($options['image-alt']) && empty($options['image_alt'])) {
     $options['image_alt'] = $options['image-alt'];
 }
+// Migration end
 
 if (empty($options['image']['id'])) {
     if (!empty($options['image-url'])) {
@@ -59,29 +61,27 @@ if (!empty($options['width'])) {
 }
 $media->link = $options['url'];
 $media->alt = $options['image_alt'];
-
-echo '<table width="100%" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td align="', esc_attr($options['align']), '">';
-
-if ($media->link) {
-     echo '<a href="', esc_attr($media->link), '" target="_blank" rel="noopener nofollow" style="display: block; font-size: 0; text-decoration: none; line-height: normal!important">';
-} else {
-}
-
-
-echo '<img src="', esc_attr($media->url), '" width="', esc_attr($media->width), '"';
-if ($media->height) {
-    echo ' height="', esc_attr($media->height), '"';
-}
-echo ' alt="', esc_attr($media->alt), '"';
-// The font size is important for the alt text
-echo ' border="0" style="display: block; height: auto; max-width: ', esc_attr($media->width), 'px !important; width: 100%; padding: 0; border: 0; font-size: 12px"';
-echo '>';
-
-if ($media->link) {
-    echo '</a>';
-} else {
-}
-
-echo '</td></tr></table>';
 ?>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation">
+    <tr>
+        <td align="<?php echo esc_attr($options['align']); ?>">
+
+            <?php if ($media->link) { ?>
+                <a href="', esc_attr($media->link), '" target="_blank" rel="noopener nofollow" style="display: block; font-size: 0; text-decoration: none; line-height: normal!important">';
+                <?php } ?>
+
+                <img src="<?php echo esc_attr($media->url); ?>" width="<?php echo esc_attr($media->width); ?>"
+                <?php echo $media->height ? 'height="' . esc_attr($media->height) . '"' : ''; ?>
+                     alt="<?php echo esc_attr($media->alt); ?>"
+                     border="0" style="display: block; height: auto; max-width: <?php echo esc_attr($media->width); ?>px !important; width: 100%; padding: 0; border: 0; font-size: 12px">
+
+                <?php if ($media->link) { ?>
+                    echo '</a>';
+            <?php } ?>
+
+        </td>
+    </tr>
+</table>
+
 

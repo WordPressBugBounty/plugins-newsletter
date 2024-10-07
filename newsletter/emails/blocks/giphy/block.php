@@ -23,16 +23,16 @@ $options = array_merge($defaults, $options);
 ?>
 <style>
     .image {
-        display: inline-block; 
-        max-width: 100%!important; 
+        display: inline-block;
+        max-width: 100%!important;
         height: auto!important;
         font-size: 0;
     }
 </style>
-<table width="100%" border="0" cellpadding="0" cellspacing="0" class="responsive">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="responsive" role="presentation">
     <tr>
         <td align="center">
-            <img src="<?php echo $options['giphy_url'] ?>" inline-class="image">
+            <img src="<?php echo esc_attr($options['giphy_url']) ?>" inline-class="image">
         </td>
     </tr>
 </table>

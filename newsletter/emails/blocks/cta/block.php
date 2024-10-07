@@ -20,14 +20,23 @@ $default_options = array(
     'button_align' => 'center',
     'block_padding_top' => 20,
     'block_padding_bottom' => 20,
+    'block_style' => '',
     'schema' => ''
 );
 
-if (!empty($options['schema'])) {
-    if ($options['schema'] === 'wire') {
+if (!empty($options['block_style'])) {
+    if ($options['block_style'] === 'wire') {
         $options['button_background'] = $composer['block_background'];
         $options['button_border_color'] = $composer['button_background_color'];
         $options['button_font_color'] = '#000000';
+    } elseif ($options['block_style'] === 'inverted') {
+        $options['button_background'] = '#000000';
+        $options['button_border_color'] = '';
+        $options['button_font_color'] = '#ffffff';
+    } elseif ($options['block_style'] === 'default') {
+        $options['button_background'] = '';
+        $options['button_border_color'] = '';
+        $options['button_font_color'] = '';
     }
 }
 
@@ -73,7 +82,6 @@ $options = array_merge($default_options, $options);
 //        $options['button_background'] = '#256F9C';
 //    }
 //}
-
 // Cloned since we need to set the general options
 $button_options = $options;
 

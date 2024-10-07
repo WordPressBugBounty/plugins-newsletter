@@ -9,7 +9,7 @@
 /* @var $options array */
 /* @var $wpdb wpdb */
 
-$default_options = array(
+$defaults = array(
     'html'=>'This is a piece of nice html code. You can use any tag, but be aware that email readers do not render everything.',
     'block_padding_left' => 15,
     'block_padding_right' => 15,
@@ -22,7 +22,7 @@ $default_options = array(
     'font_weight' => '',
 );
 
-$options = array_merge($default_options, $options);
+$options = array_merge($defaults, $options);
 $title_style = TNP_Composer::get_text_style($options, '', $composer);
 ?>
 <style>
@@ -33,7 +33,7 @@ $title_style = TNP_Composer::get_text_style($options, '', $composer);
         letter-spacing: normal;
     }
 </style>
-<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
         <td valign="top" align="center" inline-class="html-td" class="html-td-global">
             <?php echo $options['html'] ?>

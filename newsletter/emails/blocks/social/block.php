@@ -23,7 +23,9 @@ $type = (int) $options['type'];
 $width = (int) $options['width'];
 $social_icon_url = plugins_url('newsletter') . '/images/social-' . $type;
 
-$socials = ['facebook', 'twitter', 'pinterest', 'linkedin', 'tumblr', 'youtube', 'soundcloud', 'instagram', 'vimeo', 'telegram', 'vk', 'discord', 'tiktok', 'twitch', 'whatsapp', 'threads'];
+$socials = ['facebook', 'twitter', 'pinterest', 'linkedin', 'tumblr', 'youtube',
+    'soundcloud', 'instagram', 'vimeo', 'telegram', 'vk', 'discord', 'tiktok',
+    'twitch', 'whatsapp', 'threads'];
 
 $valid_socials = [];
 foreach ($socials as &$social) {
@@ -43,7 +45,7 @@ if (!$valid_socials) {
         text-decoration: none;
     }
 </style>
-<table border="0" cellspacing="0" cellpadding="0" width="100%" class="responsive">
+<table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">
     <tr>
         <td align="center" valign="middle">
             <?php foreach ($valid_socials as &$social) { ?>

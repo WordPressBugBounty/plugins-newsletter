@@ -550,8 +550,38 @@ class NewsletterComposer {
         static $kses_style_filter = false;
         include_once NEWSLETTER_INCLUDES_DIR . '/helper.php';
 
+        $block = $this->get_block($block_id);
+
+        // Block not found
+        if (!$block) {
+            if ($wrapper) {
+                echo '<table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="border-collapse: collapse; width: 100%;" class="tnpc-row tnpc-row-block" data-id="', esc_attr($block_id), '">';
+                echo '<tr>';
+                echo '<td data-options="" bgcolor="#ffffff" align="center" style="padding: 0; font-family: Helvetica, Arial, sans-serif; mso-line-height-rule: exactly;" class="edit-block">';
+            }
+            echo $this->get_outlook_wrapper_open($composer['width']);
+
+            echo '<p>Ops, this block type is not avalable.</p>';
+
+            echo $this->get_outlook_wrapper_close();
+
+            if ($wrapper) {
+                echo '</td></tr></table>';
+            }
+            return;
+        }
+
         if (!is_array($options)) {
             $options = [];
+        }
+
+        $defaults_file = $block['dir'] . '/defaults.php';
+        if (file_exists($defaults_file)) {
+            include $defaults_file;
+        }
+
+        if (!isset($defaults) || !is_array($defaults)) {
+            $defaults = [];
         }
 
         // On block first creation we still do not have the defaults... this is a problem we need to address in a new
@@ -564,10 +594,12 @@ class NewsletterComposer {
             'block_background' => '',
             'block_background_2' => '',
             'block_width' => $composer['width'],
-            'block_align' => 'center'
+            'block_align' => 'center',
+            'block_border_color' => '',
+            'block_border_radius' => '0',
         );
 
-        $options = array_merge($common_defaults, $options);
+        $options = array_merge($common_defaults, $defaults, $options);
 
         //Remove 'options_composer_' prefix
         $composer_defaults = ['width' => 600];
@@ -604,7 +636,7 @@ class NewsletterComposer {
         $global_button_font_weight = $composer['button_font_weight'];
         $global_button_background_color = $composer['button_background_color'];
 
-        $global_block_background = $composer['block_background'];
+        $global_block_background = sanitize_hex_color($composer['block_background']);
 
         $info = Newsletter::instance()->get_options('info');
 
@@ -614,30 +646,11 @@ class NewsletterComposer {
         $options = wp_kses_post_deep($options);
         remove_filter('safe_style_css', [$this, 'hook_safe_style_css']);
 
-        $block = $this->get_block($block_id);
-
         if (!isset($context['type'])) {
             $context['type'] = '';
         }
 
-        // Block not found
-        if (!$block) {
-            if ($wrapper) {
-                echo '<table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="border-collapse: collapse; width: 100%;" class="tnpc-row tnpc-row-block" data-id="', esc_attr($block_id), '">';
-                echo '<tr>';
-                echo '<td data-options="" bgcolor="#ffffff" align="center" style="padding: 0; font-family: Helvetica, Arial, sans-serif; mso-line-height-rule: exactly;" class="edit-block">';
-            }
-            echo $this->get_outlook_wrapper_open($composer['width']);
 
-            echo '<p>Ops, this block type is not avalable.</p>';
-
-            echo $this->get_outlook_wrapper_close();
-
-            if ($wrapper) {
-                echo '</td></tr></table>';
-            }
-            return;
-        }
 
         $out = ['subject' => '', 'return_empty_message' => false, 'stop' => false, 'skip' => false];
 
@@ -676,7 +689,7 @@ class NewsletterComposer {
         $options['block_padding_right'] = (int) str_replace('px', '', $options['block_padding_right']);
         $options['block_padding_left'] = (int) str_replace('px', '', $options['block_padding_left']);
 
-        $block_background = empty($options['block_background']) ? $global_block_background : $options['block_background'];
+        $block_background = empty($options['block_background']) ? $global_block_background : sanitize_hex_color($options['block_background']);
 
         // Internal TD wrapper
         $style = 'text-align: center; ';
@@ -687,26 +700,49 @@ class NewsletterComposer {
         $style .= 'padding: ' . $options['block_padding_top'] . 'px ' . $options['block_padding_right'] . 'px ' . $options['block_padding_bottom'] . 'px ' .
                 $options['block_padding_left'] . 'px;';
 
+        if (!empty($options['block_border_color'])) {
+            $style .= 'border: 1px solid ' . sanitize_hex_color($options['block_border_color']) . ';';
+        }
+
+        if (!empty($options['block_border_radius'])) {
+            $style .= 'border-collapse: separate !important;border-radius: ' . ((int) $options['block_border_radius']) . 'px;';
+        }
+
+        $background_style = '';
+
         if (!empty($block_background)) {
-            $style .= 'background-color: ' . $block_background . ';';
+            $background_style .= 'background-color: ' . $block_background . ';';
         }
 
         if (isset($options['block_background_gradient'])) {
-            $style .= 'background: linear-gradient(180deg, ' . $block_background . ' 0%, ' . $options['block_background_2'] . '  100%);';
+            $background_style .= 'background: linear-gradient(180deg, ' . $block_background . ' 0%, ' . $options['block_background_2'] . '  100%);';
         }
 
         $data = $this->options_encode($options);
         // First time block creation wrapper
         if ($wrapper) {
-            echo '<table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="border-collapse: collapse; width: 100%;" class="tnpc-row tnpc-row-block" data-id="', esc_attr($block_id), '">', "\n";
+            echo '<table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="border-collapse: collapse; width: 100%;" class="tnpc-row tnpc-row-block" data-id="', esc_attr($block_id), '">', "\n";
             echo "<tr>";
             echo '<td align="center" style="padding: 0;" class="edit-block">', "\n";
         }
 
-        // Container that fixes the width and makes the block responsive
-        echo $this->get_outlook_wrapper_open($options['block_width']);
 
-        echo '<table type="options" data-json="', esc_attr($data), '" class="tnpc-block-content" border="0" cellpadding="0" align="center" cellspacing="0" width="100%" style="width: 100%!important; max-width: ', $composer['width'], 'px!important">', "\n";
+        // Container to make the background color 100% wide
+        if (!empty($options['block_background_wide'])) {
+            echo '<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: separate !important; width: 100%!important;">', "\n";
+            echo "<tr>";
+            echo '<td align="center" width="100%" style="width: 100%; ', esc_attr($background_style), '" bgcolor="', esc_attr($block_background), '">';
+            $block_background = '';
+        } else {
+            // Applied to the internal container
+            $style .= $background_style;
+        }
+
+        // Container that fixes the width and makes the block responsive
+
+        echo $this->get_outlook_wrapper_open($composer['width']);
+        echo '<table role="presentation" type="options" data-json="', esc_attr($data), '" class="tnpc-block-content" border="0" cellpadding="0" align="center" cellspacing="0" width="100%" style="border-collapse: separate !important; width: 100%!important; max-width: ', $composer['width'], 'px!important">', "\n";
+
         echo "<tr>";
         //echo '<td align="', esc_attr($options['block_align']), '" style="', esc_attr($style), '" bgcolor="', esc_attr($block_background), '" width="100%">';
         echo '<td align="', esc_attr($options['block_align']), '" style="', esc_attr($style), '" bgcolor="', esc_attr($block_background), '">';
@@ -716,8 +752,12 @@ class NewsletterComposer {
         //echo "\n<!-- /block generated content -->\n";
 
         echo "</td></tr></table>";
+
         echo $this->get_outlook_wrapper_close();
 
+        if (!empty($options['block_background_wide'])) {
+            echo "</td></tr></table>";
+        }
         // First time block creation wrapper
         if ($wrapper) {
             echo "</td></tr></table>";
@@ -819,6 +859,12 @@ class NewsletterComposer {
     function regenerate_blocks($content, $context = [], $composer = []) {
         $this->logger->debug('Blocks regeneration started');
 
+        $result = ['content' => '', 'subject' => ''];
+
+        if (empty($content)) {
+            return $result;
+        }
+
         preg_match_all('/data-json="(.*?)"/m', $content, $matches, PREG_PATTERN_ORDER);
 
         $this->logger->debug('Found ' . count($matches[1]) . ' blocks');
@@ -826,7 +872,7 @@ class NewsletterComposer {
         // Compatibility
         $width = $composer['width'];
 
-        $result = ['content' => '', 'subject' => ''];
+
 
         foreach ($matches[1] as $match) {
             $a = html_entity_decode($match, ENT_QUOTES, 'UTF-8');

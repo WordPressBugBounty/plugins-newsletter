@@ -8,20 +8,41 @@
 </p>
 
 <?php $controls->hidden('placeholder') ?>
-<?php $fields->media('image', 'Choose an image', array('alt' => true)) ?>
-<?php $fields->url('image-url', 'or direct image src URL
-        <br>(like <strong>personalized images</strong> and <strong>countdowns</strong> from <a href="https://niftyimages.com/" target="_blank">niftyimages.com</a>)') ?>
-<?php $fields->text('image-alt', 'Alternative text') ?>
-<?php $fields->url('url', __('Link URL', 'newsletter')) ?>
 
-<div class="tnp-field-row">
-    <div class="tnp-field-col-2">
-        <?php $fields->size('width', __('Width', 'newsletter')) ?>
+<div class="tnp-accordion">
+    <h3><?php esc_html_e('Media gallery', 'newsletter'); ?></h3>
+    <div>
+        <?php $fields->media('image', 'Choose an image', array('alt' => true)) ?>
     </div>
-    <div class="tnp-field-col-2">
-        <?php $fields->align() ?>
+
+    <h3><?php esc_html_e('External URL', 'newsletter'); ?></h3>
+    <div>
+        <p>Use a direct image URL to external services
+            (for example <a href="https://niftyimages.com/" target="_blank">niftyimages.com</a>)
+        </p>
+
+        <?php $fields->url('image-url', __('Image URL', 'newsletter')) ?>
+        <?php $fields->text('image-alt', 'Alternative text') ?>
+    </div>
+
+    <h3><?php esc_html_e('Link and appearance', 'newsletter'); ?></h3>
+    <div>
+        <?php $fields->url('url', __('Link URL', 'newsletter')) ?>
+
+        <div class="tnp-field-row">
+            <div class="tnp-field-col-2">
+                <?php $fields->size('width', __('Width', 'newsletter')) ?>
+            </div>
+            <div class="tnp-field-col-2">
+                <?php $fields->align(); ?>
+            </div>
+        </div>
+    </div>
+
+    <h3><?php esc_html_e('Commons', 'newsletter'); ?></h3>
+    <div>
+        <?php $fields->block_commons() ?>
     </div>
 </div>
 
-<?php $fields->block_commons() ?>
 

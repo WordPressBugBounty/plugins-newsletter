@@ -158,7 +158,8 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                 <?php $fields->font('options_composer_text_font', __('Text font', 'newsletter')) ?>
                 <?php $fields->button_style('options_composer_button', __('Button style', 'newsletter')); ?>
 
-                <?php $fields->select('options_composer_width', __('Width', 'newsletter'), ['600' => '600', '650' => '650', '700' => '700']); ?>
+                <?php $fields->select('options_composer_width', __('Width', 'newsletter'),
+                        ['600' => '600', '650' => '650', '700' => '700', '750' => '750']); ?>
 
                 <button class="button-secondary" name="apply"><?php _e("Apply", 'newsletter') ?></button>
 

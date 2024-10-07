@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.6.2
-Stable tag: 8.5.2
+Stable tag: 8.5.3
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -128,6 +128,17 @@ Thank you, The Newsletter Team
 3. The Reports extension
 
 == Changelog ==
+
+= 8.5.3 =
+
+* Added styles support to header and footer blocks
+* Added accordion on some block for easy configuration
+* Added support for block layouts
+* Added support for block default config on external file
+* Added some new (not completely) email safe font
+* Added 2 new set of social icons (white and black pure logos)
+* New newsletter footer block layout
+* Added full wide block background
 
 = 8.5.2 =
 

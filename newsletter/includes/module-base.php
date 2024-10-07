@@ -960,7 +960,10 @@ class NewsletterModuleBase {
         return self::sanitize_name($value);
     }
 
-    static function sanitize_gender($gender) {
+    static function sanitize_gender($gender = 'n') {
+        if (empty($gender)) {
+            return 'n';
+        }
         $gender = trim(strtolower($gender));
         if (empty($gender)) {
             return 'n';
@@ -972,7 +975,7 @@ class NewsletterModuleBase {
         return $gender;
     }
 
-    static function sanitize_language($value) {
+    static function sanitize_language($value = '') {
         $languages = self::get_languages();
         return isset($languages[$value]) ? $value : '';
     }

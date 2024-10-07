@@ -266,6 +266,10 @@ class NewsletterStatistics extends NewsletterModule {
 
         $ip = $this->process_ip($ip);
 
+        if (strlen($url) > 254) {
+            $url = substr($url, 0, 254);
+        }
+
         $this->insert(NEWSLETTER_STATS_TABLE, array(
             'email_id' => $email_id,
             'user_id' => $user_id,
