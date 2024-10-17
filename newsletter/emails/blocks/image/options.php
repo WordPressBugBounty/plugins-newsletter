@@ -12,13 +12,15 @@
 <div class="tnp-accordion">
     <h3><?php esc_html_e('Media gallery', 'newsletter'); ?></h3>
     <div>
-        <?php $fields->media('image', 'Choose an image', array('alt' => true)) ?>
+        <?php $fields->media('image', 'Choose an image', ['alt' => true]) ?>
     </div>
 
     <h3><?php esc_html_e('External URL', 'newsletter'); ?></h3>
     <div>
-        <p>Use a direct image URL to external services
-            (for example <a href="https://niftyimages.com/" target="_blank">niftyimages.com</a>)
+        <p>
+            Use a direct image URL to external services
+            (for example <a href="https://niftyimages.com/" target="_blank">niftyimages.com</a>).
+            <strong>It has priority over the media selected from your gallery.</strong>
         </p>
 
         <?php $fields->url('image-url', __('Image URL', 'newsletter')) ?>

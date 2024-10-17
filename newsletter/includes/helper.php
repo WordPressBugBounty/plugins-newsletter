@@ -350,7 +350,12 @@ function tnp_resize($media_id, $size) {
         $original_size = $editor->get_size();
         if ($width > $original_size['width'] && ($height > $original_size['height'] || $height == 0)) {
             Newsletter::instance()->logger->error('Requested size larger than the original one');
-            return _tnp_get_default_media($media_id, $size);
+            if ($width < 800 || $original_size['width'] < 400) {
+                return _tnp_get_default_media($media_id, $size);
+            }
+            // Try with half the requested size
+            $width = floor($width / 2);
+            $height = floor($height / 2);
         }
 
         if ($height > $original_size['height'] && ($width > $original_size['width'] || $width == 0)) {

@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.6.2
-Stable tag: 8.5.6
+Stable tag: 8.5.7
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -129,9 +129,19 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 8.5.7 =
+
+* Added filter to support TranslatePress public page translation
+* Removed the full layout option on the footer block
+* Added "mobile" padding to the composer global settings for mobile devices useful for boxed layouts
+* NOTE: "mobile" padding works on Outlook and Gmail apps on Android, it could not work on other devices
+* NOTE: "mobile" padding does not work on Thunderbird desktop app when resized to simulate a mobile device (known behavior)
+* Added role "presentation" to tables for screen readers
+* Improved the media cropping when low res images are used
+
 = 8.5.6 =
 
-* Fixed the popup submission error
+* Changed the simple popup action url
 
 = 8.5.5 =
 

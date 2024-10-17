@@ -1,11 +1,12 @@
 <?php
+
 /*
  * Name: Call To Action
  * Section: content
  * Description: Call to action button
  */
 
-$default_options = array(
+$defaults = array(
     'button_label' => 'Call to action',
     'button_url' => home_url(),
     'button_font_family' => '',
@@ -21,7 +22,6 @@ $default_options = array(
     'block_padding_top' => 20,
     'block_padding_bottom' => 20,
     'block_style' => '',
-    'schema' => ''
 );
 
 if (!empty($options['block_style'])) {
@@ -67,48 +67,22 @@ unset($options['background']);
 unset($options['text']);
 unset($options['width']);
 
-$options = array_merge($default_options, $options);
-
-//if (!empty($options['schema'])) {
-//    if ($options['schema'] === 'dark') {
-//        $options['block_background'] = '#000000';
-//        $options['button_font_color'] = '#ffffff';
-//        $options['button_background'] = '#96969C';
-//    }
-//
-//    if ($options['schema'] === 'bright') {
-//        $options['block_background'] = '#ffffff';
-//        $options['button_font_color'] = '#ffffff';
-//        $options['button_background'] = '#256F9C';
-//    }
-//}
-// Cloned since we need to set the general options
-$button_options = $options;
+$options = array_merge($defaults, $options);
 
 if (method_exists('NewsletterReports', 'build_lists_change_url')) {
     $lists = [];
-    if (!empty($button_options['list'])) {
-        $lists[$button_options['list']] = 1;
+    if (!empty($options['list'])) {
+        $lists[$options['list']] = 1;
     }
-    if (!empty($button_options['unlist'])) {
-        $lists[$button_options['unlist']] = 0;
+    if (!empty($options['unlist'])) {
+        $lists[$options['unlist']] = 0;
     }
     if ($lists) {
-        $button_options["button_url"] = NewsletterReports::build_lists_change_url($button_options["button_url"], $lists);
+        $button_options["button_url"] = NewsletterReports::build_lists_change_url($options["button_url"], $lists);
     }
 }
-
-//if (!empty($options['list']) && method_exists('NewsletterReports', 'build_list_change_url')) {
-//    $button_options['button_url'] = NewsletterReports::build_list_change_url($button_options['button_url'], 0, 1);
-//}
 ?>
 
+<?php echo TNP_Composer::button($options, 'button', $composer); ?>
 
-<table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0; border-collapse: collapse;">
-    <tr>
-        <td align="<?php echo esc_attr($options['align']) ?>">
-            <?php echo TNP_Composer::button($button_options, 'button', $composer); ?>
-        </td>
-    </tr>
-</table>
 

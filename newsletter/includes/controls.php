@@ -2229,6 +2229,7 @@ tnp_controls_init();
         }
         echo '<div class="tnpc-media">';
         echo '<a class="tnpc-media-remove" href="#" onclick="newsletter_media_remove(\'' . esc_attr($name) . '\'); return false;">&times;</a>';
+        echo '<div class="tnpc-media-img">';
         if ($media === false) {
             $media = array('', '', '');
             $media_full = array('', '', '');
@@ -2237,6 +2238,7 @@ tnp_controls_init();
         } else {
             echo '<img style="max-width: 200px; max-height: 150px;" id="' . esc_attr($name) . '_img" src="' . esc_attr($media[0]) . '" onclick="newsletter_media(\'' . esc_attr($name) . '\')">';
         }
+        echo '</div>';
 
         echo '</div>';
         echo '<input type="hidden" id="' . esc_attr($name) . '_id" name="options[' . esc_attr($name) . '][id]" value="' . esc_attr($media_id) . '" size="5">';

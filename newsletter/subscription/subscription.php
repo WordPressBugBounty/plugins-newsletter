@@ -71,7 +71,7 @@ class NewsletterSubscription extends NewsletterModule {
 
         <script>
             var tnp_popup_test = <?php echo $this->popup_test ? 'true' : 'false' ?>;
-            var tnp_popup_url = '<?php echo Newsletter::add_qs(home_url('/'), 'na=popup&language=' . urlencode($this->language())); ?>';
+            var tnp_popup_url = '<?php echo Newsletter::add_qs(home_url('/'), 'na=popup&language=' . rawurlencode($this->language())); ?>';
             var tnp_popup_action = '<?php echo $this->build_action_url('sa'); ?>';
         </script>
         <script src="<?php echo esc_attr(plugins_url('assets/popup.js', __FILE__)) ?>" async></script>

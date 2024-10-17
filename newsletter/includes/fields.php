@@ -624,11 +624,13 @@ class NewsletterFields {
             }
             echo '<div class="tnpf-media-mini-select" data-name="' . esc_attr($name) . '" style="width: 100px; height: 100px; overflow: hidden; border: 1px dashed #999; position: relative" onclick="tnp_fields_media_mini_select(this)">';
             echo '<a style="position: absolute; top: 5px; right: 5px; background-color: #000; color: #fff; padding: 0px 5px 6px 5px; font-size: 24px; display: block; text-decoration: none" href="#" onclick="tnp_fields_media_mini_remove(\'' . esc_attr($name) . '\'); return false;">&times;</a>';
+            echo '<div class="tnpf-media-img">';
             if ($media) {
                 echo '<img style="max-width: 100%; height: auto; display: block" id="' . esc_attr($name) . '_img" src="' . esc_attr($media[0]) . '">';
             } else {
                 echo '<img style="max-width: 100%; height: auto; display: block" id="' . esc_attr($name) . '_img" src="">';
             }
+            echo '</div>';
 
             echo '</div>';
             echo '<input type="hidden" id="' . esc_attr($name) . '_id" name="options[' . esc_attr($name) . '][id]" value="' . esc_attr($media_id) . '">';

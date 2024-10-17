@@ -357,12 +357,12 @@ class NewsletterEmails extends NewsletterModule {
         return NewsletterComposer::instance()->get_block($id);
     }
 
-    function get_composer_css() {
-        return NewsletterComposer::instance()->get_composer_css();
+    function get_composer_css($attrs = []) {
+        return NewsletterComposer::instance()->get_composer_css($attrs);
     }
 
-    function get_composer_backend_css() {
-        return NewsletterComposer::instance()->get_composer_backend_css();
+    function get_composer_backend_css($attrs = []) {
+        return NewsletterComposer::instance()->get_composer_backend_css($attrs);
     }
 
     function restore_options_from_request() {

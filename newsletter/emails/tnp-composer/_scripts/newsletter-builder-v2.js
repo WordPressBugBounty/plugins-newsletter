@@ -538,6 +538,15 @@ function tnpc_load_preset(id, subject, isEditMode) {
 
         tnp_controls_init();
         _setBuilderAreaBackgroundColor(document.getElementById('options-options_composer_background').value);
+        let padding = document.getElementById('options-options_composer_padding').value;
+        if (padding !== '') {
+            padding = parseInt(padding);
+        } else {
+            padding = 0;
+        }
+        let style = document.getElementById('tnp-backend-css');
+        style.innerText = '#tnpb-content.tnp-view-mobile { padding-left: ' + padding + 'px; padding-right: ' + padding + 'px; padding-top: ' + padding + 'px; padding-bottom: ' + padding + 'px; }';
+
     }
 
 }
@@ -743,6 +752,16 @@ jQuery(function () {
                     jQuery('#tnpb-content').html(response.data.content);
                     //Change background color of builder area
                     _setBuilderAreaBackgroundColor(document.getElementById('options-options_composer_background').value);
+
+                    let padding = document.getElementById('options-options_composer_padding').value;
+                    if (padding !== '') {
+                        padding = parseInt(padding);
+                    } else {
+                        padding = 0;
+                    }
+                    let style = document.getElementById('tnp-backend-css');
+                    style.innerText = '#tnpb-content.tnp-view-mobile { padding-left: ' + padding + 'px; padding-right: ' + padding + 'px; }';
+
                     init_builder_area();
                 }
                 TNP.toast(response.data.message);

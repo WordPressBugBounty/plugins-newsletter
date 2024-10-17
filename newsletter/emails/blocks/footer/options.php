@@ -3,10 +3,10 @@
 ?>
 
 <?php
-$fields->select('block_layout', __('Layout', 'newsletter'), [
-    'default' => __('Default', 'newsletter'),
-    'full' => __('Full', 'newsletter'),
-]);
+//$fields->select('block_layout', __('Layout', 'newsletter'), [
+//    'default' => __('Default', 'newsletter'),
+//    'full' => __('Full', 'newsletter'),
+//]);
 ?>
 
 <?php

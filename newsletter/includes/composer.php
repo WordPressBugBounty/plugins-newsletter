@@ -125,6 +125,14 @@ class TNP_Composer {
      * @return type
      */
     static function get_html_open($email) {
+
+        $css_attrs = [
+            'body_padding_left' => ($email->options['composer_padding'] ?? '0') . 'px',
+            'body_padding_right' => ($email->options['composer_padding'] ?? '0') . 'px',
+            'body_padding_bottom' => ($email->options['composer_padding'] ?? '0') . 'px',
+            'body_padding_top' => ($email->options['composer_padding'] ?? '0') . 'px',
+        ];
+
         $open = '<!DOCTYPE html>' . "\n";
         $open .= '<html xmlns="https://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">' . "\n";
         $open .= '<head>' . "\n";
@@ -136,36 +144,15 @@ class TNP_Composer {
         $open .= '<meta name="format-detection" content="telephone=no">' . "\n";
         $open .= '<meta name="format-detection" content="email=no">' . "\n";
         $open .= '<meta name="x-apple-disable-message-reformatting">' . "\n";
-
-//        $open .= '<!--[if !mso]><!-->' . "\n";
-//        $open .= '<meta http-equiv="X-UA-Compatible" content="IE=edge" />' . "\n";
-//        $open .= '<!--<![endif]-->' . "\n";
-//        $open .= '<!--[if mso]>' . "\n";
-
         $open .= '<!--[if gte mso 9]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->' . "\n";
-
-//        $open .= '<style type="text/css">';
-//        $open .= 'table {border-collapse:collapse;border-spacing:0;margin:0;}';
-//        $open .= 'div, td {padding:0;}';
-//        $open .= 'div {margin:0 !important;}';
-//        $open .= '</style>';
-//        $open .= "\n";
-//        $open .= '<noscript>';
-//        $open .= '<xml>';
-//        $open .= '<o:OfficeDocumentSettings>';
-//        $open .= '<o:PixelsPerInch>96</o:PixelsPerInch>';
-//        $open .= '</o:OfficeDocumentSettings>';
-//        $open .= '</xml>';
-//        $open .= '</noscript>';
-//        $open .= "\n";
-//        $open .= '<![endif]-->';
-//        $open .= "\n";
         $open .= '<style type="text/css">' . "\n";
-        $open .= NewsletterEmails::instance()->get_composer_css();
+        $open .= NewsletterEmails::instance()->get_composer_css($css_attrs);
         $open .= "\n</style>\n";
         $open .= "</head>\n";
+
         $open .= '<body style="margin: 0; padding: 0; line-height: normal; word-spacing: normal;" dir="' . (is_rtl() ? 'rtl' : 'ltr') . '">';
         $open .= "\n";
+
         $open .= self::get_html_preheader($email);
 
         return $open;
@@ -200,9 +187,9 @@ class TNP_Composer {
             $bgcolor = $email->options['composer_background'];
         }
 
-        return "\n<table cellpadding='0' cellspacing='0' border='0' width='100%'>\n" .
+        return "\n<table cellpadding='0' cellspacing='0' border='0' width='100%' role='presentation'>\n" .
                 "<tr>\n" .
-                "<td bgcolor='$bgcolor' valign='top'><!-- tnp -->";
+                "<td bgcolor='$bgcolor' valign='top' class='wrapper'><!-- tnp -->";
     }
 
     /**
@@ -634,6 +621,9 @@ class TNP_Composer {
         $attrs = wp_parse_args($attrs, ['width' => 600, 'columns' => 2, 'widths' => [], 'padding' => 10, 'responsive' => true]);
         $width = (int) $attrs['width'] - 2; // To compensate the border
         $columns = (int) $attrs['columns'];
+        if (empty($columns)) {
+            return;
+        }
         $padding = (int) $attrs['padding'];
 
         if (empty($attrs['widths'])) {
@@ -643,10 +633,10 @@ class TNP_Composer {
         $td_widths = [];
         $sum = (float) array_sum($attrs['widths']);
         for ($i = 0; $i < $columns; $i++) {
-            $column_widths[$i] = ($width - $padding * $columns) * $attrs['widths'][$i] / $sum;
-            $td_widths[$i] = (int) (100 * $attrs['widths'][$i] / $sum);
+            $column_widths[$i] = floor(($width) * $attrs['widths'][$i] / $sum);
+            $td_widths[$i] = floor((100 * $attrs['widths'][$i] / $sum));
         }
-        $column_width = ($width - $padding * $columns) / $columns;
+
         $td_width = 100 / $columns;
         $chunks = array_chunk($items, $columns);
 
@@ -657,13 +647,19 @@ class TNP_Composer {
                 $e .= '<div style="text-align:center;font-size:0;">';
                 $e .= '<!--[if mso]><table role="presentation" width="100%"><tr><![endif]-->';
                 $i = 0;
-                foreach ($chunk as &$item) {
+                foreach ($chunk as $idx => &$item) {
                     $e .= '<!--[if mso]><td width="' . $td_widths[$i] . '%" style="width:' . $td_widths[$i] . '%;padding:' . $padding . 'px" valign="top"><![endif]-->';
 
                     $e .= '<div class="max-width-100" style="width:100%;max-width:' . $column_widths[$i] . 'px;display:inline-block;vertical-align: top;box-sizing: border-box;">';
 
                     // This element to add padding without deal with border-box not well supported
-                    $e .= '<div style="padding:' . $padding . 'px;">';
+//                    if ($idx === 0) {
+//                        $e .= '<div style="padding:' . $padding . 'px; padding-left: 0;" class="p-0">';
+//                    } elseif ($idx === count($items)-1) {
+//                        $e .= '<div style="padding:' . $padding . 'px; padding-right: 0" class="p-0">';
+//                    } else {
+                        $e .= '<div style="padding:' . $padding . 'px;" class="p-0">';
+//                    }
                     $e .= $item;
                     $e .= '</div>';
                     $e .= '</div>';

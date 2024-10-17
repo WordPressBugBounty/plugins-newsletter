@@ -723,6 +723,13 @@ class NewsletterModule extends NewsletterModuleBase {
             $url = Newsletter::instance()->get_newsletter_page_url($language);
         }
 
+        $url = apply_filters('newsletter_message_url', $url);
+
+        // Do not accept filtered empty urls...
+        if (empty($url)) {
+            $url = Newsletter::instance()->get_newsletter_page_url($language);
+        }
+
         return self::add_qs($url, $params, false);
     }
 

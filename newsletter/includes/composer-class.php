@@ -235,7 +235,7 @@ class NewsletterComposer {
      *
      * @return type
      */
-    function get_composer_css() {
+    function get_composer_css($attrs = []) {
         $css = file_get_contents(NEWSLETTER_DIR . '/emails/tnp-composer/css/newsletter.css');
         $blocks = $this->get_blocks();
         foreach ($blocks as $block) {
@@ -246,13 +246,33 @@ class NewsletterComposer {
             $css .= "/* " . $block['name'] . " */\n";
             $css .= file_get_contents($block['dir'] . '/style.css');
         }
+
+        $keys = array_map(
+                function ($key) {
+                    return 'var(--' . sanitize_key($key) . ')';
+                },
+                array_keys($attrs)
+        );
+
+        $css = str_replace($keys, $attrs, $css);
+
         return $css;
     }
 
-    function get_composer_backend_css() {
+    function get_composer_backend_css($attrs = []) {
         $css = file_get_contents(NEWSLETTER_DIR . '/emails/tnp-composer/css/backend.css');
         $css .= "\n\n";
         $css .= $this->get_composer_css();
+
+        $keys = array_map(
+                function ($key) {
+                    return 'var(--' . sanitize_key($key) . ')';
+                },
+                array_keys($attrs)
+        );
+
+        $css = str_replace($keys, $attrs, $css);
+
         return $css;
     }
 
@@ -871,8 +891,6 @@ class NewsletterComposer {
 
         // Compatibility
         $width = $composer['width'];
-
-
 
         foreach ($matches[1] as $match) {
             $a = html_entity_decode($match, ENT_QUOTES, 'UTF-8');

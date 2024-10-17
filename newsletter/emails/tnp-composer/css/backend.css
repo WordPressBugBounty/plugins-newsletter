@@ -1,5 +1,10 @@
 /* Contains some rules to simulate device layout on backend preview */
 
+#tnpb-content.tnp-view-mobile {
+    padding-left: var(--body_padding_left);
+    padding-right: var(--body_padding_right);
+}
+
 #tnpb-content.tnp-view-mobile table[class="responsive"],
 #tnpb-content.tnp-view-mobile table.responsive
 {
@@ -17,6 +22,10 @@
     padding-left: 0 !important;
     padding-right: 0 !important;
     float: none;
+}
+
+#tnpb-content.tnp-view-mobile .fs-90 {
+    font-size: 90% !important;
 }
 
 #tnpb-content.tnp-view-mobile img[class="responsive"],

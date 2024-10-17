@@ -18,6 +18,11 @@ foreach ($list as $key => $data) {
     $blocks[$data['section']][$key]['icon'] = $data['icon'];
 }
 
+$css_attrs = [
+    'body_padding_left' => intval($this->data['options_composer_padding'] ?? '0') . 'px',
+    'body_padding_right' => intval($this->data['options_composer_padding'] ?? '0') . 'px',
+];
+
 // order the sections
 $blocks = array_merge(array_flip(array('header', 'content', 'footer')), $blocks);
 
@@ -48,7 +53,10 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 </script>
 
 <style>
-<?php echo NewsletterEmails::instance()->get_composer_backend_css(); ?>
+<?php echo NewsletterEmails::instance()->get_composer_backend_css($css_attrs); ?>
+</style>
+
+<style id="tnp-backend-css">
 </style>
 
 <div id="tnp-builder" dir="ltr">
@@ -60,13 +68,13 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                 <table role="presentation" style="width: 100%">
                     <?php if (!empty($controls->data['sender_email'])) { ?>
                         <tr>
-                            <th dir="<?php echo $dir ?>"><?php _e('From', 'newsletter') ?></th>
+                            <th dir="<?php echo $dir ?>"><?php esc_html_e('From', 'newsletter') ?></th>
                             <td dir="<?php echo $dir ?>"><?php echo esc_html($controls->data['sender_email']) ?></td>
                         </tr>
                     <?php } ?>
                     <tr>
                         <th dir="<?php echo $dir ?>">
-                            <?php _e('Subject', 'newsletter') ?>
+                            <?php esc_html_e('Subject', 'newsletter') ?>
                             <?php if ($context_type === 'automated') { ?>
                                 <?php $this->field_help('https://www.thenewsletterplugin.com/documentation/addons/extended-features/automated-extension/#subject') ?>
                             <?php } ?>
@@ -98,7 +106,7 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 
                     <?php if ($show_test) { ?>
                         <span class="button-primary" data-tnp-modal-target="#test-newsletter-modal" title="<?php esc_attr_e('Test', 'newsletter') ?>">
-                            <i class="fas fa-paper-plane"></i> <?php //_e('Test', 'newsletter')       ?>
+                            <i class="fas fa-paper-plane"></i> <?php //_e('Test', 'newsletter')          ?>
                         </span>
                     <?php } ?>
 
@@ -157,11 +165,20 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                 <?php $fields->font('options_composer_title_font', __('Titles font', 'newsletter')) ?>
                 <?php $fields->font('options_composer_text_font', __('Text font', 'newsletter')) ?>
                 <?php $fields->button_style('options_composer_button', __('Button style', 'newsletter')); ?>
+                <div class="tnp-field-row">
+                    <div class="tnp-field-col-2">
+                        <?php
+                        $fields->select('options_composer_width', __('Width', 'newsletter'),
+                                ['600' => '600', '650' => '650', '700' => '700', '750' => '750']);
+                        ?>
 
-                <?php $fields->select('options_composer_width', __('Width', 'newsletter'),
-                        ['600' => '600', '650' => '650', '700' => '700', '750' => '750']); ?>
+                    </div>
+                    <div class="tnp-field-col-2">
+                        <?php $fields->text('options_composer_padding', __('Mobile padding', 'newsletter'), ['size'=> '40', 'description' => 'For boxed layouts']); ?>
+                    </div>
+                </div>
 
-                <button class="button-secondary" name="apply"><?php _e("Apply", 'newsletter') ?></button>
+                <button class="button-secondary" name="apply"><?php esc_html_e("Apply", 'newsletter') ?></button>
 
             </form>
 
@@ -170,8 +187,8 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
         <!-- Block options container (dynamically loaded -->
         <div id="tnpc-block-options">
             <div id="tnpc-block-options-buttons">
-                <span id="tnpc-block-options-cancel" class="button-secondary"><?php _e("Cancel", "newsletter") ?></span>
-                <span id="tnpc-block-options-save" class="button-primary"><?php _e("Apply", "newsletter") ?></span>
+                <span id="tnpc-block-options-cancel" class="button-secondary"><?php esc_html_e("Cancel", "newsletter") ?></span>
+                <span id="tnpc-block-options-save" class="button-primary"><?php esc_html_e("Apply", "newsletter") ?></span>
             </div>
             <form id="tnpc-block-options-form" onsubmit="return false;">
                 <!-- Block options -->
@@ -206,13 +223,13 @@ wp_enqueue_script('tnp-composer', plugins_url('newsletter') . '/emails/tnp-compo
 
 <?php include NEWSLETTER_DIR . '/emails/subjects.php'; ?>
 <div id="tnpc-placeholders" style="display: none">
-    <h3><?php esc_html_e('Placeholders', 'newsletter')?></h3>
+    <h3><?php esc_html_e('Placeholders', 'newsletter') ?></h3>
     <ul>
-        <li>{name} - <?php esc_html_e('First name', 'newsletter')?></li>
-        <li>{surname} - <?php esc_html_e('Last name', 'newsletter')?></li>
-        <li>{email} - <?php esc_html_e('Email', 'newsletter')?></li>
-        <li>{profile_N} - <?php esc_html_e('Profile numner N with N=1, 2, 3, ...', 'newsletter')?></li>
-        <li>{email_url} - <?php esc_html_e('Email online view', 'newsletter')?></li>
+        <li>{name} - <?php esc_html_e('First name', 'newsletter') ?></li>
+        <li>{surname} - <?php esc_html_e('Last name', 'newsletter') ?></li>
+        <li>{email} - <?php esc_html_e('Email', 'newsletter') ?></li>
+        <li>{profile_N} - <?php esc_html_e('Profile numner N with N=1, 2, 3, ...', 'newsletter') ?></li>
+        <li>{email_url} - <?php esc_html_e('Email online view', 'newsletter') ?></li>
     </ul>
     <p>
         <a href="https://www.thenewsletterplugin.com/documentation/newsletters/newsletter-tags/" target="_blank">See the documentation</a>

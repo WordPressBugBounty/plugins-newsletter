@@ -53,6 +53,8 @@ if (empty($options['image']['id'])) {
     if (!$media) {
         echo 'The selected media file cannot be processed';
         return;
+    } else {
+        $media->set_width($composer['content_width']);
     }
 }
 

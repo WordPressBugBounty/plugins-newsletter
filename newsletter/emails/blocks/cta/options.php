@@ -4,7 +4,7 @@
 $fields->controls->data['schema'] = '';
 ?>
 
-<?php $fields->block_style(__('Apply style', 'newsletter'), ['default' => 'Default', 'wire' => 'Wire', 'inverted' => 'Inverted']) ?>
+<?php $fields->block_style('', ['default' => 'Default', 'wire' => 'Wire', 'inverted' => 'Inverted']) ?>
 
 <div class="tnp-accordion">
     <h3><?php esc_html_e('Appearance', 'newsletter'); ?></h3>
