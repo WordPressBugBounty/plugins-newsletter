@@ -4,7 +4,8 @@
 /* @var $fields NewsletterFields */
 ?>
 <p>
-    We suggest <a href="https://wordpress.org/plugins/instant-images/" target="_blank">Instant Images</a> to get all images you need directly on the media gallery.
+    We suggest <a href="https://wordpress.org/plugins/instant-images/" target="_blank">Instant Images</a> to get all images
+    you need directly on the media gallery.
 </p>
 
 <?php $controls->hidden('placeholder') ?>

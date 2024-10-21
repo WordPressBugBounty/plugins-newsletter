@@ -184,6 +184,9 @@ $utc = new DateTimeZone('UTC');
                         <th><?php esc_html_e('Name', 'newsletter') ?></th>
                         <th><?php esc_html_e('Status', 'newsletter') ?></th>
                         <th><?php esc_html_e('Date') ?></th>
+                        <?php if ($is_multilanguage) { ?>
+                        <th><i class="fa fa-globe" aria-hidden="true"></i></th>
+                        <?php } ?>
                         <th style="white-space: nowrap"><?php $controls->checkbox('show_lists', __('Lists', 'newsletter'), ['onchange' => 'this.form.act.value=\'go\'; this.form.submit()']) ?></th>
                         <th>&nbsp;</th>
                         <th>&nbsp;</th>
@@ -204,7 +207,11 @@ $utc = new DateTimeZone('UTC');
                         <td>
                             <?php $controls->echo_date($s->created_at); ?>
                         </td>
-
+                        <?php if ($is_multilanguage) { ?>
+                        <td>
+                            <?php echo esc_html($s->language); ?>
+                        </td>
+                        <?php } ?>
                         <td>
                             <?php if (!empty($controls->data['show_lists'])) { ?>
                                 <small><?php

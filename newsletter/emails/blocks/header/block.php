@@ -18,6 +18,7 @@ $defaults = array(
     'block_padding_right' => 16,
     'block_background' => '',
     'block_layout' => 'default',
+    'block_style' => '',
     'block_background_wide' => '0',
 );
 
@@ -66,7 +67,7 @@ if (!empty($options['layout'])) {
 
 $options = array_merge($defaults, $options);
 
-$block_layout = sanitize_key($options['block_layout'] ?? '');
+$block_layout = sanitize_key($options['block_layout']);
 
 $block_style = $options['block_style'] ?? '';
 $options = array_merge($options, $styles[$block_style] ?? []);

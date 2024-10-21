@@ -811,7 +811,7 @@ class NewsletterControls {
             $this->hidden($name); // To preserve the value
         }
         echo '<select id="options-', esc_attr($name), '" name="options[', esc_attr($name), ']"';
-        if ($attrs) {
+        if ($attrs && is_array($attrs)) {
             foreach ($attrs as $key => $value) {
                 echo ' ', esc_attr($key), '="', esc_attr($value), '"';
             }

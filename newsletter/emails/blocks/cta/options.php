@@ -1,7 +1,6 @@
 <?php
 /* @var $fields NewsletterFields */
 
-$fields->controls->data['schema'] = '';
 ?>
 
 <?php $fields->block_style('', ['default' => 'Default', 'wire' => 'Wire', 'inverted' => 'Inverted']) ?>

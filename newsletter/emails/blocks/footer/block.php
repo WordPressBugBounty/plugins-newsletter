@@ -89,7 +89,7 @@ if (!isset($options['profile_enabled']) && isset($options['url'])) {
 }
 
 // Old set of settings
-if (!empty($options['view']) && !isset($options['block_layout'])) {
+if (isset($options['view']) && !isset($options['show_logo'])) {
     $options['show_company'] = 0;
     $options['show_motto'] = 0;
     $options['show_logo'] = 0;
@@ -97,7 +97,9 @@ if (!empty($options['view']) && !isset($options['block_layout'])) {
 }
 
 $options = array_merge($defaults, $options);
-$block_style = $options['block_style'] ?? 'default';
+$block_layout = sanitize_key($options['block_layout']);
+
+$block_style = sanitize_key($options['block_style']);
 $options = array_merge($options, $styles[$block_style] ?? []);
 
 $links = [];
@@ -144,8 +146,6 @@ foreach ($socials as &$social) {
 $show_socials = !empty($options['show_socials']) && !empty($valid_socials);
 
 $text_style = TNP_Composer::get_text_style($options, '', $composer, ['scale' => 0.8]);
-
-$block_layout = sanitize_key($options['block_layout'] ?? 'default');
 
 include __DIR__ . '/layouts/' . $block_layout . '/layout.php';
 

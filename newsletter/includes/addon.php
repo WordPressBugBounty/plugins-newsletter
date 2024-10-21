@@ -723,15 +723,17 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
     }
 
     /**
-     *
+     * Processes the subscription, logs errors and returns the subscriber.
+     * 
      * @param TNP_Subscription $subscription
-     * @param misex $form_id
+     * @param mixed $form_id
      * @return TNP_User|WP_Error
      */
     function subscribe($subscription, $form_id) {
         $logger = $this->get_logger();
-
-        $logger->debug($subscription);
+        if ($logger->is_debug) {
+            $logger->debug($subscription);
+        }
 
         $user = NewsletterSubscription::instance()->subscribe2($subscription);
 
@@ -742,6 +744,16 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
         }
 
         return $user;
+    }
+
+    /**
+     * Adds a log visible on the "logs" page for the specific form.
+     *
+     * @param string $form_id
+     * @param string $text
+     */
+    function log($form_id, $text) {
+        Newsletter\Logs::add($this->name . '-' . $form_id, $text);
     }
 
     /**
