@@ -52,10 +52,12 @@ if (!$controls->is_action()) {
         if (empty($controls->errors)) {
             $this->save_options($controls->data, '', $language);
             $controls->add_toast_saved();
-            $this->logger->debug('Main options saved');
-            NewsletterMainAdmin::instance()->set_completed_step('sender');
-            if ($controls->data['scheduler_max'] != 100) {
-                NewsletterMainAdmin::instance()->set_completed_step('delivery-speed');
+            if (!$language) {
+                $this->logger->debug('Main options saved');
+                NewsletterMainAdmin::instance()->set_completed_step('sender');
+                if ($controls->data['scheduler_max'] != 100) {
+                    NewsletterMainAdmin::instance()->set_completed_step('delivery-speed');
+                }
             }
         }
 
@@ -90,16 +92,18 @@ if (!$controls->is_action()) {
     }
 }
 
-$return_path = $controls->data['return_path'];
+if (!$language) {
+    $return_path = $controls->data['return_path'] ?? '';
 
-if (!empty($return_path)) {
-    list($return_path_local, $return_path_domain) = explode('@', $return_path);
+    if (!empty($return_path)) {
+        list($return_path_local, $return_path_domain) = explode('@', $return_path);
 
-    $sender = $this->get_option('sender_email');
-    list($sender_local, $sender_domain) = explode('@', $sender);
+        $sender = $this->get_option('sender_email');
+        list($sender_local, $sender_domain) = explode('@', $sender);
 
-    if ($sender_domain != $return_path_domain) {
-        $controls->warnings[] = __('Your Return Path domain is different from your Sender domain. Providers may require them to match.', 'newsletter');
+        if ($sender_domain != $return_path_domain) {
+            $controls->warnings[] = __('Your Return Path domain is different from your Sender domain. Providers may require them to match.', 'newsletter');
+        }
     }
 }
 

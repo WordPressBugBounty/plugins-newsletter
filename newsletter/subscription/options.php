@@ -26,7 +26,7 @@ if ($controls->is_action()) {
         $controls->data['confirmation_url'] = trim($controls->data['confirmation_url']);
 
         $this->save_options($controls->data, '', $language);
-        NewsletterMainAdmin::instance()->set_completed_step('notificartion');
+        NewsletterMainAdmin::instance()->set_completed_step('notification');
         $controls->add_toast_saved();
     }
 

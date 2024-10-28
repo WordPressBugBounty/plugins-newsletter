@@ -119,10 +119,10 @@ function percentValue($value, $total) {
             <div id="tabs">
 
                 <ul>
-                    <li><a href="#tabs-general"><?php esc_html_e('General', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-general"><?php esc_html_e('Main', 'newsletter') ?></a></li>
                     <li><a href="#tabs-preferences"><?php esc_html_e('Lists', 'newsletter') ?></a></li>
                     <li><a href="#tabs-profile"><?php esc_html_e('Custom fields', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-other"><?php esc_html_e('Other', 'newsletter') ?></a></li>
+                    <li class="tnp-tabs-advanced"><a href="#tabs-other"><?php esc_html_e('Advanced', 'newsletter') ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-meta">Meta</a></li>
                     <?php } ?>
@@ -183,7 +183,12 @@ function percentValue($value, $total) {
 
                     </table>
                 </div>
+
                 <div id="tabs-preferences" class="tnp-tab">
+                    <p>
+                        <a href="?page=newsletter_subscription_lists" target="_blank"><?php esc_html_e('Configure', 'newsletter') ?></a>
+                    </p>
+
                     <table class="form-table">
                         <tr>
                             <th>
@@ -198,6 +203,10 @@ function percentValue($value, $total) {
                 </div>
 
                 <div id="tabs-profile" class="tnp-tab">
+
+                    <p>
+                        <a href="?page=newsletter_subscription_customfields" target="_blank"><?php esc_html_e('Configure', 'newsletter') ?></a>
+                    </p>
 
                     <table class="widefat">
                         <thead>
@@ -284,7 +293,12 @@ function percentValue($value, $total) {
                             <th><?php esc_html_e('Profile URL', 'newsletter'); ?></th>
                             <td>
                                 <?php $profile_url = NewsletterProfile::instance()->get_profile_url($user) ?>
-                                <a href='<?php echo esc_attr($profile_url) ?>' target="_blank"><?php echo esc_attr($profile_url) ?></a>
+                                <a href='<?php echo esc_attr($profile_url) ?>' target="_blank"><?php echo esc_html($profile_url) ?></a>
+                                <?php if (NEWSLETTER_DEBUG) { ?>
+                                    <br>
+                                    <?php $profile_page_url = NewsletterProfile::instance()->get_profile_page_url($user) ?>
+                                    <a href='<?php echo esc_attr($profile_page_url) ?>' target="_blank"><?php echo esc_html($profile_page_url) ?></a>
+                                <?php } ?>
                             </td>
                         </tr>
 
@@ -293,6 +307,10 @@ function percentValue($value, $total) {
 
                 <?php if (NEWSLETTER_DEBUG) { ?>
                     <div id="tabs-meta" class="tnp-tab">
+
+                        <p>
+                            Dump of the meta data only for debug.
+                        </p>
 
                         <table class="widefat" style="width: auto">
                             <thead>

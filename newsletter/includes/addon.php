@@ -393,12 +393,17 @@ class NewsletterMailerAddon extends NewsletterAddon {
         return esc_html($this->menu_title) . $this->get_status_badge();
     }
 
-    /** @since 8.4.0 */
+    /**
+     * @since 8.4.0
+     */
     function echo_title() {
         echo esc_html($this->menu_title);
         $this->echo_status_badge();
     }
 
+    /**
+     * @since 8.5.9
+     */
     function set_bounced($email, $type = 'permanent', $data = '') {
         global $wpdb;
         $logger = $this->get_logger();
@@ -411,11 +416,15 @@ class NewsletterMailerAddon extends NewsletterAddon {
         }
 
         Newsletter::instance()->set_user_status($user, TNP_User::STATUS_BOUNCED);
-        add_user_log($user, $this->name);
+        Newsletter::instance()->add_user_log($user, $this->name);
         Newsletter\Logs::add($this->name, $email . ' - ' . $type . ' bounce', 0, $data);
+        do_action('newsletter_user_complained', $user);
     }
 
-    function set_complained($email) {
+    /**
+     * @since 8.5.9
+     */
+    function set_complained($email, $data = '') {
         global $wpdb;
         $logger = $this->get_logger();
         $logger->info($email . ' complained');
@@ -428,9 +437,14 @@ class NewsletterMailerAddon extends NewsletterAddon {
 
         Newsletter::instance()->set_user_status($user, TNP_User::STATUS_COMPLAINED);
         Newsletter::instance()->add_user_log($user, $this->name);
+        Newsletter\Logs::add($this->name, $email . ' - ' . $type . ' complaint', 0, $data);
+        do_action('newsletter_user_complained', $user);
     }
 
-    function set_unsubscribed($email) {
+    /**
+     * @since 8.5.9
+     */
+    function set_unsubscribed($email, $data = '') {
         global $wpdb;
         $logger = $this->get_logger();
         $logger->info($email . ' unsubscribed');
@@ -443,6 +457,8 @@ class NewsletterMailerAddon extends NewsletterAddon {
 
         Newsletter::instance()->set_user_status($user, TNP_User::STATUS_UNSUBSCRIBED);
         Newsletter::instance()->add_user_log($user, $this->name);
+        Newsletter\Logs::add($this->name, $email . ' - ' . $type . ' unsubscribe', 0, $data);
+        do_action('newsletter_user_unsubscribed', $user);
     }
 
     /**
@@ -724,7 +740,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
 
     /**
      * Processes the subscription, logs errors and returns the subscriber.
-     * 
+     *
      * @param TNP_Subscription $subscription
      * @param mixed $form_id
      * @return TNP_User|WP_Error

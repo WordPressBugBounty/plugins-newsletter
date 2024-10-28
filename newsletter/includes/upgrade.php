@@ -247,7 +247,7 @@ class NewsletterUpgrade {
         }
 
         if ($this->old_version < '8.0.8') {
-            $opt = get_option('newsletter_subscription');
+            $opt = $this->get_option_array('newsletter_subscription');
             if (!empty($opt['confirmed_disabled'])) {
                 $opt['welcome_email'] = '2';
                 update_option('newsletter_subscription', $opt);
@@ -255,8 +255,8 @@ class NewsletterUpgrade {
         }
 
         if ($this->old_version === '7.8.0' || $this->old_version === '7.8.1') {
-            $opt = get_option('newsletter_forms');
-            if ($opt !== false) {
+            $opt = $this->get_option_array('newsletter_forms');
+            if ($opt) {
                 update_option('newsletter_htmlforms', $opt, false);
             }
         }
@@ -268,30 +268,30 @@ class NewsletterUpgrade {
 
             // Create the new antispam options
 
-            $opt = get_option('newsletter_subscription_antibot');
-            if ($opt !== false) {
+            $opt = $this->get_option_array('newsletter_subscription_antibot');
+            if ($opt) {
                 update_option('newsletter_antispam', $opt, false);
             }
 
 
             // Create the new HTML forms options
 
-            $opt = get_option('newsletter_forms');
-            if ($opt !== false) {
+            $opt = $this->get_option_array('newsletter_forms');
+            if ($opt) {
                 update_option('newsletter_htmlforms', $opt, false);
             }
 
             // Some original options we need and that will be overwritten
-            $lists = get_option('newsletter_subscription_lists');
-            $profile = get_option('newsletter_profile');
+            $lists = $this->get_option_array('newsletter_subscription_lists');
+            $profile = $this->get_option_array('newsletter_profile');
 
             $languages = array_keys(Newsletter::instance()->get_languages());
 
             // Create the new form options (originally in the "profile" option set)
 
-            if (!get_option('newsletter_form')) {
+            if (!$this->get_option_array('newsletter_form')) {
 
-                $form = get_option('newsletter_profile');
+                $form = $profile;
 
                 if ($form) {
 
@@ -338,7 +338,7 @@ class NewsletterUpgrade {
                 update_option('newsletter_form', $form, true);
 
                 foreach ($languages as $language) {
-                    $form = get_option('newsletter_profile_' . $language);
+                    $form = $this->get_option_array('newsletter_profile_' . $language);
                     if (!empty($form)) {
                         // Remove the profile_* keys
                         foreach (array_keys($form) as $key) {
@@ -395,7 +395,7 @@ class NewsletterUpgrade {
 
             // Generate the new profile options related to the profile page and not anymore to the "form";
             // this is a delicate overwrite!
-            $opt = get_option('newsletter_profile_main');
+            $opt = $this->get_option_array('newsletter_profile_main');
             if ($opt) {
                 $opt['lists'] = [];
                 for ($i = 1; $i <= NEWSLETTER_LIST_MAX; $i++) {
@@ -420,7 +420,7 @@ class NewsletterUpgrade {
                 }
             }
 
-            $opt = get_option('newsletter');
+            $opt = $this->get_option_array('newsletter');
             if ($opt !== false) {
                 update_option('newsletter_subscription', $opt, true);
                 foreach ($languages as $language) {
@@ -433,16 +433,16 @@ class NewsletterUpgrade {
                 }
             }
 
-            $opt = get_option('newsletter_main_info');
-            if ($opt !== false) {
+            // Rename the company info options
+            $opt = $this->get_option_array('newsletter_main_info');
+            if ($opt) {
                 update_option('newsletter_info', $opt, false);
             }
 
 
             // Lists migration
-
-            $opt = get_option('newsletter_subscription_lists');
-            if ($opt !== false) {
+            $opt = $this->get_option_array('newsletter_subscription_lists');
+            if ($opt) {
                 foreach (array_keys($opt) as $key) {
                     if (strpos($key, '_subscription') > 0) {
                         unset($opt[$key]);
@@ -458,21 +458,22 @@ class NewsletterUpgrade {
                 delete_option('newsletter_subscription_lists');
                 foreach ($languages as $language) {
                     // Original lists options
-                    $opt = get_option('newsletter_subscription_lists_' . $language);
-                    if ($opt !== false) {
+                    $opt = $this->get_option_array('newsletter_subscription_lists_' . $language);
+                    if ($opt) {
                         update_option('newsletter_lists_' . $language, $opt, true);
                         delete_option('newsletter_subscription_lists_' . $language);
                     }
                 }
             }
 
-            $opt = get_option('newsletter_subscription_template');
-            if ($opt !== false) {
+            // Convert the message template options
+            $opt = $this->get_option_array('newsletter_subscription_template');
+            if ($opt) {
                 update_option('newsletter_template', $opt, true);
                 delete_option('newsletter_subscription_template');
                 foreach ($languages as $language) {
                     // Original lists options
-                    $opt = get_option('newsletter_subscription_template_' . $language);
+                    $opt = $this->get_option_array('newsletter_subscription_template_' . $language);
                     if ($opt !== false) {
                         update_option('newsletter_template_' . $language, $opt, true);
                         delete_option('newsletter_subscription_template_' . $language);

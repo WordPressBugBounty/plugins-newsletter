@@ -99,12 +99,14 @@ class NewsletterModuleBase {
             self::$previous_locale = self::$locale;
             self::$language = $language;
             self::$locale = $this->get_locale($language);
+            do_action('wpml_switch_language', $language);
         }
     }
 
     function restore_language() {
         self::$language = self::$previous_language;
         self::$locale = self::$previous_locale;
+        do_action('wpml_switch_language', self::$previous_language);
     }
 
     /** Returns a prefix to be used for option names and other things which need to be uniquely named. The parameter

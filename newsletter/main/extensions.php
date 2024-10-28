@@ -16,6 +16,8 @@ if ($controls->is_action('activate')) {
     }
 }
 
+NewsletterMainAdmin::instance()->set_completed_step('addons-manager');
+
 function tnp_extensions_table($extensions, $category) {
     ?>
 

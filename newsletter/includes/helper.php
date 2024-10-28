@@ -47,6 +47,7 @@ function tnp_post_thumbnail_src($post, $size = 'thumbnail', $alternative = '') {
 $tnp_excerpt_length = 0;
 
 function tnp_excerpt_length($length) {
+    
     global $tnp_excerpt_length;
     return $tnp_excerpt_length;
 }

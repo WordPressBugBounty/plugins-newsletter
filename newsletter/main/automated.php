@@ -6,6 +6,7 @@ defined('ABSPATH') || exit;
 include_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
 $controls = new NewsletterControls();
 $src = esc_attr(plugins_url('newsletter') . '/main/images/automated');
+NewsletterMainAdmin::instance()->set_completed_step('automated');
 ?>
 
 <style>
