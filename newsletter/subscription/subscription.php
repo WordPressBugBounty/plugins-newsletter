@@ -740,6 +740,8 @@ class NewsletterSubscription extends NewsletterModule {
 
         $subject = $this->replace($subject, $user);
 
+        $this->restore_language();
+
         return Newsletter::instance()->mail($user->email, $subject, $message, $headers);
     }
 

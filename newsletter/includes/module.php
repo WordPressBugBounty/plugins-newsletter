@@ -771,7 +771,7 @@ class NewsletterModule extends NewsletterModuleBase {
 
         $html = strpos($text, '<p') !== false;
         $home_url = home_url('/');
-        Newsletter::instance()->switch_language($user->language);
+        Newsletter::instance()->switch_language($user);
 
         $text = apply_filters('newsletter_replace', $text, $user, $email, $html, null);
 
@@ -861,6 +861,7 @@ class NewsletterModule extends NewsletterModuleBase {
         $text = str_replace('{company_legal}', wp_kses_post($options['footer_legal']), $text);
 
         Newsletter::instance()->restore_language();
+
         $user->_trusted = $trusted;
 
         return $text;
@@ -914,9 +915,7 @@ class NewsletterModule extends NewsletterModuleBase {
             }
         }
 
-        if ($user && $user->language) {
-            Newsletter::instance()->switch_language($user->language);
-        }
+        Newsletter::instance()->switch_language($user);
 
         $text = apply_filters('newsletter_replace', $text, $user, $email, $html, $context);
 
@@ -1019,9 +1018,8 @@ class NewsletterModule extends NewsletterModuleBase {
         $text = str_replace('{company_name}', $options['footer_title'], $text);
         $text = str_replace('{company_legal}', $options['footer_legal'], $text);
 
-        if ($user && $user->language) {
-            Newsletter::instance()->restore_language();
-        }
+        Newsletter::instance()->restore_language();
+
         return $text;
     }
 

@@ -137,6 +137,7 @@ class NewsletterUnsubscription extends NewsletterModule {
                 break;
 
             case 'uc':
+
                 $this->unsubscribe($user, $email);
                 $url = $this->build_message_url(null, 'unsubscribed', $user, $email);
                 setcookie('newsletter', '', 0, '/');

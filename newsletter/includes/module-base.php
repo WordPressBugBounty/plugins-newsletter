@@ -3,6 +3,8 @@
 class NewsletterModuleBase {
 
     static $language = '';
+    static $switched_languages = [];
+    static $switched_locales = [];
     static $locale = '';
     static $previous_language = '';
     static $previous_locale = '';
@@ -94,19 +96,31 @@ class NewsletterModuleBase {
      * @param string $language
      */
     function switch_language($language) {
-        if ($language && $this->is_multilanguage() && $language !== self::$language) {
-            self::$previous_language = self::$language;
-            self::$previous_locale = self::$locale;
-            self::$language = $language;
-            self::$locale = $this->get_locale($language);
-            do_action('wpml_switch_language', $language);
-        }
+        $language = $language->language ?? $language ?? '';
+
+//        if (NEWSLETTER_DEBUG) {
+//            error_log('Switch language: ' . $language);
+//        }
+        array_push(self::$switched_languages, self::$language);
+        array_push(self::$switched_locales, self::$locale);
+        self::$language = $language;
+        self::$locale = $this->get_locale($language);
+        do_action('wpml_switch_language', $language);
     }
 
     function restore_language() {
-        self::$language = self::$previous_language;
-        self::$locale = self::$previous_locale;
-        do_action('wpml_switch_language', self::$previous_language);
+        if (!self::$switched_languages) {
+//            if (NEWSLETTER_DEBUG) {
+//                error_log('Newsletter: unpaird call to restore_language()');
+//            }
+            return;
+        }
+        self::$language = array_pop(self::$switched_languages);
+        self::$locale = array_pop(self::$switched_locales);
+        do_action('wpml_switch_language', self::$language);
+//        if (NEWSLETTER_DEBUG) {
+//            error_log('Restore language: ' . self::$language);
+//        }
     }
 
     /** Returns a prefix to be used for option names and other things which need to be uniquely named. The parameter
