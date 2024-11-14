@@ -10,18 +10,21 @@ if ($media) {
 }
 ?>
 <style>
+
+    .link {
+        text-decoration: none;
+        line-height: normal;
+    }
     .text {
         <?php $text_style->echo_css(0.9) ?>
         text-decoration: none;
         line-height: 150%;
-        padding: 10px;
     }
 
     .title {
         <?php $title_style->echo_css(0.9) ?>
         text-decoration: none;
         line-height: normal;
-        padding: 10px;
         margin: 0;
     }
 
@@ -40,9 +43,9 @@ if ($media) {
 
         </td>
         <td width="80%" align="center" valign="center" dir="<?php echo $dir ?>">
-            <a href="<?php echo esc_attr(home_url()); ?>" target="_blank">
+            <a href="<?php echo esc_attr(home_url()); ?>" target="_blank" inline-class="link">
                 <span inline-class="title"><?php echo esc_attr($info['header_title']) ?></span>
-                <br><br>
+                <br>
                 <span inline-class="text"><?php echo esc_html($info['header_sub']) ?></span>
             </a>
         </td>

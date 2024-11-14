@@ -69,6 +69,8 @@ unset($options['width']);
 
 $options = array_merge($defaults, $options);
 
+$button_options = $options;
+
 if (method_exists('NewsletterReports', 'build_lists_change_url')) {
     $lists = [];
     if (!empty($options['list'])) {
@@ -83,6 +85,6 @@ if (method_exists('NewsletterReports', 'build_lists_change_url')) {
 }
 ?>
 
-<?php echo TNP_Composer::button($options, 'button', $composer); ?>
+<?php echo TNP_Composer::button($button_options, 'button', $composer); ?>
 
 

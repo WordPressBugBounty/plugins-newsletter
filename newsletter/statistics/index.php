@@ -37,6 +37,7 @@ foreach ($emails as $email) {
     $report->click_count += $data->click_count;
 
     $overview_labels[] = strftime('%a, %e %b %y', $email->send_on);
+    //$overview_labels[] = mb_substr($email->subject, 0, 10) . '...';
 
     $overview_open_rate[] = $data->open_rate;
     $overview_click_rate[] = $data->click_rate;
@@ -103,6 +104,9 @@ if (empty($emails)) {
 
             <div class="tnp-card">
                 <div class="tnp-card-title">Open rate</div>
+                <p>
+                    Every point represents a newsletter on the day it has been send. Stop over the point to see the subsject.
+                </p>
 
 
                 <div id="tnp-opens-chart" style="width: 90%">
@@ -123,7 +127,9 @@ if (empty($emails)) {
                                     borderColor: "#2980b9",
                                     //pointBorderColor: "#27AE60",
                                     pointBackgroundColor: "#2980b9",
-                                    data: <?php echo wp_json_encode($overview_open_rate) ?>
+                                    pointRadius: 10,
+                                    data: <?php echo wp_json_encode($overview_open_rate) ?>,
+                                    showLine: false,
                                 }
                             ]
                         },
@@ -160,7 +166,9 @@ if (empty($emails)) {
 
             <div class="tnp-card">
                 <div class="tnp-card-title">Click rate</div>
-
+                <p>
+                    Every point represents a newsletter on the day it has been send. Stop over the point to see the subsject.
+                </p>
 
                 <div id="tnp-clicks-chart" style="width: 90%">
                     <canvas id="tnp-clicks-chart-canvas"></canvas>
@@ -181,7 +189,9 @@ if (empty($emails)) {
                                     borderColor: "#2980b9",
                                     pointBorderColor: "#2980b9",
                                     pointBackgroundColor: "#2980b9",
+                                    pointRadius: 10,
                                     data: <?php echo wp_json_encode($overview_click_rate) ?>,
+                                    showLine: false,
                                 }
                             ]
                         },

@@ -1290,55 +1290,58 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         // All lists
-        if ($name == 'lists' || $name == 'preferences') {
+        if ($name === 'lists' || $name === 'preferences') {
             $list_ids = $this->get_form_option('lists');
-            if (!empty($list_ids)) {
 
-                $checked_ids = $this->get_form_option('lists_checked');
+            if (empty($list_ids)) {
+                return $this->build_field_admin_notice('No lists is set to be shown on Subscription/Form configuration for the "lists" field.');
+            }
 
-                if (isset($attrs['layout']) && $attrs['layout'] === 'dropdown') {
+            $checked_ids = $this->get_form_option('lists_checked');
 
-                    $buffer .= '<div class="tnp-field tnp-lists">';
-                    // There is not a default "label" for the block of lists, so it can only be specified in the shortcode attrs as "label"
-                    $buffer .= $this->_shortcode_label('lists', $attrs);
-                    $buffer .= '<select class="tnp-lists" name="nl[]" required>';
+            if (isset($attrs['layout']) && $attrs['layout'] === 'dropdown') {
 
-                    if (!empty($attrs['first_option_label'])) {
-                        $buffer .= '<option value="" selected disabled>' . esc_html($attrs['first_option_label']) . '</option>';
+                $buffer .= '<div class="tnp-field tnp-lists">';
+                // There is not a default "label" for the block of lists, so it can only be specified in the shortcode attrs as "label"
+                $buffer .= $this->_shortcode_label('lists', $attrs);
+                $buffer .= '<select class="tnp-lists" name="nl[]" required>';
+
+                if (!empty($attrs['first_option_label'])) {
+                    $buffer .= '<option value="" selected disabled>' . esc_html($attrs['first_option_label']) . '</option>';
+                }
+
+                foreach ($list_ids as $list_id) {
+                    $list = $this->get_list($list_id);
+                    if ($list && $list->is_private()) {
+                        continue;
                     }
+                    $buffer .= '<option value="' . esc_attr($list->id) . '">' . esc_html($list->name) . '</option>';
+                }
+                $buffer .= '</select>';
+                $buffer .= '</div>';
+            } else {
 
-                    foreach ($list_ids as $list_id) {
-                        $list = $this->get_list($list_id);
-                        if ($list && $list->is_private()) {
-                            continue;
-                        }
-                        $buffer .= '<option value="' . esc_attr($list->id) . '">' . esc_html($list->name) . '</option>';
-                    }
-                    $buffer .= '</select>';
-                    $buffer .= '</div>';
-                } else {
-
-                    $buffer .= '<div class="tnp-field tnp-lists">';
+                $buffer .= '<div class="tnp-field tnp-lists">';
 //                    if (!empty($attrs['label'])) {
 //                        $buffer .= '<p>' . $attrs['label'] . '</p>';
 //                    }
-                    foreach ($list_ids as $list_id) {
-                        $list = $this->get_list($list_id);
-                        if (!$list || $list->is_private()) {
-                            continue;
-                        }
-                        $idx++;
-                        $buffer .= '<div class="tnp-field tnp-field-checkbox tnp-field-list"><label for="nl' . $idx . '">';
-                        $buffer .= '<input type="checkbox" id="nl' . $idx . '" name="nl[]" value="' . esc_attr($list->id) . '"';
-                        if (in_array($list_id, $checked_ids)) {
-                            $buffer .= ' checked';
-                        }
-                        $buffer .= '> ' . esc_html($list->name) . '</label>';
-                        $buffer .= "</div>\n";
+                foreach ($list_ids as $list_id) {
+                    $list = $this->get_list($list_id);
+                    if (!$list || $list->is_private()) {
+                        continue;
                     }
-                    $buffer .= '</div>';
+                    $idx++;
+                    $buffer .= '<div class="tnp-field tnp-field-checkbox tnp-field-list"><label for="nl' . $idx . '">';
+                    $buffer .= '<input type="checkbox" id="nl' . $idx . '" name="nl[]" value="' . esc_attr($list->id) . '"';
+                    if (in_array($list_id, $checked_ids)) {
+                        $buffer .= ' checked';
+                    }
+                    $buffer .= '> ' . esc_html($list->name) . '</label>';
+                    $buffer .= "</div>\n";
                 }
+                $buffer .= '</div>';
             }
+
             return $buffer;
         }
 

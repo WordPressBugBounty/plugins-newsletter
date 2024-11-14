@@ -71,7 +71,7 @@ $emails = $this->get_emails('composer_template');
                 <thead>
                     <tr>
                         <th>Id</th>
-                        <th><?php _e('Subject', 'newsletter') ?></th>
+                        <th><?php esc_html_e('Subject', 'newsletter') ?></th>
                         <th>&nbsp;</th>
                         <th>&nbsp;</th>
                     </tr>

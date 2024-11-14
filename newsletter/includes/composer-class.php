@@ -450,6 +450,7 @@ class NewsletterComposer {
 
         $content = '';
 
+        // Templates in json format registered by plugins, addons, themes, ...
         $templates = $this->get_templates();
         if (isset($templates[$preset_id])) {
             $composer = (array) $templates[$preset_id]->settings;
@@ -468,6 +469,7 @@ class NewsletterComposer {
         }
 
 
+        // Default packaged templates
         if ($this->is_a_tnp_default_preset($preset_id)) {
 
             // Get preset from file
@@ -496,6 +498,7 @@ class NewsletterComposer {
                 }
             }
         } else {
+            // Templates saved as emails
             $email = NewsletterEmailsAdmin::instance()->get_email($preset_id);
             if ($email) {
                 $composer = $this->extract_composer_options($email);

@@ -582,7 +582,7 @@ class NewsletterControls {
     }
 
     function enabled($name = 'enabled', $attrs = []) {
-        $value = (int) $this->data[$name] ?? 0;
+        $value = (int) ($this->data[$name] ?? 0);
 
         echo '<select style="width: 100px" name="options[', esc_attr($name), ']" id="options-', esc_attr($name), '"';
         if (isset($attrs['bind_to'])) {
@@ -590,12 +590,12 @@ class NewsletterControls {
         }
         echo '>';
         echo '<option value="0"';
-        if ($value == 0) {
+        if ($value === 0) {
             echo ' selected';
         }
         echo '>', esc_html__('Disabled', 'newsletter'), '</option>';
         echo '<option value="1"';
-        if ($value == 1) {
+        if ($value === 1) {
             echo ' selected';
         }
         echo '>', esc_html__('Enabled', 'newsletter'), '</option>';
