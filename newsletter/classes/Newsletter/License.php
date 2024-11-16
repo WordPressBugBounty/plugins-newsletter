@@ -6,6 +6,10 @@ defined('ABSPATH') || exit;
 
 class License {
 
+    static function get_key() {
+        return \Newsletter::instance()->get_license_key();
+    }
+
     static function get_data($refresh = false) {
         return \Newsletter::instance()->get_license_data($refresh);
     }

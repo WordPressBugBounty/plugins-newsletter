@@ -12,7 +12,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
     const JOB_SKIPPED = 3;
 
     /**
-     * @return NewsletterSystem
+     * @return NewsletterSystemAdmin
      */
     static function instance() {
         if (self::$instance == null) {

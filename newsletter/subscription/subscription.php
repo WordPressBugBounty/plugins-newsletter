@@ -1294,7 +1294,8 @@ class NewsletterSubscription extends NewsletterModule {
             $list_ids = $this->get_form_option('lists');
 
             if (empty($list_ids)) {
-                return $this->build_field_admin_notice('No lists is set to be shown on Subscription/Form configuration for the "lists" field.');
+                return;
+                //return $this->build_field_admin_notice('No lists is set to be shown on Subscription/Form configuration for the "lists" field.');
             }
 
             $checked_ids = $this->get_form_option('lists_checked');

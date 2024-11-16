@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.6.1
+  Version: 8.6.2
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.6.1');
+define('NEWSLETTER_VERSION', '8.6.2');
 
 global $wpdb, $newsletter;
 
@@ -198,10 +198,10 @@ class Newsletter extends NewsletterModule {
      */
     function hook_plugins_loaded() {
 
-        $this->setup_language();
-
         // Used to load dependant modules
         do_action('newsletter_loaded', NEWSLETTER_VERSION);
+
+        $this->setup_language();
 
         if (function_exists('load_plugin_textdomain')) {
             load_plugin_textdomain('newsletter', false, plugin_basename(__DIR__) . '/languages');
@@ -326,26 +326,28 @@ class Newsletter extends NewsletterModule {
      * Sets the internal language used by admin panels to extract the language-related
      * values.
      *
-     * @return type
+     * @return string
      */
     function setup_language() {
 
-        if (defined('NEWSLETTER_LANGUAGE')) {
-            self::$is_multilanguage = true;
-        } else {
-            self::$is_multilanguage = apply_filters('newsletter_is_multilanguage', class_exists('SitePress') || function_exists('pll_default_language') || class_exists('TRP_Translate_Press'));
-        }
+        self::$is_multilanguage = apply_filters('newsletter_is_multilanguage', class_exists('SitePress') || function_exists('pll_default_language') || class_exists('TRP_Translate_Press'));
 
         if (self::$is_multilanguage) {
             self::$language = self::_get_current_language();
+
+//            if (!is_admin()) {
+//                // For plugin, like Translatepress that does not detrmine the language on AJAX calls
+//                setcookie('tnpl', self::$language, time() + DAY_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, is_ssl());
+//            } elseif (defined('DOING_AJAX') && DOING_AJAX) {
+//                if (!self::$language && isset($_COOKIE['tnpl'])) {
+//                    self::$language = $this->sanitize_language($_COOKIE['tnpl']);
+//                }
+//            }
             self::$locale = self::get_locale(self::$language);
         }
     }
 
     static function _get_current_language() {
-        if (defined('NEWSLETTER_LANGUAGE')) {
-            return NEWSLETTER_LANGUAGE;
-        }
 
         // WPML
         if (class_exists('SitePress')) {
