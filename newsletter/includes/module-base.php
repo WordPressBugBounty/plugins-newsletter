@@ -96,6 +96,10 @@ class NewsletterModuleBase {
      * @param string $language
      */
     function switch_language($language) {
+        if (!self::$is_multilanguage) {
+            return;
+        }
+
         $language = $language->language ?? $language ?? '';
 
 //        if (NEWSLETTER_DEBUG) {

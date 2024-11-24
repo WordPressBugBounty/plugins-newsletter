@@ -47,7 +47,7 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         $label = empty($attrs['label']) ? __('Unsubscribe', 'newsletter') : $attrs['label'];
 
-        $b = '<form action="' . esc_attr($this->build_action_url('uc')) . '" method="post" class="tnp-unsubscribe">';
+        $b = '<form action="' . esc_attr($this->build_action_url('uc')) . '" method="post" class="tnp-button-form tnp-unsubscribe">';
         $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
         $b .= '</form>';
@@ -62,7 +62,7 @@ class NewsletterUnsubscription extends NewsletterModule {
         }
 
         $label = empty($attrs['label']) ? __('Resubscribe', 'newsletter') : $attrs['label'];
-        $b = '<form action="' . esc_attr($this->build_action_url('reactivate')) . '" method="post" class="tnp-reactivate">';
+        $b = '<form action="' . esc_attr($this->build_action_url('reactivate')) . '" method="post" class="tnp-button-form tnp-reactivate">';
         $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
         $b .= '</form>';

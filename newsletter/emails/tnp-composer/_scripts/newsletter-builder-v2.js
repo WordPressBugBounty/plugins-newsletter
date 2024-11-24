@@ -470,8 +470,8 @@ const presetListModal = new TNPModal({
     showClose: true,
     style: {
         backgroundColor: '#ECF0F1',
-        height: '400px',
-        width: '740px',
+        height: '500px',
+        width: '900px',
     },
     onClose: function () {
         start_composer();

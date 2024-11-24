@@ -24,6 +24,29 @@ class NewsletterProfile extends NewsletterModule {
         add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
         add_action('newsletter_action', [$this, 'hook_newsletter_action'], 12, 3);
         add_action('newsletter_action_dummy', [$this, 'hook_newsletter_action_dummy'], 12, 3);
+
+        if (!is_admin() || defined('DOING_AJAX') && DOING_AJAX) {
+            add_shortcode('newsletter_export_button', [$this, 'shortcode_newsletter_export_button']);
+        }
+    }
+
+    function shortcode_newsletter_export_button($attrs, $content = '') {
+        $user = $this->get_current_user();
+
+        if (!$user || !$user->_trusted) {
+            if (NEWSLETTER_DEBUG) {
+                echo 'Not trusted';
+            }
+            return '';
+        }
+
+        $label = empty($attrs['label']) ? __('Export your data', 'newsletter') : $attrs['label'];
+
+        $b = '<form action="' . esc_attr($this->build_action_url('px')) . '" method="post" class="tnp-button-form tnp-export" target="_blank">';
+        $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
+        $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
+        $b .= '</form>';
+        return $b;
     }
 
     function get_profile_page_url($user, $alert = null) {
@@ -43,7 +66,7 @@ class NewsletterProfile extends NewsletterModule {
     }
 
     function hook_newsletter_action_dummy($action, $user, $email) {
-        if (!in_array($action, ['p', 'profile', 'profile-save', 'ps'])) {
+        if (!in_array($action, ['p', 'profile', 'profile-save', 'ps', 'px'])) {
             return;
         }
 
@@ -60,7 +83,7 @@ class NewsletterProfile extends NewsletterModule {
 
     function hook_newsletter_action($action, $user, $email) {
 
-        if (!in_array($action, ['p', 'profile', 'profile-save', 'ps'])) {
+        if (!in_array($action, ['p', 'profile', 'profile-save', 'ps', 'px'])) {
             return;
         }
 
@@ -85,7 +108,50 @@ class NewsletterProfile extends NewsletterModule {
                 $alert = is_wp_error($res) ? $res->get_error_message() : $this->get_text('saved');
 
                 $this->redirect($this->get_profile_page_url($user, $alert));
+
+            case 'px':
+                header('Content-Type: application/json;charset=UTF-8');
+                echo $this->build_export_json($user);
+                die();
         }
+    }
+
+    function build_export_json($user) {
+        global $wpdb;
+
+        $fields = array('name', 'surname', 'sex', 'created', 'ip', 'email');
+        $data = [
+            'email' => $user->email,
+            'first_name' => $user->name,
+            'last_name' => $user->surname,
+            'gender' => $user->sex,
+            'created' => $user->created,
+            'ip' => $user->ip,
+        ];
+
+        // Lists
+        $lists = $this->get_lists_public();
+        $data['lists'] = [];
+        foreach ($lists as $list) {
+            $field = 'list_' . $list->id;
+            if ($user->$field == 1) {
+                $data['lists'][] = $list->name;
+            }
+        }
+
+        // Profile
+        $profiles = $this->get_profiles_public();
+        $data['profiles'] = [];
+        foreach ($profiles as $profile) {
+            $field = 'profile_' . $profile->id;
+            $data['profiles'][] = ['name' => $profile->name, 'value' => $user->$field];
+        }
+
+//        $extra = apply_filters('newsletter_profile_export_extra', []);
+//
+//        $data = array_merge($extra, $data);
+
+        return json_encode($data, JSON_PRETTY_PRINT);
     }
 
     /**
@@ -171,7 +237,7 @@ class NewsletterProfile extends NewsletterModule {
 
         // Optimization
         if (!$user) {
-            $user =$this->get_current_user();
+            $user = $this->get_current_user();
         }
 
         $name = $attrs['name'] ?? '';

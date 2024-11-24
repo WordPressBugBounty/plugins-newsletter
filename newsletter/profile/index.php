@@ -80,7 +80,9 @@ foreach (['text'] as $key) {
                                 </div>
                                 <p class="description">
                                     Shown inside the Newsletter public page. Use <code>[newsletter_profile /]</code> where you want the edit form
-                                    to be inserted. Show the unsubscribe button <code>[newsletter_unsubscribe_button /]</code>.
+                                    to be inserted. Show the unsubscribe button <code>[newsletter_unsubscribe_button label="..." /]</code>.
+                                    Show the GDPR export
+                                    button using <code>[newsletter_export_button label="..." /]</code>
                                 </p>
                             </td>
                         </tr>
