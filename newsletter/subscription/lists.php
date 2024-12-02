@@ -32,6 +32,16 @@ if (!$controls->is_action()) {
         $this->query("update " . NEWSLETTER_USERS_TABLE . " set list_" . ((int) $controls->button_data) . "=1");
         $controls->add_toast_done();
     }
+
+    if ($controls->is_action('unconfirm')) {
+        $this->query("update " . NEWSLETTER_USERS_TABLE . " set status='S' where list_" . ((int) $controls->button_data) . "=1");
+        $controls->add_toast_done();
+    }
+
+    if ($controls->is_action('confirm')) {
+        $this->query("update " . NEWSLETTER_USERS_TABLE . " set status='C' where list_" . ((int) $controls->button_data) . "=1");
+        $controls->add_toast_done();
+    }
 }
 
 // Conditions for the count query
@@ -166,6 +176,8 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
                                         <?php if (!$language) { ?>
                                             <?php $controls->button_confirm('unlink', __('Unlink everyone', 'newsletter'), '', $i); ?>
                                             <?php $controls->button_confirm('link', __('Add everyone', 'newsletter'), '', $i); ?>
+                                            <?php $controls->button_confirm('unconfirm', __('Unconfirm all', 'newsletter'), '', $i); ?>
+                                            <?php $controls->button_confirm('confirm', __('Confirm all', 'newsletter'), '', $i); ?>
                                         <?php } ?>
                                     </td>
                                 </tr>

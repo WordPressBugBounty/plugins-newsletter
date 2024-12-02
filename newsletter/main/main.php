@@ -112,6 +112,8 @@ $license_data = License::get_data();
 if (is_wp_error($license_data)) {
     $controls->errors .= esc_html($license_data->get_error_message());
 }
+
+$batch_max = floor($controls->data['scheduler_max'] / 12);
 ?>
 
 <?php include NEWSLETTER_INCLUDES_DIR . '/codemirror.php'; ?>
@@ -274,9 +276,19 @@ if (is_wp_error($license_data)) {
                                     <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#speed') ?>
                                 </th>
                                 <td>
-                                    <?php $controls->text('scheduler_max', 5); ?> (min. 10)
+                                    <?php $controls->text('scheduler_max', 5); ?> (min. 12)
                                     <p class="description">
                                         <a href="?page=newsletter_system_delivery#tnp-speed">See the collected statistics</a>
+
+                                        <?php if ($batch_max < 5) { ?>
+                                        <br>
+                                            The delivery engines runs every 5 minutes (12 runs per hour). With that setting you'll have:
+                                            <br>
+                                            <?php echo $batch_max; ?> max emails every 5 minutes,
+                                            <?php echo $batch_max * 12; ?> max emails per hour,
+                                            <?php echo $batch_max * 12 * 24; ?> max emails per day
+                                        <?php } ?>
+
                                     </p>
                                 </td>
                             </tr>

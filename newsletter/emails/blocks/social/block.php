@@ -25,7 +25,7 @@ $social_icon_url = plugins_url('newsletter') . '/images/social-' . $type;
 
 $socials = ['facebook', 'twitter', 'pinterest', 'linkedin', 'tumblr', 'youtube',
     'soundcloud', 'instagram', 'vimeo', 'telegram', 'vk', 'discord', 'tiktok',
-    'twitch', 'whatsapp', 'threads'];
+    'twitch', 'whatsapp', 'threads', 'amazon', 'mastodon', 'bluesky', 'kickstarter'];
 
 $valid_socials = [];
 foreach ($socials as &$social) {

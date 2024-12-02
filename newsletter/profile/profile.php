@@ -429,7 +429,7 @@ class NewsletterProfile extends NewsletterModule {
             $this->switch_language($user->language);
             $buffer = '';
             $buffer .= '<div class="tnp tnp-form tnp-profile">';
-            $buffer .= '<form action="#" method="post">';
+            $buffer .= '<form action="' . esc_attr($this->build_action_url('ps')) . '" method="post">';
             $buffer .= '<input type="hidden" name="nk" value="' . esc_attr($user->id . '-' . $user->token) . '">';
             $buffer .= do_shortcode($content);
             $buffer .= '<div class="tnp-field tnp-field-button">';

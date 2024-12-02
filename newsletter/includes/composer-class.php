@@ -737,8 +737,10 @@ class NewsletterComposer {
             $background_style .= 'background-color: ' . $block_background . ';';
         }
 
-        if (isset($options['block_background_gradient'])) {
-            $background_style .= 'background: linear-gradient(180deg, ' . $block_background . ' 0%, ' . $options['block_background_2'] . '  100%);';
+        if (!empty($options['block_background_2'])) {
+            $options['block_background_2'] = sanitize_hex_color($options['block_background_2']);
+            $angle = (int)($options['block_background_angle'] ?? 180);
+            $background_style .= 'background: linear-gradient(' . $angle . 'deg, ' . $block_background . ' 0%, ' . $options['block_background_2'] . '  100%);';
         }
 
         $data = $this->options_encode($options);

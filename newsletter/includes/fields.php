@@ -827,21 +827,27 @@ class NewsletterFields {
         $this->_open('tnp-block-commons');
 
         echo '<div class="tnp-field-row">';
-        echo '<div class="tnp-field-col-3">';
+        echo '<div class="tnp-field-col-4">';
         $this->_label('Background');
         $this->controls->color('block_background');
-
         echo '&nbsp;&rarr;&nbsp;';
-        $this->controls->checkbox('block_background_gradient');
         $this->controls->color('block_background_2');
+
         echo '</div>';
 
-        echo '<div class="tnp-field-col-3">';
+        echo '<div class="tnp-field-col-4">';
+        $this->_label('Angle');
+        //$this->controls->checkbox('block_background_gradient');
+        $this->controls->select('block_background_angle', ['180' => '180°', '90°' => '90°']);
+        echo '</div>';
+
+
+        echo '<div class="tnp-field-col-4">';
         $this->_label('Full width');
         $this->yesno('block_background_wide', '');
         echo '</div>';
 
-        echo '<div class="tnp-field-col-3">';
+        echo '<div class="tnp-field-col-4">';
         $this->_label('Border');
         $this->controls->color('block_border_color');
         echo $this->controls->text('block_border_radius', ['width' => 40]), '<span style="font-size: 20px">⌀</span>';

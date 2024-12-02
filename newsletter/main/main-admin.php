@@ -139,7 +139,7 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
     function get_news() {
         $news = $this->get_option_array('newsletter_news');
         $updated = (int) get_option('newsletter_news_updated');
-        if ($updated > time() - DAY_IN_SECONDS) {
+        if (!NEWSLETTER_DEBUG && $updated > time() - DAY_IN_SECONDS) {
 
         } else {
             // Introduce asynch...
@@ -172,8 +172,10 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
         $today = date('Y-m-d');
         $list = [];
         foreach ($news as $n) {
-            if ($today < $n['start'] || $today > $n['end'])
-                continue;
+            if (!NEWSLETTER_DEBUG) {
+                if ($today < $n['start'] || $today > $n['end'])
+                    continue;
+            }
             if (in_array($n['id'], $news_dismissed))
                 continue;
             $list[] = $n;

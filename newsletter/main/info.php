@@ -196,6 +196,31 @@ if (!$controls->is_action()) {
                                     <?php $controls->text('threads_url', 40); ?>
                                 </td>
                             </tr>
+                            <tr>
+                                <th>Amazon</th>
+                                <td>
+                                    <?php $controls->text('amazon_url', 40); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Mastodon</th>
+                                <td>
+                                    <?php $controls->text('mastodon_url', 40); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Kickstarter</th>
+                                <td>
+                                    <?php $controls->text('kickstarter_url', 40); ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Bluesky</th>
+                                <td>
+                                    <?php $controls->text('bluesky_url', 40); ?>
+                                </td>
+                            </tr>
+
                         </table>
                     <?php } ?>
                 </div>
