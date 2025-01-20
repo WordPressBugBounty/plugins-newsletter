@@ -7,6 +7,16 @@ $extensions_url = '?page=newsletter_main_extension';
 if (class_exists('NewsletterExtensions')) {
     $extensions_url = '?page=newsletter_extensions_index';
 }
+
+// https://developer.wordpress.org/reference/classes/wp_user_query/
+$authors = get_users(['has_published_posts' => ['post'], 'number' => 50, 'fields' => ['ID', 'display_name']]);
+$authors_options = ['' => 'All'];
+foreach ($authors as $author) {
+    $authors_options[(string) $author->ID] = $author->display_name;
+}
+if (NEWSLETTER_DEBUG) {
+    $authors_options['-1'] = 'Test no valid author';
+}
 ?>
 <p>
     Custom post types can be added using our <a href="<?php echo $extensions_url ?>" target="_blank">Advanced Composer Blocks Addon</a>.
@@ -20,7 +30,7 @@ $fields->select('layout', __('Layout', 'newsletter'),
             'two' => __('Two columns', 'newsletter'),
             'big-image' => __('One column, big image', 'newsletter'),
             'full-post' => __('Full post', 'newsletter')
-        ])
+        ]);
 ?>
 
 <?php
@@ -28,7 +38,7 @@ $fields->block_style('', [
     'default' => __('Default', 'newsletter'),
     'inverted' => __('Inverted', 'newsletter'),
     'boxed' => __('Boxed', 'newsletter'),
-        ])
+])
 ?>
 
 <div class="tnp-accordion">
@@ -36,42 +46,42 @@ $fields->block_style('', [
     <?php if ($context['type'] == 'automated') { ?>
         <h3>Automated</h3>
         <div>
-                <p>
-                    While composing all posts are shown while on sending posts are extrated following the rules below.
-                    <a href="https://www.thenewsletterplugin.com/documentation/addons/extended-features/automated-extension/#regeneration" target="_blank">Read more</a>.
-                </p>
-                <?php $fields->select('automated_disabled', '', ['' => 'Use the last newsletter date and...', '1' => 'Do not consider the last newsletter']) ?>
+            <p>
+                While composing all posts are shown while on sending posts are extrated following the rules below.
+                <a href="https://www.thenewsletterplugin.com/documentation/addons/extended-features/automated-extension/#regeneration" target="_blank">Read more</a>.
+            </p>
+            <?php $fields->select('automated_disabled', '', ['' => 'Use the last newsletter date and...', '1' => 'Do not consider the last newsletter']) ?>
 
-                <div class="tnp-field-row">
-                    <div class="tnp-field-col-2">
-                        <?php
-                        $fields->select('automated_include', __('If there are new posts', 'newsletter'),
-                                [
-                                    'new' => __('Include only new posts', 'newsletter'),
-                                    'max' => __('Include specified max posts', 'newsletter')
-                                ],
-                                ['description' => '', 'class' => 'tnp-small'])
-                        ?>
-                    </div>
-                    <div class="tnp-field-col-2">
-                        <?php
-                        $fields->select('automated', __('If there are not new posts', 'newsletter'),
-                                [
-                                    '' => 'Show the message below',
-                                    '1' => 'Do not send the newsletter',
-                                    '2' => 'Remove this block'
-                                ],
-                                ['description' => '', 'class' => 'tnp-small'])
-                        ?>
-                        <?php $fields->text('automated_no_contents', null, ['placeholder' => 'No new posts message']) ?>
-                    </div>
+            <div class="tnp-field-row">
+                <div class="tnp-field-col-2">
+                    <?php
+                    $fields->select('automated_include', __('If there are new posts', 'newsletter'),
+                            [
+                                'new' => __('Include only new posts', 'newsletter'),
+                                'max' => __('Include specified max posts', 'newsletter')
+                            ],
+                            ['description' => '', 'class' => 'tnp-small'])
+                    ?>
                 </div>
-                <div style="clear: both"></div>
-
-                <?php $fields->text('main_title', __('Title', 'newsletter')) ?>
-                <?php $fields->font('main_title_font', false, ['family_default' => true, 'size_default' => true, 'weight_default' => true]) ?>
-                <?php $fields->align('main_title_align') ?>
+                <div class="tnp-field-col-2">
+                    <?php
+                    $fields->select('automated', __('If there are not new posts', 'newsletter'),
+                            [
+                                '' => 'Show the message below',
+                                '1' => 'Do not send the newsletter',
+                                '2' => 'Remove this block'
+                            ],
+                            ['description' => '', 'class' => 'tnp-small'])
+                    ?>
+                    <?php $fields->text('automated_no_contents', null, ['placeholder' => 'No new posts message']) ?>
+                </div>
             </div>
+            <div style="clear: both"></div>
+
+            <?php $fields->text('main_title', __('Title', 'newsletter')) ?>
+            <?php $fields->font('main_title_font', false, ['family_default' => true, 'size_default' => true, 'weight_default' => true]) ?>
+            <?php $fields->align('main_title_align') ?>
+        </div>
     <?php } ?>
 
 
@@ -132,7 +142,19 @@ $fields->block_style('', [
             </div>
             <div style="clear: both"></div>
         </div>
-        <?php $fields->language(); ?>
+
+        <div class="tnp-field-row">
+            <div class="tnp-field-col-2">
+                <?php
+                $fields->select('author', __('Author', 'newsletter'), $authors_options)
+                ?>
+            </div>
+            <div class="tnp-field-col-2">
+                <?php $fields->language('language', 'Language'); ?>
+            </div>
+            <div style="clear: both"></div>
+        </div>
+
     </div>
 
 

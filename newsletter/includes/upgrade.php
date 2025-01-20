@@ -29,8 +29,13 @@ class NewsletterUpgrade {
     }
 
     function db_delta($sql) {
+        global $wpdb;
         $res = dbDelta($sql);
         $this->logger->info($res);
+        if ($wpdb->last_error) {
+            $this->logger->fatal($wpdb->last_error);
+        }
+
     }
 
     function run() {

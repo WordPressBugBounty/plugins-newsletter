@@ -107,7 +107,7 @@ if (!$controls->is_action()) {
                                 </td>
                             </tr>
                             <tr>
-                                <th>Twitter</th>
+                                <th>X</th>
                                 <td>
                                     <?php $controls->text('twitter_url', 40); ?>
                                 </td>

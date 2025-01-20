@@ -237,6 +237,13 @@ class NewsletterComposer {
      */
     function get_composer_css($attrs = []) {
         $css = file_get_contents(NEWSLETTER_DIR . '/emails/tnp-composer/css/newsletter.css');
+
+        $css .= "/* Custom CSS */\n";
+
+        $css .= NewsletterEmails::instance()->get_main_option('css');
+
+        $css .= "/* End Custom CSS */\n";
+
         $blocks = $this->get_blocks();
         foreach ($blocks as $block) {
             if (!file_exists($block['dir'] . '/style.css')) {

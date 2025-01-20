@@ -24,7 +24,7 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer, ['scale' => 
 <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
     <?php if ($show_logo) { ?>
         <tr>
-            <td width="100%" align="center" style="padding-bottom: 24px">
+            <td width="100%" align="center" style="">
                 <?php echo TNP_Composer::image($media); ?>
             </td>
         </tr>
@@ -32,7 +32,7 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer, ['scale' => 
 
     <?php if ($show_motto) { ?>
         <tr>
-            <td width="100%" align="center" style="padding-bottom: 24px">
+            <td width="100%" align="center" style="padding-top: 24px">
                 <div inline-class="motto"><?php echo esc_html($info['header_sub']); ?></div>
             </td>
         </tr>
@@ -41,7 +41,7 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer, ['scale' => 
 
     <?php if ($show_socials) { ?>
         <tr>
-            <td align="center" valign="middle" style="padding-bottom: 24px">
+            <td align="center" valign="middle" style="padding-top: 24px">
                 <?php foreach ($valid_socials as &$social) { ?>
                     <a href="<?php echo esc_url($info[$social . '_url'], ['http', 'https']) ?>" inline-class="link" target="_blank"><img src="<?php echo esc_attr($social_icon_url) ?>/<?php echo esc_attr($social) ?>.png" width="<?php echo esc_attr($social_width) ?>" height="<?php echo esc_attr($social_width) ?>" alt="<?php echo esc_attr($social) ?>"></a>&nbsp;
                 <?php } ?>
@@ -50,14 +50,14 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer, ['scale' => 
     <?php } ?>
 
     <tr>
-        <td width="100%" align="center" dir="<?php echo $dir ?>" style="padding-bottom: 24px">
+        <td width="100%" align="center" dir="<?php echo $dir ?>" style="padding-top: 24px">
             <?php echo implode('<span inline-class="text">&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</span>', $links) ?>
         </td>
     </tr>
 
     <?php if ($show_company) { ?>
         <tr>
-            <td width="100%" align="center" dir="<?php echo $dir ?>">
+            <td width="100%" align="center" dir="<?php echo $dir ?>" style="padding-top: 24px">
                 <div inline-class="text">
                     <?php echo esc_html($info['footer_title']) ?>
                     <br>

@@ -1,6 +1,6 @@
 <?php
 $size = array(600, 400, $image_crop);
-$total_width = $composer['width'] - $options['block_padding_left'] - $options['block_padding_right'];
+$total_width = $composer['content_width'];
 $column_width = $total_width / 2 - 20;
 
 $title_style = TNP_Composer::get_style($options, 'title', $composer, 'title', ['scale' => .8]);
@@ -74,19 +74,6 @@ $items = [];
         }
     }
 
-    $meta = [];
-
-    if ($show_date) {
-        $meta[] = tnp_post_date($post);
-    }
-
-    if ($show_author) {
-        $author_object = get_user_by('id', $post->post_author);
-        if ($author_object) {
-            $meta[] = apply_filters('the_author', $author_object->display_name);
-        }
-    }
-
     $button_options['button_url'] = $post->url;
     ob_start();
     ?>
@@ -103,10 +90,10 @@ $items = [];
                 <?php echo $post->title_linked ?>
             </td>
         </tr>
-        <?php if ($meta) { ?>
+        <?php if ($post->meta) { ?>
             <tr>
                 <td align="center" inline-class="meta" class="meta">
-                    <?php echo esc_html(implode(' - ', $meta)) ?>
+                    <?php echo esc_html(implode(' - ', $post->meta)) ?>
                 </td>
             </tr>
         <?php } ?>

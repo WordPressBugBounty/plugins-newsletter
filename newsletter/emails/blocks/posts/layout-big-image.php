@@ -1,6 +1,6 @@
 <?php
 $size = [1200, 0, false];
-$content_width = $composer['width'] - $options['block_padding_left'] - $options['block_padding_right'];
+$content_width = $composer['content_width'];
 $title_style = TNP_Composer::get_title_style($options, 'title', $composer);
 $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
 ?>
@@ -65,18 +65,7 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
     }
 
 
-    $meta = [];
 
-    if ($show_date) {
-        $meta[] = tnp_post_date($post);
-    }
-
-    if ($show_author) {
-        $author_object = get_user_by('id', $post->post_author);
-        if ($author_object) {
-            $meta[] = apply_filters('the_author', $author_object->display_name);
-        }
-    }
     ?>
 
     <?php if ($media) { ?>

@@ -409,6 +409,17 @@ class NewsletterSubscription extends NewsletterModule {
         // GDPR
         $subscription->data->ip = $this->process_ip($subscription->data->ip);
 
+        if ($user != null && $user->status == TNP_User::STATUS_UNSUBSCRIBED) {
+            $multiple = $this->get_main_option('allow_unsubscribed');
+            if (empty($multiple)) {
+                return new WP_Error('unsubscribed', 'Subscriber blocked since unsubscribed. Contact the site administrator.');
+            }
+            $this->logger->info('Subscription for unsubscribed emails allowed');
+            // Act as a new subscription of an unconfirmed subscriber
+            $this->set_user_status($user, TNP_User::STATUS_NOT_CONFIRMED);
+            $user = $this->get_user($user->id);
+        }
+
         // Do we accept repeated subscriptions?
         if ($user != null && $user->status !== TNP_User::STATUS_NOT_CONFIRMED) {
             $this->logger->info('Existing subscriber: ' . $user->status);
@@ -421,9 +432,7 @@ class NewsletterSubscription extends NewsletterModule {
                 return new WP_Error('complained', 'Subscriber blocked since complained. Contact the site administrator.');
             }
 
-            if ($user->status == TNP_User::STATUS_UNSUBSCRIBED) {
-                return new WP_Error('unsubscribed', 'Subscriber blocked since unsubscribed. Contact the site administrator.');
-            }
+
 
             if ($subscription->if_exists === TNP_Subscription::EXISTING_ERROR) {
                 return new WP_Error('exists', 'Email address already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.');

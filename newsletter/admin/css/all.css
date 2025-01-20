@@ -2019,6 +2019,11 @@ span.tnp-user-status {
     padding: 1em;
 }
 
+#tnp-body .form-table td .CodeMirror pre{
+    border: none;
+    padding: 0 1rem;
+}
+
 /* Default text container for customizable texts */
 #tnp-body .form-table .tnpc-default-text {
     border:1px dashed var(--tnp-gray-light);

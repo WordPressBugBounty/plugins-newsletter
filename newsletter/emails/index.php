@@ -25,7 +25,9 @@ if ($controls->is_action('template')) {
 
 if ($controls->is_action('copy')) {
     $original = $this->get_email($_POST['btn']);
-    $email = array();
+    // It is not saved so we can modify it
+    //NewsletterComposer::instance()->regenerate($original);
+    $email = [];
     $email['subject'] = $original->subject;
     $email['message'] = $original->message;
     $email['message_text'] = $original->message_text;

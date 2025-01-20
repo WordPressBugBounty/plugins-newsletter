@@ -15,15 +15,13 @@ $defaults = array(
     'font_family' => '',
     'font_size' => '',
     'font_color' => '',
-
     'main_title' => '',
     'main_title_weight' => '',
     'main_title_font_family' => '',
     'main_title_font_size' => '',
     'main_title_font_color' => '',
     'main_title_font_weight' => '',
-    'main_title_align' => is_rtl()?'right':'left',
-
+    'main_title_align' => is_rtl() ? 'right' : 'left',
     'title_weight' => '',
     'title_font_family' => '',
     'title_font_size' => '',
@@ -35,11 +33,10 @@ $defaults = array(
     'reverse' => '',
     'categories' => '',
     'tags' => '',
+    'author' => '',
     'layout' => 'one',
-
     'show_image' => 1,
     'show_date' => 1,
-
     'language' => '',
     'button_label' => __('Read more...', 'newsletter'),
     'button_background' => '',
@@ -141,6 +138,10 @@ if (!empty($options['private'])) {
     $filters['post_status'] = ['publish', 'private'];
 }
 
+if (!empty($options['author'])) {
+    $filters['author'] = (int)$options['author'];
+}
+
 if ($context['type'] != 'automated') {
     $posts = Newsletter::instance()->get_posts($filters, $options['language']);
 } else {
@@ -227,7 +228,13 @@ Newsletter::instance()->switch_language($options['language']);
 $main_title = wp_kses_post($options['main_title']);
 $main_title_style = TNP_Composer::get_title_style($options, 'main_title', $composer);
 
-foreach ($posts as $post) {
+// Some filters need those variables like on a real template loop
+global $authordata, $post;
+
+foreach ($posts as $p) {
+
+    $post = $p;
+
     $post->url = tnp_post_permalink($post);
 
     $post->title = TNP_Composer::is_post_field_edited_inline($options['inline_edits'], 'title', $post->ID) ?
@@ -245,6 +252,19 @@ foreach ($posts as $post) {
     $post->excerpt_linked = '<a href="' . esc_attr($post->url) . '" inline-class="excerpt" class="tnpc-inline-editable" '
             . 'data-type="text" data-id="' . esc_attr($post->ID) . '" dir="' . esc_attr($dir) . '">'
             . $post->excerpt . '</a>';
+
+    $post->meta = [];
+
+    if ($show_date) {
+        $post->meta[] = tnp_post_date($post);
+    }
+
+    if ($show_author) {
+        $authordata = get_user_by('id', $post->post_author);
+        if ($authordata) {
+            $post->meta[] = apply_filters('the_author', $authordata->display_name);
+        }
+    }
 }
 
 if ($options['layout'] == 'one') {

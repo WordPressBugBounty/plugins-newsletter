@@ -560,6 +560,21 @@ function tnp_describe_table($table) {
                             </tr>
                         </thead>
                         <tbody>
+                            
+                            <?php if (is_plugin_active('health-check/health-check.php')) { ?>
+                                <tr>
+                                    <td><a href="https://wordpress.org/plugins/health-check/" target="_blank">Health Check</a></td>
+                                    <td>
+                                        <span class="tnp-maybe">MAY BE</span>
+                                    </td>
+                                    <td>
+                                        We found problems with the WP scheduler (afftecting Newsletter and other plugins). Be sure, once
+                                        deactovated, even the
+                                        <a href="<?php echo esc_attr(admin_url('plugins.php')); ?>?plugin_status=mustuse" target="_blank">must use part of that plugin</a>
+                                        is removed.
+                                    </td>
+                                </tr>
+                            <?php } ?>
                             <?php if (is_plugin_active('wp-html-email/wp-html-email.php')) { ?>
                                 <tr>
                                     <td><a href="https://wordpress.org/plugins/wp-html-email/" target="_blank">WP HMTL Email</a></td>

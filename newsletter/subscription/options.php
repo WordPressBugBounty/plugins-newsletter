@@ -150,10 +150,14 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                     </table>
 
                     <?php if (!$language) { ?>
+                        <h3>Subscription of existing subscribers</h3>
+
                         <table class="form-table">
+
                             <tr>
                                 <th>
-                                    <?php esc_html_e('Repeated subscriptions', 'newsletter') ?>
+                                    When confirmed
+                                    <?php //esc_html_e('Repeated subscriptions', 'newsletter') ?>
                                 </th>
                                 <td>
                                     <?php
@@ -162,7 +166,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                                         '1' => __('Allowed', 'newsletter'),
                                         '2' => __('Allowed (single opt-in)', 'newsletter'),
                                         '3' => __('Allowed (double opt-in)', 'newsletter')
-                                        ]);
+                                    ]);
                                     ?>
                                     <br><br>
 
@@ -177,6 +181,38 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                                     <p class="description">Shown only when "not allowed" is selected<p>
                                 </td>
                             </tr>
+
+                            <tr>
+                                <th>
+                                    When unsubscribed
+                                </th>
+                                <td>
+                                    <?php
+                                    $controls->select('allow_unsubscribed', [
+                                        '0' => __('Not allowed', 'newsletter'),
+                                        '1' => __('Allowed', 'newsletter'),
+                                    ]);
+                                    ?>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    When bounced or complained
+                                </th>
+                                <td>
+                                    Not allowed.
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    When not confirmed
+                                </th>
+                                <td>
+                                    Allowed.
+                                </td>
+                            </tr>
+
                         </table>
                     <?php } ?>
 

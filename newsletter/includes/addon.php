@@ -64,12 +64,29 @@ class NewsletterAddon {
                     add_filter('newsletter_menu_subscribers', [$this, 'subscribers_menu']);
                 }
             }
+            add_filter('newsletter_support_data', [$this, 'support_data'], 10, 1);
         }
     }
 
     function weekly_check() {
         $logger = $this->get_logger();
         $logger->info('Weekly check for ' . $this->name);
+    }
+
+    /**
+     * To be overridden.
+     *
+     * @return array
+     */
+    function get_support_data() {
+        return [];
+    }
+
+    function support_data($data = []) {
+        $d = $this->get_support_data();
+        $d = array_merge($d, ['version' => $this->version]);
+        $data[$this->name] = $d;
+        return $data;
     }
 
     function deactivate() {
