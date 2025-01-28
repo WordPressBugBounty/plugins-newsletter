@@ -91,10 +91,10 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
                         </td>
                     </tr>
 
-                    <?php if ($meta) { ?>
+                    <?php if ($post->meta) { ?>
                         <tr>
                             <td align="<?php echo $align_left ?>" inline-class="meta">
-                                <?php echo esc_html(implode(' - ', $meta)) ?>
+                                <?php echo esc_html(implode(' - ', $post->meta)) ?>
                             </td>
                         </tr>
                     <?php } ?>
