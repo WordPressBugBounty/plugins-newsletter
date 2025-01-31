@@ -218,9 +218,17 @@ class TNP_Subscription_Data {
             if ($list_id <= 0 || $list_id > NEWSLETTER_LIST_MAX) {
                 continue;
             }
-            $this->lists[$list_id] = 1;
+            $this->lists['' . $list_id] = 1;
         }
     }
+
+//    function set_list($id, $value) {
+//        $value = (int)$value;
+//        if ($value !== 1 && $value !== 0) {
+//            return;
+//        }
+//        $this->lists['' . $id] = $value;
+//    }
 }
 
 /**
@@ -255,7 +263,7 @@ class TNP_Subscription {
     var $send_emails = true;
     var $welcome_email_id = 0;
     var $welcome_page_id = 0;
-    var $autoresponders = [];
+    var $autoresponders = []; // Positive/Negative IDs
 
     public function __construct() {
         $this->data = new TNP_Subscription_Data();

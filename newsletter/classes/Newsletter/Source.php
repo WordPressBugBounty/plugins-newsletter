@@ -9,6 +9,7 @@ class Source {
     var $slug;
     var $plugin;
     var $config_url = '';
+    var $action = '';
 
     public function __construct($name = '', $plugin = '', $slug = '') {
         $this->name = $name;

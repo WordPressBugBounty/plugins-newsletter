@@ -560,7 +560,7 @@ function tnp_describe_table($table) {
                             </tr>
                         </thead>
                         <tbody>
-                            
+
                             <?php if (is_plugin_active('health-check/health-check.php')) { ?>
                                 <tr>
                                     <td><a href="https://wordpress.org/plugins/health-check/" target="_blank">Health Check</a></td>
@@ -880,6 +880,7 @@ function tnp_describe_table($table) {
 
                             <tr>
                                 <?php
+                                // Problems with some addons die to github.com/openssl/openssl/issues/19589
                                 $condition = function_exists('curl_version');
                                 $version = null;
                                 if ($condition) {
@@ -901,7 +902,7 @@ function tnp_describe_table($table) {
                                 <td>
                                     <?php
                                     if (!$condition) {
-                                        echo 'cUrl is not available, ask the provider to install it and activate the PHP cUrl library or openssl version is the bugged 3.0.7<br>';
+                                        echo 'cUrl is not available or with a bugger openssl version: ask the provider to install it and activate the PHP cUrl library or openssl version is the bugged 3.0.7<br>';
                                     }
                                     if ($version) {
                                         echo 'Version: ' . esc_html($version['version']) . '<br>';

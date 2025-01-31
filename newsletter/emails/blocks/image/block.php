@@ -70,7 +70,7 @@ $media->alt = $options['image_alt'];
         <td align="<?php echo esc_attr($options['align']); ?>">
 
             <?php if ($media->link) { ?>
-                <a href="<?php echo esc_attr($media->link); ?>" target="_blank" rel="noopener nofollow" style="display: block; font-size: 0; text-decoration: none; line-height: normal!important">';
+                <a href="<?php echo esc_attr($media->link); ?>" target="_blank" rel="noopener nofollow" style="display: block; font-size: 0; text-decoration: none; line-height: normal!important">
                 <?php } ?>
 
                 <img src="<?php echo esc_attr($media->url); ?>" width="<?php echo esc_attr($media->width); ?>"

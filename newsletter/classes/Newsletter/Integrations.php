@@ -239,7 +239,7 @@ class Integrations {
         foreach ($forms as $form) {
             $source = new Source($form->get_setting('title'), 'Ninja Forms', 'ninjaforms');
             if (class_exists('NewsletterNinjaForms')) {
-                $source->config_url = '?page=newsletter_forminator_edit&id=' . rawurlencode($form->get_id());
+                $source->config_url = '?page=newsletter_ninjaforms_edit&id=' . rawurlencode($form->get_id());
             }
             $sources[] = $source;
         }

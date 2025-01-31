@@ -1623,7 +1623,14 @@ class NewsletterControls {
         }
     }
 
-    function series($name = 'series') {
+    /**
+     * Shows all the autoresponders giving the choice to activate, deactivate or left
+     * unchanged. The generated value is an associative array where the key is the autoresponder
+     * ID and the value is 'on', 'off', or ''.
+     *
+     * @param string $name
+     */
+    function autoresponders_on_off($name = 'autoresponders') {
         if (!class_exists('NewsletterAutoresponder')) {
             echo 'The Autoresponder addon is required.';
             return;
@@ -1638,19 +1645,28 @@ class NewsletterControls {
             echo esc_html($autoresponder->name);
             echo '</td><td>';
 
-            echo '<select name="options[', esc_attr($name), '][', $autoresponder->id, ']"';
+            echo '<select name="options[', esc_attr($name), '][]"';
             echo '>';
 
             echo '<option value="">', esc_html__('Ignore', 'newsletter'), '</option>';
 
-            $value = $this->get_value($name);
-            foreach (['1' => 'Activate', '-1' => 'Deactivate'] as $key => $label) {
-                echo '<option value="', esc_attr($key), '"';
-                if ($value['' . $autoresponder->id] == $key) {
-                    echo ' selected';
-                }
-                echo '>', esc_html($label), '</option>';
+            $values = $this->get_value_array($name);
+
+            // Positive ID
+            echo '<option value="', esc_attr($autoresponder->id), '"';
+            if (in_array('' . $autoresponder->id, $values)) {
+                echo ' selected';
             }
+            echo '>', esc_html__('Activate', 'newsletter'), '</option>';
+
+            // Negative ID
+            echo '<option value="-', esc_attr($autoresponder->id), '"';
+            if (in_array('-' . $autoresponder->id, $values)) {
+                echo ' selected';
+            }
+            echo '>', esc_html__('Deactivate', 'newsletter'), '</option>';
+
+
             echo '</select>';
 
             echo '</tr></td>';
@@ -1958,6 +1974,8 @@ class NewsletterControls {
             $cookie_name = 'newsletter_tab';
         }
 
+        $tab = $_GET['tab'] ?? $_COOKIE[$cookie_name] ?? '';
+
         echo '<script type="text/javascript">
     jQuery(document).ready(function(){
 
@@ -1968,7 +1986,7 @@ tnp_controls_init();
             jQuery(this).css("height", "400px");
         });
       tabs = jQuery("#tabs").tabs({
-        active : jQuery.cookie("', sanitize_key($cookie_name), '"),
+        active : "', sanitize_key($tab), '",
         activate : function( event, ui ){
             jQuery.cookie("', sanitize_key($cookie_name), '", ui.newTab.index(),{expires: 1});
         }

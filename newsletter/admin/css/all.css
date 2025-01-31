@@ -1680,6 +1680,21 @@ span.tnp-user-status {
     background-color: #f4f4f4;
 }
 
+.tnp-flow-item.green {
+    border: 1px dashed #ccc;
+    background-color: var(--tnp-green-lighter);
+    color: var(--tnp-green-dark) !important;
+    font-weight: bold;
+}
+
+.tnp-flow-item.red {
+    border: 1px dashed #ccc;
+    background-color: var(--tnp-red-lighter);
+    color: var(--tnp-red-dark) !important;
+    font-weight: bold;
+}
+
+
 .tnp-flow-item.notusable {
     border: 1px dashed #ccc;
     background-color: #eee;
