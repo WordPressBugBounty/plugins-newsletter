@@ -96,7 +96,11 @@ class NewsletterStatistics extends NewsletterModule {
             }
             setcookie('tnpe', $email->id . '-' . $email->token, time() + 60 * 60 * 24 * 365, '/');
 
+            // Quick fix to fix
             $is_action = strpos($url, '?na=');
+            if (!$is_action) {
+                $is_action = strpos($url, '&na=');
+            }
 
             $ip = $this->get_remote_ip();
             $ip = $this->process_ip($ip);
