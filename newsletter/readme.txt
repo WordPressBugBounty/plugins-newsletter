@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.7.1
-Stable tag: 8.6.9
+Stable tag: 8.7.0
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -129,10 +129,13 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 8.7.0 =
+
+* Fixed referrer
+
 = 8.6.9 =
 
 * Fixed tracking of action links with the ajax format
-* Fixed referrer
 
 = 8.6.8 =
 

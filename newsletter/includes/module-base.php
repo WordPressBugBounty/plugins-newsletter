@@ -1036,7 +1036,7 @@ class NewsletterModuleBase {
         }
 
         if (isset($data->referrer)) {
-            $data->referrer = self::sanitize_user_field($data->referer, 50);
+            $data->referrer = self::sanitize_user_field($data->referrer, 50);
         }
 
         for ($i = 1; $i < NEWSLETTER_PROFILE_MAX; $i++) {
