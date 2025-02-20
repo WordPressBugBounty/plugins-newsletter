@@ -945,12 +945,28 @@ function tnp_describe_table($table) {
                             <tr>
                                 <td>DB_CHARSET</td>
                                 <td></td>
-                                <td><?php echo esc_html(DB_CHARSET); ?></td>
+                                <td>
+                                    <?php
+                                    if (defined('DB_CHARSET')) {
+                                        echo esc_html(DB_CHARSET);
+                                    } else {
+                                        echo 'Not defined';
+                                    }
+                                    ?>
+                                </td>
                             </tr>
                             <tr>
                                 <td>DB_COLLATE</td>
                                 <td></td>
-                                <td><?php echo esc_html(DB_COLLATE); ?></td>
+                                <td>
+                                    <?php
+                                    if (defined('DB_COLLATE')) {
+                                        echo esc_html(DB_COLLATE);
+                                    } else {
+                                        echo 'Not defined';
+                                    }
+                                    ?>
+                                </td>
                             </tr>
 
                             <tr>
