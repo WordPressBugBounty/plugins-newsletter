@@ -1,6 +1,5 @@
 <?php
 
-/** For old style coders */
 function tnp_register_block($dir) {
     return TNP_Composer::register_block($dir);
 }
@@ -658,7 +657,7 @@ class TNP_Composer {
 //                    } elseif ($idx === count($items)-1) {
 //                        $e .= '<div style="padding:' . $padding . 'px; padding-right: 0" class="p-0">';
 //                    } else {
-                        $e .= '<div style="padding:' . $padding . 'px;" class="p-0">';
+                    $e .= '<div style="padding:' . $padding . 'px;" class="p-0">';
 //                    }
                     $e .= $item;
                     $e .= '</div>';
@@ -738,6 +737,40 @@ class TNP_Composer {
         $button_options['button_label'] = empty($options[$prefix . '_label']) ? '' : $options[$prefix . '_label'];
 
         return $button_options;
+    }
+
+    /**
+     * Return the url of a post with a patch for WPML to be sure the link is built considering the
+     * post language (argh!)
+     *
+     * @param WP_Post $post
+     * @return string
+     */
+    static function get_post_url($post) {
+        // WPML does not return the correct permalink for a post: on WP frontend it returns the permalink of the
+        // translated post for the current language... ok it's complicated!
+        if (class_exists('SitePress')) {
+            $data = apply_filters('wpml_post_language_details', [], $post->ID);
+            if (isset($data['language_code'])) {
+                do_action('wpml_switch_language', $data['language_code']);
+            }
+        }
+        return get_permalink($post->ID);
+
+        // Interesting but WPML redirect to the current language version of the post...
+        //return wp_get_shortlink($post->ID);
+    }
+
+    static function get_post_content($post) {
+       return $post->post_content;
+    }
+
+    static function get_post_title($post) {
+        return get_the_title($post);
+    }
+
+    static function get_post_date($post, $format = null) {
+        return get_the_date($format, $post);
     }
 
     static function convert_to_text($html) {

@@ -33,10 +33,11 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
             add_action('wp_ajax_tnpc_get_all_presets', array($this, 'ajax_get_all_presets'));
             add_action('wp_ajax_tnpc_get_preset', array($this, 'ajax_get_preset'));
             add_action('wp_ajax_tnpc_render', array($this, 'ajax_tnpc_render'));
+            add_action('wp_ajax_tnpc_test', array($this, 'ajax_tnpc_test'));
             add_action('wp_ajax_tnpc_preview', array($this, 'ajax_tnpc_preview'));
             add_action('wp_ajax_tnpc_css', array($this, 'ajax_tnpc_css'));
-            add_action('wp_ajax_tnpc_delete_preset', array($this, 'ajax_tnpc_delete_preset'));
             add_action('wp_ajax_tnpc_regenerate_email', array($this, 'ajax_tnpc_regenerate_email'));
+            add_action('wp_ajax_tnpc_block_form', array($this, 'ajax_tnpc_block_form'));
         }
     }
 
@@ -56,10 +57,6 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
 
         $this->add_admin_page('automated', 'Automated');
         $this->add_admin_page('autoresponder', 'Autoresponder');
-    }
-
-    function get_preset_content($preset_id) {
-        return NewsletterComposer::instance()->get_preset_content($preset_id);
     }
 
     /** Returns the correct admin page to edit the newsletter with the correct editor. */
@@ -108,6 +105,101 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         return $editor_type;
     }
 
+    function ajax_tnpc_test() {
+        check_admin_referer('save');
+        if (!$this->is_allowed()) {
+            wp_send_json_error('Not allowed', 403);
+        }
+
+        if (!class_exists('NewsletterControls')) {
+            include NEWSLETTER_INCLUDES_DIR . '/controls.php';
+        }
+
+        $controls = new NewsletterControls();
+        $email = new TNP_Email();
+        NewsletterComposer::update_email($email, $controls);
+
+        if (isset($_POST['to_email'])) {
+            $message = $this->send_test_newsletter_to_email_address($email, $controls->data['test_email']);
+            echo $message;
+        } else {
+            $this->send_test_email($email, $controls);
+            if ($controls->messages) {
+                echo $controls->messages;
+            } else {
+                echo $controls->errors;
+            }
+        }
+
+        die();
+    }
+
+    /**
+     * Builds the HTML of a block configuration form.
+     *
+     * @param array $block
+     * @return string
+     */
+    function get_block_form($block) {
+
+        require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+        $encoded_options = wp_unslash($_REQUEST['options']);
+        $options = NewsletterComposer::options_decode($encoded_options);
+
+        $defaults_file = $block['dir'] . '/defaults.php';
+        if (file_exists($defaults_file)) {
+            include $defaults_file;
+        }
+
+        if (!isset($defaults) || !is_array($defaults)) {
+            $defaults = [];
+        }
+
+        $options = array_merge($defaults, $options);
+
+        $composer = wp_unslash($_POST['composer'] ?? []);
+
+        if (empty($composer['width'])) {
+            $composer['width'] = 600;
+        }
+
+        $context = ['type' => sanitize_key($_REQUEST['context_type'] ?? '')];
+
+        // Used by the options.php script
+        $controls = new NewsletterControls($options);
+        $fields = new NewsletterFields($controls);
+
+        ob_start();
+        $controls->init(['nested' => true]); // To avoid conflict with master form...
+        echo '<input type="hidden" name="action" value="tnpc_render">';
+        echo '<input type="hidden" name="id" value="' . esc_attr($block_id) . '">';
+        echo '<input type="hidden" name="context_type" value="' . esc_attr($context['type']) . '">';
+        wp_nonce_field('save');
+        $inline_edits = '';
+        if (isset($controls->data['inline_edits'])) {
+            $inline_edits = $controls->data['inline_edits'];
+        }
+        echo '<input type="hidden" name="options[inline_edits]" value="', esc_attr(NewsletterComposer::options_encode($inline_edits)), '">';
+        include $block['dir'] . '/options.php';
+        $html = ob_get_clean();
+        return $html;
+    }
+
+    /**
+     * Used by Composer 3
+     */
+    function ajax_tnpc_block_form() {
+        $block_id = sanitize_key($_REQUEST['id']);
+        $block = NewsletterComposer::instance()->get_block($block_id);
+        if (!$block) {
+            die('Block not found with id ' . $block_id);
+        }
+        $data = ['form' => $this->get_block_form($block), 'title' => $block['name']];
+        header('Content-Type: application/json;charset=UTF-8');
+        echo wp_json_encode($data);
+        die();
+    }
+
     /**
      * Loads the options.php file of a block and outputs the generated form.
      *
@@ -121,11 +213,21 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
             die('Block not found with id ' . $block_id);
         }
 
-        if (!class_exists('NewsletterControls')) {
-            include NEWSLETTER_INCLUDES_DIR . '/controls.php';
-        }
+        require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
         $encoded_options = wp_unslash($_REQUEST['options']);
         $options = NewsletterComposer::options_decode($encoded_options);
+
+        $defaults_file = $block['dir'] . '/defaults.php';
+        if (file_exists($defaults_file)) {
+            include $defaults_file;
+        }
+
+        if (!isset($defaults) || !is_array($defaults)) {
+            $defaults = [];
+        }
+
+        $options = array_merge($defaults, $options);
+
         $composer = wp_unslash($_POST['composer'] ?? []);
 
         if (empty($composer['width'])) {
@@ -138,10 +240,11 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         $controls = new NewsletterControls($options);
         $fields = new NewsletterFields($controls);
 
-        $controls->init();
+        $controls->init(['nested' => true]); // To avoid conflict with master form...
         echo '<input type="hidden" name="action" value="tnpc_render">';
         echo '<input type="hidden" name="id" value="' . esc_attr($block_id) . '">';
         echo '<input type="hidden" name="context_type" value="' . esc_attr($context['type']) . '">';
+        wp_nonce_field('save');
         $inline_edits = '';
         if (isset($controls->data['inline_edits'])) {
             $inline_edits = $controls->data['inline_edits'];
@@ -159,30 +262,35 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         wp_send_json_success($this->get_all_preset());
     }
 
-    /**
-     * @todo Improve!
-     */
     function ajax_get_preset() {
+        $id = sanitize_key($_REQUEST['id']);
+        $email = null;
 
-        if (empty($_REQUEST['id'])) {
-            wp_send_json_error([
-                'msg' => __('Invalid preset ID')
-            ]);
+        // If it is an email id, get it from the database and fall back to the
+        // static templates if not found (maybe a template folder has been created
+        // just using a number...). I don't like this.
+        if (is_numeric($id)) {
+            $email = $this->get_email($id);
         }
 
-        $preset_id = $_REQUEST['id'];
-        $preset_content = $this->get_preset_content($preset_id);
+        if (!$email) {
+            $email = NewsletterComposer::instance()->build_email_from_template($id);
+        }
 
-        $global_options = NewsletterComposer::instance()->get_preset_composer_options($preset_id);
+        if (is_wp_error($email)) {
+            wp_send_json_error($email);
+        }
 
+        // Send back and keep only the blocks' HTML
         wp_send_json_success([
-            'content' => $preset_content,
-            'globalOptions' => $global_options,
+            'content' => TNP_Composer::unwrap_html_element($email->message),
+            'globalOptions' => NewsletterComposer::extract_composer_options($email),
+            'subject' => $email->subject
         ]);
     }
 
     function ajax_tnpc_preview() {
-        $email = $this->get_email($_REQUEST['id']);
+        $email = $this->get_email((int) $_REQUEST['id']);
 
         echo $email->message;
 
@@ -278,22 +386,6 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         ]);
     }
 
-    function ajax_tnpc_delete_preset() {
-
-        if (!check_ajax_referer('preset')) {
-            wp_die('Invalid nonce', 403);
-        }
-
-        $preset = $this->get_email($_REQUEST['presetId']);
-
-        if ($preset && $preset->type === NewsletterEmails::PRESET_EMAIL_TYPE) {
-            $this->delete_email($preset->id);
-            wp_send_json_success();
-        } else {
-            wp_send_json_error('Invalid preset ID');
-        }
-    }
-
     private function is_normal_context_request() {
         return empty($_REQUEST['context_type']);
     }
@@ -301,6 +393,8 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
     /**
      * Generated the HTML with the preset lists for the modal used in the composer to create a new
      * email.
+     *
+     * TODO: move out as modal to be included, it's simpler
      *
      * @return string The presets selection HTML
      */
@@ -315,48 +409,41 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         // LOAD USER PRESETS
         $user_preset_list = $this->get_emails(NewsletterEmails::PRESET_EMAIL_TYPE);
 
-        foreach ($user_preset_list as $user_preset) {
+        if ($user_preset_list) {
 
-            $default_icon_url = plugins_url('newsletter') . "/emails/presets/default-icon.png?ver=2";
-            $preset_name = $user_preset->subject;
+            $content .= '<h3>Custom templates</h3>';
 
-            // esc_js() assumes the string will be in single quote (arghhh!!!)
-            $onclick_load = 'tnpc_load_preset(' . ((int) $user_preset->id) . ', \'' . esc_js($preset_name) . '\', event)';
+            $content .= '<div class="tnpc-preset-block">';
 
-            $content .= "<div class='tnpc-preset' onclick='" . esc_attr($onclick_load) . "'>\n";
-            $content .= "<img src='$default_icon_url' title='" . esc_attr($preset_name) . "' alt='" . esc_attr($preset_name) . "'>\n";
-            $content .= "<span class='tnpc-preset-label'>" . esc_html($user_preset->subject) . "</span>\n";
-            $content .= "</div>";
-        }
+            foreach ($user_preset_list as $user_preset) {
 
-        // LOAD TNP PRESETS
-        foreach (NewsletterComposer::presets as $id) {
-            $preset = NewsletterComposer::instance()->get_preset_from_file($id);
+                $default_icon_url = plugins_url('newsletter') . "/emails/presets/default-icon.png?ver=2";
+                $preset_name = $user_preset->subject;
 
-            if (!empty($preset->version) && $preset->version == 2) {
-                if (empty($preset->name)) {
-                    $preset_name = $preset->subject;
-                } else {
-                    $preset_name = $preset->name;
-                }
-            } else {
-                $preset_name = $preset->name;
+                // esc_js() assumes the string will be in single quote (arghhh!!!)
+                $onclick_load = 'tnpc_load_preset(' . ((int) $user_preset->id) . ', \'' . esc_js($preset_name) . '\', event)';
+
+                $content .= "<div class='tnpc-preset' onclick='" . esc_attr($onclick_load) . "'>\n";
+                $content .= "<img src='$default_icon_url' title='" . esc_attr($preset_name) . "' alt='" . esc_attr($preset_name) . "'>\n";
+                $content .= "<span class='tnpc-preset-label'>" . esc_html($user_preset->subject) . "</span>\n";
+                $content .= "</div>";
             }
-
-            if (!empty($preset->version) && $preset->version == 2) {
-                $content .= '<div class="tnpc-preset tnpc-preset2" onclick="tnpc_load_preset(\'' . esc_attr($id) . '\')">';
-            } else {
-                $content .= '<div class="tnpc-preset" onclick="tnpc_load_preset(\'' . esc_attr($id) . '\')">';
-            }
-            $content .= '<img src="' . esc_attr($preset->icon) . '" title="' . esc_attr($preset_name) . '" alt="' . esc_attr($preset_name) . '">';
-            $content .= '<span class="tnpc-preset-label">' . esc_html($preset_name) . '</span>';
             $content .= '</div>';
         }
 
+        $content .= '<h3>Standard templates</h3>';
+
+        $content .= '<div class="tnpc-preset-block">';
+
         $templates = NewsletterComposer::instance()->get_templates();
+
         foreach ($templates as $template) {
+            $type = $template->type ?? '';
+            if ($type === 'activation' || $type === 'welcome') {
+                continue;
+            }
             $content .= '<div class="tnpc-preset tnpc-preset2" onclick="tnpc_load_preset(\'' . esc_attr($template->id) . '\')">';
-            $content .= '<img src="' . esc_attr($template->icon) . '" title="' . esc_attr($preset_name) . '" alt="' . esc_attr($template->name) . '">';
+            $content .= '<img src="' . esc_attr($template->icon) . '" title="' . esc_attr($template->name) . '" alt="' . esc_attr($template->name) . '">';
             $content .= '<span class="tnpc-preset-label">' . esc_html($template->name) . '</span>';
             $content .= '</div>';
         }
@@ -366,6 +453,24 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
             $content .= $this->get_autoresponder_spot_element();
             $content .= $this->get_raw_html_preset_element();
         }
+        $content .= '</div>';
+
+        $content .= '<h3>Welcome and activation templates</h3>';
+
+        $content .= '<div class="tnpc-preset-block">';
+        foreach ($templates as $template) {
+            $type = $template->type ?? '';
+            if ($type !== 'confirmation' && $type !== 'welcome') {
+                continue;
+            }
+            $content .= '<div class="tnpc-preset tnpc-preset2" onclick="tnpc_load_preset(\'' . esc_attr($template->id) . '\')">';
+            $content .= '<img src="' . esc_attr($template->icon) . '" title="' . esc_attr($template->name) . '" alt="' . esc_attr($template->name) . '">';
+            $content .= '<span class="tnpc-preset-label">' . esc_html($template->name) . '</span>';
+            $content .= '</div>';
+        }
+
+        $content .= '</div>';
+        $content .= '</div>';
 
         return $content;
     }

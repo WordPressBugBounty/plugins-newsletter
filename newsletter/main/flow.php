@@ -116,7 +116,7 @@ $blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
     <div id="tnp-heading">
         <?php $controls->title_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration') ?>
 
-        <h2><?php esc_html_e('Dashboard', 'newsletter'); ?></h2>
+<!--        <h2><?php esc_html_e('Dashboard', 'newsletter'); ?></h2>-->
         <?php include __DIR__ . '/dashboard-nav.php' ?>
 
     </div>

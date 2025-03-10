@@ -18,7 +18,7 @@ ksort($options);
 
     <div id="tnp-heading">
 
-        <h2><?php _e('System', 'newsletter') ?></h2>
+<!--        <h2><?php _e('System', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
@@ -65,10 +65,6 @@ ksort($options);
                         </tbody>
                     </table>
                 </div>
-            </div>
-
-            <div class="tnp-buttons">
-                <?php $controls->button('delete_logs', 'Delete all'); ?>
             </div>
 
         </form>

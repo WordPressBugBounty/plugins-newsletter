@@ -177,6 +177,11 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
 
             wp_enqueue_script('tnp-admin', $url . '/admin/js/all.js', ['jquery'], NEWSLETTER_VERSION);
 
+            $data = [];
+            $data['site_url'] = site_url('/');
+            $data['newsletter_url'] = plugins_url('newsletter');
+            wp_localize_script('tnp-admin', 'NewsletterControls', $data);
+
             wp_enqueue_style('tnp-select2', $url . '/vendor/select2/css/select2.min.css', [], NEWSLETTER_VERSION);
             wp_enqueue_script('tnp-select2', $url . '/vendor/select2/js/select2.min.js', ['jquery'], NEWSLETTER_VERSION);
 

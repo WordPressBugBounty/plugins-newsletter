@@ -181,6 +181,7 @@ class TNP_Subscription_Data {
             $subscriber->language = $this->language;
         if (!empty($this->ip))
             $subscriber->ip = $this->ip;
+
         if (!empty($this->referrer))
             $subscriber->referrer = $this->referrer;
         if (!empty($this->http_referrer))
@@ -235,6 +236,7 @@ class TNP_Subscription_Data {
  * Represents a subscription request with the subscriber data and actions to be taken by
  * the subscription engine (spam check, notifications, ...).
  */
+#[\AllowDynamicProperties]
 class TNP_Subscription {
 
     const EXISTING_ERROR = 1;
@@ -261,8 +263,12 @@ class TNP_Subscription {
      * @var boolean
      */
     var $send_emails = true;
-    var $welcome_email_id = 0;
+    var $welcome_email_id = 0; // -1 to block the email
     var $welcome_page_id = 0;
+
+    var $confirmation_email_id = 0;
+    var $confirmation_page_id = 0;
+
     var $autoresponders = []; // Positive/Negative IDs
 
     public function __construct() {
@@ -270,20 +276,18 @@ class TNP_Subscription {
     }
 
     public function set_optin($optin) {
-        if (empty($optin))
-            return;
-        if ($optin != 'single' && $optin != 'double') {
+        if ($optin !== 'single' && $optin !== 'double') {
             return;
         }
         $this->optin = $optin;
     }
 
     public function is_single_optin() {
-        return $this->optin == 'single';
+        return $this->optin === 'single';
     }
 
     public function is_double_optin() {
-        return $this->optin == 'double';
+        return $this->optin === 'double';
     }
 }
 
@@ -371,7 +375,8 @@ class TNP_User {
  * @property int $sent Total sent emails by now
  * @property int $open_count Total opened emails
  * @property int $click_count Total clicked emails
- * */
+ **/
+#[\AllowDynamicProperties]
 class TNP_Email {
 
     const STATUS_DRAFT = 'new';

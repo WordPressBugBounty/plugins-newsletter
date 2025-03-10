@@ -12,21 +12,29 @@ if (!$controls->is_action()) {
     $email = Newsletter::instance()->get_email($controls->data['welcome_email_id'] ?? 0);
 
     if (!$email) {
-        $email = [];
-        $email['type'] = 'welcome';
-        $email['editor'] = NewsletterEmails::EDITOR_COMPOSER;
-        $email['message'] = NewsletterComposer::instance()->get_preset_content('welcome-1');
-        $email['track'] = Newsletter::instance()->get_option('track');
-        $email['subject'] = 'Welcome';
-        $email['status'] = 'sent';
+        $email = NewsletterComposer::instance()->build_email_from_template('welcome-1');
+        $email->status = TNP_Email::STATUS_SENT;
+
+        $email->subject = $this->get_default_text('confirmed_subject');
+
         $email = NewsletterEmails::instance()->save_email($email);
         $controls->data['welcome_email_id'] = $email->id;
         $controls->data['welcome_email'] = '';
         $this->save_options($controls->data, '', $language);
     }
-    $email = Newsletter::instance()->get_email($controls->data['welcome_email_id']);
-    TNP_Composer::prepare_controls($controls, $email);
+
+    $r = NewsletterComposer::instance()->regenerate($email);
+    NewsletterComposer::update_controls($controls, $email);
 } else {
+
+    if (NEWSLETTER_DEBUG && $controls->is_action('delete')) {
+        $options = $this->get_options('', $language);
+        $this->delete_email($controls->data['welcome_email_id']);
+        $options['welcome_email_id'] = 0;
+        $this->save_options($controls->data, '', $language);
+        $controls->js_redirect('?page=newsletter_subscription_welcome');
+    }
+
     if ($controls->is_action('save')) {
         foreach ($controls->data as $k => $v) {
             if (strpos($k, '_custom') > 0) {
@@ -41,80 +49,41 @@ if (!$controls->is_action()) {
         $options = $this->get_options('', $language);
         $options['confirmed_message'] = NewsletterModule::clean_url_tags($controls->data['confirmed_message']);
         $options['confirmed_subject'] = $controls->data['confirmed_subject'];
+
+        $options['confirmed_text'] = $controls->data['confirmed_text'];
+        $options['confirmed_tracking'] = $controls->data['confirmed_tracking'];
+        $options['confirmed_id'] = $controls->data['confirmed_id'];
+        $options['confirmed_url'] = $controls->data['confirmed_url'];
+
         $options['welcome_email'] = $controls->data['welcome_email'];
+
         $this->save_options($options, '', $language);
         $email = Newsletter::instance()->get_email($options['welcome_email_id']);
         $email->track = Newsletter::instance()->get_option('track');
-        TNP_Composer::update_email($email, $controls);
+        NewsletterComposer::update_email($email, $controls);
         $email = NewsletterEmails::instance()->save_email($email);
         $controls->add_toast_saved();
         $controls->data = $options;
-        TNP_Composer::prepare_controls($controls, $email);
+        NewsletterComposer::update_controls($controls, $email);
 
         NewsletterMainAdmin::instance()->set_completed_step('welcome-email');
     }
 }
 
-foreach (['confirmed_message'] as $key) {
+foreach (['confirmed_message', 'confirmed_text'] as $key) {
     if (!empty($controls->data[$key])) {
         $controls->data[$key . '_custom'] = '1';
     }
 }
-
-
 ?>
 
-<script>
-    var tnp_preset_show = false;
-    jQuery(function () {
-        jQuery('#options-welcome_email').on('change', function () {
-            console.log(document.getElementById('options-welcome_email').value);
-            switch (document.getElementById('options-welcome_email').value) {
-                case '':
-                    jQuery('#tnp-composer-welcome').hide();
-                    jQuery('#tnp-stats-button').hide();
-                    jQuery('#tnp-standard-welcome').show();
-                    break;
-                case '1':
-                    jQuery('#tnp-composer-welcome').show();
-                    jQuery('#tnp-stats-button').show();
-                    jQuery('#tnp-standard-welcome').hide();
-                    break;
-                case '2':
-                    jQuery('#tnp-composer-welcome').hide();
-                    jQuery('#tnp-stats-button').hide();
-                    jQuery('#tnp-standard-welcome').hide();
-                    break;
-
-            }
-        });
-        switch (document.getElementById('options-welcome_email').value) {
-            case '':
-                jQuery('#tnp-composer-welcome').hide();
-                jQuery('#tnp-stats-button').hide();
-                jQuery('#tnp-standard-welcome').show();
-                break;
-            case '1':
-                jQuery('#tnp-composer-welcome').show();
-                jQuery('#tnp-stats-button').show();
-                jQuery('#tnp-standard-welcome').hide();
-                break;
-            case '2':
-                jQuery('#tnp-composer-welcome').hide();
-                jQuery('#tnp-stats-button').hide();
-                jQuery('#tnp-standard-welcome').hide();
-                break;
-
-        }
-    });
-</script>
 <div class="wrap" id="tnp-wrap">
 
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription') ?>
-        <h2><?php _e('Subscription', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Subscription', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
@@ -124,59 +93,120 @@ foreach (['confirmed_message'] as $key) {
 
         <?php $controls->show(); ?>
 
-        <form method="post" id="tnpc-form" action="" onsubmit="tnpc_save(this); return true;">
+        <form method="post" action="">
             <?php $controls->init(); ?>
 
-            <p>
+            <div id="tabs">
+                <ul>
+                    <li><a href="#tabs-settings"><?php esc_html_e('Page', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-email"><?php esc_html_e('Email', 'newsletter') ?></a></li>
+                </ul>
 
-                <?php
-                $controls->select('welcome_email',
-                        ['' => __('Standard email', 'newsletter'), '1' => __('New email', 'newsletter'), '2' => __('Do not send', 'newsletter')]);
-                ?>
-                <?php $controls->button_save() ?>
-                &nbsp;&nbsp;
-                <?php
-                $controls->button_icon_statistics(NewsletterStatisticsAdmin::instance()->get_statistics_url($controls->data['welcome_email_id']),
-                        ['secondary' => true, 'id' => 'tnp-stats-button', 'target' => '_blank'])
-                ?>
-                <?php if (NEWSLETTER_DEBUG) { ?>
-                                <?php $controls->btn_link(home_url('/') . '?na=json&id=' . $email->id, '{}') ?>
-                                <?php } ?>
-            </p>
+                <div id="tabs-settings">
 
-            <?php $controls->composer_fields_v2() ?>
+                    <?php //$this->language_notice(); ?>
 
-            <div id="tnp-standard-welcome" style="display: none">
-                <table class="form-table">
-                    <tr>
-                        <th>
-                            <?php _e('Welcome email', 'newsletter') ?>
-                        </th>
-                        <td>
 
-                            <?php $controls->text('confirmed_subject', 70, $this->get_default_text('confirmed_subject')); ?>
-                            <br><br>
-                            <?php $controls->checkbox2('confirmed_message_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
-                            <div data-bind="options-confirmed_message_custom">
-                                <?php $controls->wp_editor('confirmed_message', ['editor_height' => 150], ['default' => $this->get_default_text('confirmed_message')]); ?>
-                            </div>
-                            <div data-bind="!options-confirmed_message_custom" class="tnpc-default-text">
-                                <?php echo wp_kses_post($this->get_default_text('confirmed_message')) ?>
-                            </div>
 
-                        </td>
-                    </tr>
+                    <table class="form-table">
+                        <tr>
+                            <th><?php esc_html_e('Welcome page', 'newsletter') ?></th>
+                            <td>
+                                <?php $controls->page_or_url('confirmed', '', false); ?>
 
-                </table>
+                            </td>
+                        </tr>
+                        <tr data-show="confirmed_id=0">
+                            <th><?php esc_html_e('Page content', 'newsletter') ?></th>
+                            <td>
+                                <?php $controls->checkbox2('confirmed_text_custom', 'Customize'); ?>
+                                <div data-show="confirmed_text_custom=1">
+                                    <?php $controls->wp_editor('confirmed_text', ['editor_height' => 150], ['default' => $this->get_default_text('confirmed_text')]); ?>
+                                </div>
+                                <div data-show="confirmed_text_custom=0" class="tnpc-default-text">
+                                    <?php echo wp_kses_post($this->get_default_text('confirmed_text')) ?>
+                                </div>
+                            </td>
+                        </tr>
+
+
+
+                        <tr data-show="confirmed_id=0">
+                            <th><?php esc_html_e('Conversion tracking code', 'newsletter') ?>
+                                <?php $controls->help('/subscription#conversion') ?></th>
+                            <td>
+                                <?php $controls->textarea('confirmed_tracking'); ?>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <p>
+                        <?php $controls->button_save() ?>
+                        <?php if (current_user_can('administrator')) { ?>
+                            <?php $controls->btn_link($this->build_dummy_action_url('c'), __('Preview', 'newsletter'), ['tertiary' => true, 'target' => '_blank']); ?>
+                        <?php } ?>
+                    </p>
+
+
+                </div>
+
+                <div id="tabs-email">
+
+                    <?php //$this->language_notice(); ?>
+
+
+                    <?php
+                    $controls->select('welcome_email',
+                            ['0' => __('Default', 'newsletter'), '1' => __('Composer', 'newsletter'), '2' => __('Do not send', 'newsletter')]);
+                    ?>
+                    <?php
+                    $controls->button_icon_statistics(NewsletterStatisticsAdmin::instance()->get_statistics_url($controls->data['welcome_email_id']),
+                            ['secondary' => true, 'id' => 'tnp-stats-button', 'target' => '_blank', 'data-show' => 'welcome_email=1'])
+                    ?>
+                    <?php $controls->button_save() ?>
+                    <?php if (NEWSLETTER_DEBUG) { ?>
+                        <?php $controls->btn_link(home_url('/') . '?na=json&id=' . $email->id, '{}') ?>
+                        <?php $controls->button_icon_delete(); ?>
+                        [#<?php echo (int) $controls->data['welcome_email_id']; ?>]
+                    <?php } ?>
+
+
+                    <div id="tnp-composer-welcome" style="display: none" data-show="welcome_email=1">
+                        <?php $controls->composer_v3(true, false); ?>
+                    </div>
+
+                    <div id="tnp-standard-welcome" style="display: none" data-show="welcome_email=0">
+                        <table class="form-table">
+                            <tr>
+                                <td>
+
+                                    <?php $controls->text('confirmed_subject', 70, $this->get_default_text('confirmed_subject')); ?>
+                                    <br><br>
+                                    <?php $controls->checkbox2('confirmed_message_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
+
+                                    <div data-show="confirmed_message_custom=1">
+                                        <?php $controls->wp_editor('confirmed_message', ['editor_height' => 150], ['default' => $this->get_default_text('confirmed_message')]); ?>
+                                    </div>
+
+                                    <div data-show="confirmed_message_custom=0" class="tnpc-default-text">
+                                        <?php echo wp_kses_post($this->get_default_text('confirmed_message')) ?>
+                                    </div>
+
+                                </td>
+                            </tr>
+
+                        </table>
+
+                    </div>
+                </div>
+
 
             </div>
+
+
         </form>
 
-        <div id="tnp-composer-welcome" style="display: none">
 
-            <?php $controls->composer_load_v2(true, false, 'automated') ?>
-
-        </div>
 
     </div>
 </div>

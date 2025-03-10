@@ -350,9 +350,7 @@ if ($email['status'] != 'sent') {
                         <?php } ?>
                     <?php } else { ?>
 
-                        <a class="button-secondary" href="<?php echo $this->get_editor_url($email_id, $editor_type) ?>">
-                            <i class="fas fa-edit"></i> <?php esc_html_e('Edit', 'newsletter') ?>
-                        </a>
+                        <?php $controls->btn_link($this->get_editor_url($email_id, $editor_type), __('Edit', 'newsletter'), ['icon' => 'fa-edit', 'secondary' => true]); ?>
 
                     <?php } ?>
 

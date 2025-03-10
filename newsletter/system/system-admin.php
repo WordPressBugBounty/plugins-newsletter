@@ -70,7 +70,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
             }
         }
         $stats->avg = round(array_sum($stats->deltas) / count($stats->deltas));
-        $stats->good = $stats->avg < NEWSLETTER_CRON_INTERVAL * 1.1; // 10% error
+        $stats->good = $stats->avg < NEWSLETTER_CRON_INTERVAL * 1.2; // 10% error
         return $stats;
     }
 

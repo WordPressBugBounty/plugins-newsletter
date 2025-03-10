@@ -1,6 +1,6 @@
 <?php ?>
 <ul class="tnp-nav">
-    <!--<li class="tnp-nav-title">Subscription</li>-->
+    <li class="tnp-nav-title"><?php esc_html_e('System', 'newsletter') ?></li>
     <li class="<?php echo $_GET['page'] === 'newsletter_system_status' ? 'active' : '' ?>">
         <?php if ($system_warnings['status']) { ?>
             <i class="fas fa-exclamation-triangle tnp-menu-warning" style="color: red;"></i>

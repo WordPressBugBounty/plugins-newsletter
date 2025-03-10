@@ -333,7 +333,6 @@ function percentValue($value, $total) {
                     </div>
                 <?php } ?>
 
-
             </div>
 
             <p>

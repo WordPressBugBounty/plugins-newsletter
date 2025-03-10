@@ -18,6 +18,11 @@ if (!$controls->is_action()) {
 
 $posts = get_posts(['posts_per_page' => 1]);
 $last_post_url = $posts ? get_the_permalink($posts[0]) : null;
+
+$leads_active = class_exists('NewsletterLeads') && NewsletterLeads::$instance->inject_bottom_enabled;
+if ($leads_active) {
+    $controls->warnings[] = 'The Newsletter Leads Addon is active, we recommend to configure the injections on that addon page';
+}
 ?>
 
 <div class="wrap" id="tnp-wrap">
@@ -26,8 +31,8 @@ $last_post_url = $posts ? get_the_permalink($posts[0]) : null;
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription') ?>
-        <h2><?php esc_html_e('Standard Form', 'newsletter') ?></h2>
-        <?php include __DIR__ . '/nav-form.php' ?>
+<!--        <h2><?php esc_html_e('Forms', 'newsletter') ?></h2>-->
+        <?php include __DIR__ . '/nav-forms.php' ?>
     </div>
 
     <div id="tnp-body">
@@ -42,31 +47,45 @@ $last_post_url = $posts ? get_the_permalink($posts[0]) : null;
 
         <form action="" method="post">
             <?php $controls->init(); ?>
+            <div id="tabs">
+                <ul>
+                    <li><a href="#tabs-settings"><?php esc_html_e('Settings', 'newsletter') ?></a></li>
+                    <?php if (NEWSLETTER_DEBUG) { ?>
+                        <li><a href="#tabs-debug">Debug</a></li>
+                    <?php } ?>
+                </ul>
 
-            <table class="form-table">
-                <tr>
-                    <th><?php esc_html_e('Enabled?', 'newsletter'); ?></th>
-                    <td>
-                        <?php $controls->checkbox2('bottom_enabled'); ?>
-                    </td>
-                </tr>
-                <tr>
-                    <th><?php esc_html_e('Preview', 'newsletter'); ?></th>
-                    <td>
-                        <?php if ($last_post_url) { ?>
-                            <a href="<?php echo esc_attr($last_post_url) ?>#tnp-subscription-posts" target="test">See on your last post</a>.
-                        <?php } else { ?>
-                            No public posts on your site?
-                        <?php } ?>
-                    </td>
-                </tr>
-                <tr>
-                    <th><?php esc_html_e('Shown before the form', 'newsletter'); ?></th>
-                    <td>
-                        <?php $controls->wp_editor('bottom_text', ['editor_height' => 150], ['body_background' => '#ccc']); ?>
-                    </td>
-                </tr>
-            </table>
+                <div id="tabs-settings">
+                    <table class="form-table">
+                        <tr>
+                            <th><?php esc_html_e('Enabled?', 'newsletter'); ?></th>
+                            <td>
+                                <?php $controls->yesno('bottom_enabled'); ?>
+                                <?php if ($last_post_url) { ?>
+                                    <a href="<?php echo esc_attr($last_post_url) ?>#tnp-subscription-posts" target="test">See on your last post</a>.
+                                <?php } else { ?>
+                                    No public posts on your site?
+                                <?php } ?>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th><?php esc_html_e('Shown before the form', 'newsletter'); ?></th>
+                            <td>
+                                <?php $controls->wp_editor('bottom_text', ['editor_height' => 150], ['body_background' => '#ccc']); ?>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+
+                <?php if (NEWSLETTER_DEBUG) { ?>
+                    <div id="tabs-debug">
+                        <?php //$controls->button_reset(); ?>
+                        <pre><?php echo esc_html(json_encode($this->get_db_options('inject', $language), JSON_PRETTY_PRINT)) ?></pre>
+                    </div>
+                <?php } ?>
+            </div>
 
             <p>
                 <?php $controls->button_save(); ?>

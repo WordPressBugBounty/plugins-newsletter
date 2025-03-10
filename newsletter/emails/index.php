@@ -53,7 +53,6 @@ if ($controls->is_action('delete_selected')) {
 
 $pagination_controller = new TNP_Pagination_Controller(NEWSLETTER_EMAILS_TABLE, 'id', ['type' => 'message']);
 $emails = $pagination_controller->get_items();
-
 ?>
 
 <div class="wrap tnp-emails tnp-emails-index" id="tnp-wrap">
@@ -62,7 +61,7 @@ $emails = $pagination_controller->get_items();
 
     <div id="tnp-heading">
 
-        <h2><?php esc_html_e('Newsletters', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Newsletters', 'newsletter') ?></h2>-->
 
         <?php include __DIR__ . '/nav.php' ?>
 
@@ -75,9 +74,9 @@ $emails = $pagination_controller->get_items();
         <form method="post" action="">
             <?php $controls->init(); ?>
 
-            <a href="<?php echo $this->get_admin_page_url('composer'); ?>" class="button-primary"><?php esc_html_e('Add new', 'newsletter') ?></a>
+            <?php $controls->btn_link($this->get_admin_page_url('composer'), __('Add new', 'newsletter')); ?>
 
-            <?php $controls->btn('delete_selected', __('Delete selected', 'newsletter'), ['tertiary'=>true, 'confirm'=>true]); ?>
+            <?php $controls->btn('delete_selected', __('Delete selected', 'newsletter'), ['tertiary' => true, 'confirm' => true]); ?>
 
             <?php $pagination_controller->display_paginator(); ?>
 
@@ -131,16 +130,16 @@ $emails = $pagination_controller->get_items();
                             </td>
 
                             <td style="white-space: nowrap">
-                                <?php $controls->button_icon_statistics(NewsletterStatisticsAdmin::instance()->get_statistics_url($email->id), ['secondary'=>true]) ?>
+                                <?php $controls->button_icon_statistics(NewsletterStatisticsAdmin::instance()->get_statistics_url($email->id), ['secondary' => true]) ?>
                                 <?php $controls->button_icon_view(home_url('/') . '?na=view&id=' . urlencode($email->id)) ?>
                             </td>
 
                             <td style="white-space: nowrap">
                                 <?php $controls->button_icon_copy($email->id); ?>
-                                <?php $controls->button_icon_delete($email->id, ['secondary'=>true]); ?>
-                                <?php $controls->btn('template', 'T', ['data'=>$email->id, 'tertiary'=>true, 'confirm'=>'Create a template from this newsletter?', 'title' => 'Create a template']); ?>
+                                <?php $controls->button_icon_delete($email->id, ['secondary' => true]); ?>
+                                <?php $controls->btn('template', 'T', ['data' => $email->id, 'tertiary' => true, 'confirm' => 'Create a template from this newsletter?', 'title' => 'Create a template']); ?>
                                 <?php if (NEWSLETTER_DEBUG) { ?>
-                                <?php $controls->btn_link(home_url('/') . '?na=json&id=' . $email->id, '{}') ?>
+                                    <?php $controls->btn_link(home_url('/') . '?na=json&id=' . $email->id, '{}') ?>
                                 <?php } ?>
                             </td>
                         </tr>

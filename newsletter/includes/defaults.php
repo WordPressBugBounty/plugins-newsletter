@@ -11,7 +11,7 @@ class NewsletterDefaults {
     static function get_options($sub) {
 
         if ($sub === 'main') {
-            $sitename = strtolower(wp_parse_url(home_url(),PHP_URL_HOST));
+            $sitename = strtolower(wp_parse_url(home_url(), PHP_URL_HOST));
             if (substr($sitename, 0, 4) == 'www.') {
                 $sitename = substr($sitename, 4);
             }
@@ -80,15 +80,29 @@ class NewsletterDefaults {
             ];
         }
 
+        // welcome_ and confirmed_ prefixes identify the same step, it's an error
+        // kept for compatibility (welcome_ it's the right one, btw)
         if ($sub === 'subscription') {
             return [
-                'noconfirmation' => 1,
-                'notify_email' => get_option('admin_email'),
-                'multiple' => 1,
-                'notify' => 0,
-                'confirmed_tracking' => '',
-                'welcome_email' => '',
-                'welcome_email_id' => 0
+            'noconfirmation' => 1,
+            'notify_email' => get_option('admin_email'),
+            'multiple' => 1,
+            'notify' => 0,
+            'confirmed_tracking' => '',
+            'welcome_email' => '0',
+            'welcome_email_id' => 0,
+            'confirmed_message' => '',
+            'confirmed_subject' => '',
+            'confirmed_text' => '',
+            'confirmed_id' => '',
+            'confirmed_url' => '',
+            'confirmation_email' => '0',
+            'confirmation_email_id' => 0,
+            'confirmation_page_id' => 0,
+            'confirmation_page_url' => 0,
+            'confirmation_message' => '',
+            'confirmation_subject' => '',
+            'confirmation_text' => '',
             ];
         }
 
@@ -246,5 +260,4 @@ class NewsletterDefaults {
 
         return '';
     }
-
 }

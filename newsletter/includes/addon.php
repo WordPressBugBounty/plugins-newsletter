@@ -692,6 +692,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
         $subscription = NewsletterSubscription::instance()->get_default_subscription();
         $subscription->floodcheck = false;
 
+        // 'welcome_email' is a flag indicating what to use for that email (0- default, 1 - custom, 2 - don't send)
         if (!empty($form_options['welcome_email'])) {
             if ($form_options['welcome_email'] == '1') {
                 $subscription->welcome_email_id = (int) $form_options['welcome_email_id'];
@@ -699,6 +700,23 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
                 $subscription->welcome_email_id = -1;
             }
         }
+
+        if (!empty($form_options['welcome_page_id'])) {
+            $subscription->welcome_page_id = (int)$form_options['welcome_page_id'];
+        }
+
+        if (!empty($form_options['confirmation_email'])) {
+            if ($form_options['confirmation_email'] == '1') {
+                $subscription->confirmation_email_id = (int) $form_options['confirmation_email_id'];
+            } else {
+                $subscription->confirmation_email_id = -1;
+            }
+        }
+
+        if (!empty($form_options['confirmation_page_id'])) {
+            $subscription->confirmation_page_id = (int)$form_options['confirmation_page_id'];
+        }
+
         if (!empty($form_options['status'])) {
             $subscription->optin = $form_options['status'];
         }

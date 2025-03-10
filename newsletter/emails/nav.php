@@ -2,7 +2,7 @@
 $p = $_GET['page'];
 ?>
 <ul class="tnp-nav">
-    <!--<li class="tnp-nav-title">Subscription</li>-->
+        <li class="tnp-nav-title"><?php esc_html_e('Newsletters', 'newsletter'); ?></li>
     <li class="<?php echo $p === 'newsletter_emails_index'?'active':''?>"><a href="?page=newsletter_emails_index"><?php esc_html_e('Newsletters', 'newsletter')?></a></li>
     <li class="<?php echo $p === 'newsletter_emails_presets'?'active':''?>"><a href="?page=newsletter_emails_presets"><?php esc_html_e('Templates', 'newsletter')?></a></li>
     <li class="<?php echo $p === 'newsletter_emails_settings'?'active':''?>"><a href="?page=newsletter_emails_settings"><?php esc_html_e('Settings', 'newsletter')?></a></li>

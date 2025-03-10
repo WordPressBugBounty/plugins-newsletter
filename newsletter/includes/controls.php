@@ -752,7 +752,7 @@ class NewsletterControls {
      * @param string $language
      * @param bool $show_id
      */
-    function page_or_url($name = 'page', $language = '', $show_id = true) {
+    function page_or_url($name = 'page', $language = '', $show_id = true, $attrs = []) {
         $args = array(
             'post_type' => 'page',
             // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page
@@ -778,9 +778,14 @@ class NewsletterControls {
             $options[$page->ID] = $label;
         }
 
-        $this->select($name . '_id', $options, __('None', 'newsletter'), ['onchange' => 'jQuery(\'#options-' . esc_attr($name) . '_url\').toggle(this.value===\'url\');']);
-        echo '<br><br>';
-        $this->text($name . '_url', ['visible' => $this->get_value($name . '_id') === 'url', 'placeholder' => 'https://']);
+        $this->select($name . '_id', $options, __('Newsletter public page', 'newsletter'));
+        if (!empty($attrs['preview_url']) && current_user_can('administrator')) {
+            $this->btn_link($attrs['preview_url'], __('Preview', 'newsletter'), ['tertiary' => true, 'target' => '_blank']);
+        }
+        echo '<p class="description" data-show="', esc_attr($name), '_id=0">The public page is set on general Setting page.</p>';
+        echo '<div data-show="', esc_attr($name), '_id=url" style="margin-top: 1rem;">';
+        $this->text($name . '_url', ['placeholder' => 'https://']);
+        echo '</div>';
     }
 
     /** Used to create a select which is part of a group of controls identified by $name that will
@@ -1041,10 +1046,12 @@ class NewsletterControls {
     function btn($action, $label, $attrs = []) {
         $action = sanitize_key($action);
 
-        if (isset($attrs['tertiary'])) {
-            echo '<button class="button-secondary button-tertiary tnpc-button"';
+        if (isset($attrs['delete'])) {
+            echo '<button class="button-secondary button-tertiary tnpc-button tnpc-button-delete"';
+        } elseif (isset($attrs['tertiary'])) {
+            echo '<button class="button-secondary button-tertiary tnpc-button tnpc-button-tertiary"';
         } elseif (isset($attrs['secondary'])) {
-            echo '<button class="button-secondary tnpc-button"';
+            echo '<button class="button-secondary tnpc-button tnpc-button-secondary"';
         } else {
             echo '<button class="button-primary tnpc-button"';
         }
@@ -1099,9 +1106,9 @@ class NewsletterControls {
      */
     function btn_link($url, $label, $attrs = []) {
         if (isset($attrs['tertiary'])) {
-            echo '<a href="', esc_attr($url), '" class="button-secondary button-tertiary tnpc-button"';
+            echo '<a href="', esc_attr($url), '" class="button-secondary button-tertiary tnpc-button tnpc-button-tertiary"';
         } elseif (isset($attrs['secondary'])) {
-            echo '<a href="', esc_attr($url), '" class="button-secondary tnpc-button"';
+            echo '<a href="', esc_attr($url), '" class="button-secondary tnpc-button tnpc-button-secondary"';
         } else {
             echo '<a href="', esc_attr($url), '" class="button-primary tnpc-button"';
         }
@@ -1116,6 +1123,9 @@ class NewsletterControls {
         }
         if (!empty($attrs['target'])) {
             echo ' target="', esc_attr($attrs['target']), '"';
+        }
+        if (!empty($attrs['data-show'])) {
+            echo ' data-show="', esc_attr($attrs['data-show']), '"';
         }
         echo '>';
         if (!empty($attrs['icon'])) {
@@ -1173,7 +1183,7 @@ class NewsletterControls {
      * @param type $data
      */
     function button_delete($data = '') {
-        $this->btn('delete', __('Delete', 'newsletter'), ['data' => $data, 'icon' => 'fa-times', 'confirm' => true, 'style' => 'background-color: darkred; color: #ffffff']);
+        $this->btn('delete', __('Delete', 'newsletter'), ['data' => $data, 'icon' => 'fa-times', 'confirm' => true, 'delete' => true]);
     }
 
     function button_icon_delete($data = '', $attrs = []) {
@@ -1639,6 +1649,10 @@ class NewsletterControls {
         $autoresponders = NewsletterAutoresponder::instance()->get_autoresponders();
 
         echo '<table class="widefat" style="width: auto">';
+        echo '<thead><tr>';
+        echo '<th>Series</th><th>&nbsp;</th>';
+
+        echo '</tr></thead>';
 
         foreach ($autoresponders as $autoresponder) {
             echo '<tr><td>';
@@ -1665,7 +1679,6 @@ class NewsletterControls {
                 echo ' selected';
             }
             echo '>', esc_html__('Deactivate', 'newsletter'), '</option>';
-
 
             echo '</select>';
 
@@ -1964,6 +1977,8 @@ class NewsletterControls {
 
     function init($options = []) {
 
+        $nested = $options['nested'] ?? false;
+
         if (isset($options['cookie_name'])) {
             $cookie_name = $options['cookie_name'];
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1976,103 +1991,27 @@ class NewsletterControls {
 
         $tab = $_GET['tab'] ?? $_COOKIE[$cookie_name] ?? '';
 
-        echo '<script type="text/javascript">
-    jQuery(document).ready(function(){
+        $config = [];
+        $config['nested'] = $nested;
+        $config['tab'] = $tab;
+        $config['tab_name'] = $cookie_name;
 
-tnp_controls_init();
+        echo '<script>' . PHP_EOL;
+        echo 'jQuery(document).ready(function(){' . PHP_EOL;
+        echo 'tnp_controls_init(' . wp_json_encode($config), ');' . PHP_EOL;
+        echo '});' . PHP_EOL;
+        echo '</script>' . PHP_EOL;
 
-        jQuery("textarea.dynamic").focus(function() {
-            jQuery("textarea.dynamic").css("height", "50px");
-            jQuery(this).css("height", "400px");
-        });
-      tabs = jQuery("#tabs").tabs({
-        active : "', sanitize_key($tab), '",
-        activate : function( event, ui ){
-            jQuery.cookie("', sanitize_key($cookie_name), '", ui.newTab.index(),{expires: 1});
+        if (!$nested) {
+            echo '<input name="act" type="hidden" value=""/>' . PHP_EOL;
+            ;
+            echo '<input name="btn" type="hidden" value=""/>' . PHP_EOL;
+            ;
+            wp_nonce_field('save');
         }
-      });
-      jQuery(".tnp-tabs").tabs({});
-      jQuery(".tnp-accordion").accordion({collapsible: true, heightStyle: "content"});
 
-    });
-    function newsletter_media(name) {
-        var tnp_uploader = wp.media({
-            title: "Select an image",
-            button: {
-                text: "Select"
-            },
-            multiple: false
-        }).on("select", function() {
-            var media = tnp_uploader.state().get("selection").first();
-            document.getElementById(name + "_id").value = media.id;
-            jQuery("#" + name + "_id").trigger("change");
-            console.log(media.attributes);
-            if (media.attributes.url.substring(0, 0) == "/") {
-                media.attributes.url = "', site_url('/'), '" + media.attributes.url;
-            }
-            document.getElementById(name + "_url").value = media.attributes.url;
-
-            var img_url = media.attributes.url;
-            if (typeof media.attributes.sizes.medium !== "undefined") img_url = media.attributes.sizes.medium.url;
-            if (img_url.substring(0, 0) == "/") {
-                img_url = "', site_url('/'), '" + img_url;
-            }
-            document.getElementById(name + "_img").src = img_url;
-            var alt = document.getElementById("options-" + name + "_alt");
-            if (alt) {
-                alt.value = media.attributes.alt;
-            }
-        }).open();
-    }
-    function newsletter_media_remove(name) {
-        if (confirm("Are you sure?")) {
-            document.getElementById(name + "_id").value = "";
-            document.getElementById(name + "_url").value = "";
-            document.getElementById(name + "_img").src = "', plugins_url('newsletter'), '/images/nomedia.png";
-            var alt = document.getElementById("options-" + name + "_alt");
-            if (alt) {
-                alt.value = "";
-            }
-        }
-    }
-    function newsletter_textarea_preview(id, header, footer) {
-        var d = document.getElementById(id + "-iframe").contentWindow.document;
-        d.open();
-        if (templateEditor) {
-            d.write(templateEditor.getValue());
-        } else {
-            d.write(header + document.getElementById(id).value + footer);
-        }
-        d.close();
-
-        var d = document.getElementById(id + "-iframe-phone").contentWindow.document;
-        d.open();
-        if (templateEditor) {
-            d.write(templateEditor.getValue());
-        } else {
-            d.write(header + document.getElementById(id).value + footer);
-        }
-        d.close();
-        //jQuery("#" + id + "-iframe-phone").toggle();
-        jQuery("#" + id + "-preview").toggle();
-    }
-    function tnp_select_images(state) {
-        if (!state.id) { return state.text; }
-        var $state = jQuery("<span class=\"tnp-select2-option\"><img style=\"height: 20px!important; position: relative; top: 5px\" src=\"" + state.element.getAttribute("image") + "\"> " + state.text + "</span>");
-        return $state;
-    }
-    function tnp_select_images_selection(state) {
-        if (!state.id) { return state.text; }
-        var $state = jQuery("<span class=\"tnp-select2-option\"><img style=\"height: 20px!important; position: relative; top: 5px\" src=\"" + state.element.getAttribute("image") + "\"> " + state.text + "</span>");
-        return $state;
-    }
-
-
-</script>
-';
-        echo '<input name="act" type="hidden" value=""/>';
-        echo '<input name="btn" type="hidden" value=""/>';
-        wp_nonce_field('save');
+        // Required on nested "controls" since the submit is limited to the specific group of fields when
+        // used on composer block options.
     }
 
     function log_level($name = 'log_level') {
@@ -2283,7 +2222,7 @@ tnp_controls_init();
             $media = array('', '', '');
             $media_full = array('', '', '');
             $media_id = 0;
-            echo '<img style="max-width: 200px; max-height: 150px; width: 100px;" id="' . esc_attr($name) . '_img" src="' . esc_attr(plugins_url('newsletter')) . '/images/nomedia.png" onclick="newsletter_media(\'' . esc_attr($name) . '\')">';
+            echo '<img style="max-width: 200px; max-height: 150px; width: 100px;" id="' . esc_attr($name) . '_img" src="' . esc_attr(plugins_url('newsletter')) . '/admin/images/nomedia.png" onclick="newsletter_media(\'' . esc_attr($name) . '\')">';
         } else {
             echo '<img style="max-width: 200px; max-height: 150px;" id="' . esc_attr($name) . '_img" src="' . esc_attr($media[0]) . '" onclick="newsletter_media(\'' . esc_attr($name) . '\')">';
         }
@@ -2531,6 +2470,24 @@ tnp_controls_init();
         echo '&nbsp;<a href="#subject-ideas-modal" rel="modal:open"><i class="far fa-lightbulb tnp-suggest-subject"></i></a>';
         do_action('newsletter_composer_subject');
 
+        echo '<img src="', esc_attr(plugins_url('newsletter')), '/admin/images/subject/android.png" style="position: absolute; width: 16px; left: 330px; top: 25px; display: block; opacity: 0">';
+        echo '<img src="', esc_attr(plugins_url('newsletter')), '/admin/images/subject/iphone.png" style="position: absolute; width: 16px; left: 380px; top: 25px; display: block; opacity: 0">';
+        echo '</div>';
+    }
+
+    function composer_v3($show_subject = false, $show_test = true, $context_type = '') {
+
+        // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+        echo "<link href='", esc_attr(plugins_url('newsletter')), "/composer/css/composer.css?ver=", rawurlencode(NEWSLETTER_VERSION), "' rel='stylesheet' type='text/css'>";
+
+        include NEWSLETTER_DIR . '/composer/index.php';
+    }
+
+    function subject_v3($name = 'subject') {
+        $value = $this->get_value($name);
+        echo '<div style="position: relative"><input size="80" id="options-', esc_attr($name), '" name="options[' . esc_attr($name) . ']" type="text" placeholder="" value="';
+        echo esc_attr($value);
+        echo '">';
         echo '<img src="', esc_attr(plugins_url('newsletter')), '/admin/images/subject/android.png" style="position: absolute; width: 16px; left: 330px; top: 25px; display: block; opacity: 0">';
         echo '<img src="', esc_attr(plugins_url('newsletter')), '/admin/images/subject/iphone.png" style="position: absolute; width: 16px; left: 380px; top: 25px; display: block; opacity: 0">';
         echo '</div>';

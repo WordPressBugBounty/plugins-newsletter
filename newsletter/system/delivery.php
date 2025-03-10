@@ -152,7 +152,7 @@ $speed = Newsletter::instance()->get_send_speed();
 
     <div id="tnp-heading">
 
-        <h2><?php esc_html_e('System', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('System', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>

@@ -50,7 +50,7 @@ if ($controls->is_action()) {
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription/antiflood') ?>
-        <h2><?php esc_html_e('Subscription', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Subscription', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
     </div>
 
@@ -94,6 +94,9 @@ if ($controls->is_action()) {
                                     1 => __('Enabled', 'newsletter')
                                 ]);
                                 ?>
+                                <span class="description">
+                                    Sends the subscription data to Akismet to know if it's spam
+                                </span>
                             </td>
                         </tr>
 
@@ -116,6 +119,10 @@ if ($controls->is_action()) {
                                     360 => '60 ' . __('minutes', 'newsletter')
                                 ));
                                 ?>
+
+                                <span class="description">
+                                    Refuses repeated subscription from the same IP or for the same address by the specified interval.
+                                </span>
                             </td>
                         </tr>
                         <tr>
@@ -155,24 +162,6 @@ if ($controls->is_action()) {
                             <td>
                                 <?php $controls->textarea('address_blacklist'); ?>
                                 <p class="description"><?php esc_html_e('One per line', 'newsletter') ?></p>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>
-                                <?php $controls->label(__('IP blacklist', 'newsletter'), '/subscription/antiflood/#ip-blacklist') ?>
-                            </th>
-                            <td>
-                                <p style="font-weight: bold">
-                                    This configuration is no more used, it is kept to preserve the data if you
-                                    want to use on a firewall or similar tools.
-                                </p>
-                                <?php $controls->textarea('ip_blacklist'); ?>
-                                <p class="description">
-                                    <?php esc_html_e('One per line', 'newsletter') ?>
-                                    IPv4 (aaa.bbb.ccc.ddd) supported. IPv6 supported. CIDR supported only for IPv4. Lines starting with # are
-                                    considered comments.
-                                </p>
                             </td>
                         </tr>
                     </table>

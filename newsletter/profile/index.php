@@ -35,7 +35,7 @@ foreach (['text'] as $key) {
 
     <div id="tnp-heading">
         <?php $controls->title_help('/profile-page') ?>
-        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/../users/nav.php' ?>
 
     </div>
@@ -44,19 +44,17 @@ foreach (['text'] as $key) {
 
         <?php $controls->show() ?>
         <p>
-            Where your subscribers can change their data.
-            <?php if (current_user_can('administrator')) { ?>
-                <a href="<?php echo esc_attr($this->build_action_url('p')); ?>&nk=0-0" target="_blank">Preview online</a>
-            <?php } ?>
+            The online page where your subscribers manage their subscription. They reach this page
+            clicking the link on the footer of your newsleters.
         </p>
 
         <form id="channel" method="post" action="">
             <?php $controls->init(); ?>
             <div id="tabs">
                 <ul>
-                    <li><a href="#tabs-general"><?php esc_html_e('General', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-fields"><?php esc_html_e('Form', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-labels"><?php esc_html_e('Messages and labels', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-general"><?php esc_html_e('General', 'newsletter'); ?></a></li>
+                    <li><a href="#tabs-fields"><?php esc_html_e('Form', 'newsletter'); ?></a></li>
+                    <li><a href="#tabs-labels"><?php esc_html_e('Labels', 'newsletter'); ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
                     <?php } ?>
@@ -65,9 +63,19 @@ foreach (['text'] as $key) {
                 <div id="tabs-general">
 
                     <table class="form-table">
-
                         <tr>
-                            <th><?php esc_html_e('Page content', 'newsletter') ?>
+                            <th><?php esc_html_e('Page', 'newsletter') ?></th>
+                            <td>
+                                <?php $controls->page_or_url('page'); ?>
+<!--                                <p class="description">
+                                    The specified page must contain the <code>[newsletter /]</code> shortcode which will be replaced with the
+                                    content below.
+                                </p>-->
+                            </td>
+                        </tr>
+                        <tr data-show="page_id=0">
+                            <th>
+                                <?php esc_html_e('Page content', 'newsletter') ?>
                             </th>
                             <td>
 
@@ -79,22 +87,21 @@ foreach (['text'] as $key) {
                                     <?php echo wp_kses_post($this->get_default_text('text')) ?>
                                 </div>
                                 <p class="description">
-                                    Shown inside the Newsletter public page. Use <code>[newsletter_profile /]</code> where you want the edit form
-                                    to be inserted. Show the unsubscribe button <code>[newsletter_unsubscribe_button label="..." /]</code>.
-                                    Show the GDPR export
-                                    button using <code>[newsletter_export_button label="..." /]</code>
+                                    Content of the Newsletter public page
                                 </p>
                             </td>
                         </tr>
 
                         <tr>
-                            <th><?php esc_html_e('Custom profile page', 'newsletter') ?></th>
+                            <th>
+                                Notes
+                            </th>
                             <td>
-                                <?php $controls->page_or_url('page'); ?>
-                                <p class="description">
-                                    The specified page must contain the <code>[newsletter /]</code> shortcode which will be replaced with the
-                                    custom content above.
-                                </p>
+                                <ul>
+                                    <li>Use <code>[newsletter_profile /]</code> where you want the edit form to be inserted.</li>
+                                    <li>Use <code>[newsletter_unsubscribe_button label="..." /]</code> to add the unsubscribe button.</li>
+                                    <li>Use <code>[newsletter_export_button label="..." /]</code> to add the GDPR export button.</li>
+                                </ul>
                             </td>
                         </tr>
 
@@ -250,6 +257,9 @@ foreach (['text'] as $key) {
 
             <p>
                 <?php $controls->button_save() ?>
+                <?php if (current_user_can('administrator')) { ?>
+                    <?php $controls->btn_link($this->build_dummy_action_url('p'), __('Preview', 'newsletter'), ['tertiary' => true, 'target' => '_blank']); ?>
+                <?php } ?>
             </p>
 
         </form>

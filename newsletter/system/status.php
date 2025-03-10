@@ -118,7 +118,7 @@ function tnp_describe_table($table) {
 
     <div id="tnp-heading">
 
-        <h2><?php esc_html_e('System', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('System', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
     </div>
 
@@ -543,6 +543,13 @@ function tnp_describe_table($table) {
                                 <td>
                                     <?php echo has_filter('newsletter_enqueue_style') ? '' : '-' ?>
                                     <?php echo $this->get_hook_functions('newsletter_enqueue_style') ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><code>get_the_excerpt</code></td>
+                                <td>
+                                    <?php echo has_filter('get_the_excerpt') ? '' : '-' ?>
+                                    <?php echo $this->get_hook_functions('get_the_excerpt') ?>
                                 </td>
                             </tr>
                         </tbody>
@@ -1092,7 +1099,6 @@ function tnp_describe_table($table) {
 
 
                     <h3>Tables</h3>
-                    <h3>Database tables' status</h3>
                     <table class="widefat">
                         <thead>
                             <tr>
@@ -1197,6 +1203,34 @@ function tnp_describe_table($table) {
                                 </td>
                             </tr>
 
+                            <?php
+                            $r = $wpdb->get_row("check table " . esc_sql($wpdb->options));
+                            $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                            ?>
+                            <tr>
+                                <td><code><?php echo esc_html($wpdb->options) ?></code></td>
+                                <td>
+                                    <?php $this->condition_flag($condition) ?>
+                                </td>
+                                <td>
+                                    <?php esc_html(print_r($r)) ?>
+                                </td>
+                            </tr>
+
+                            <?php
+                            $r = $wpdb->get_row("check table " . esc_sql($wpdb->users));
+                            $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                            ?>
+                            <tr>
+                                <td><code><?php echo esc_html($wpdb->users) ?></code></td>
+                                <td>
+                                    <?php $this->condition_flag($condition) ?>
+                                </td>
+                                <td>
+                                    <?php esc_html(print_r($r)) ?>
+                                </td>
+                            </tr>
+
                             <?php if (class_exists('NewsletterAutomated')) { ?>
                                 <?php
                                 $r = $wpdb->get_row("check table " . $wpdb->prefix . 'newsletter_automated');
@@ -1262,6 +1296,13 @@ function tnp_describe_table($table) {
                                 <td>NEWSLETTER_VERSION</td>
                                 <td>
                                     <?php echo esc_html(NEWSLETTER_VERSION) ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>NEWSLETTER_CRON_INTERVAL</td>
+                                <td>
+                                    <?php echo esc_html(NEWSLETTER_CRON_INTERVAL) ?> (seconds)
                                 </td>
                             </tr>
 

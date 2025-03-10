@@ -43,6 +43,10 @@ if ($controls->is_action('test')) {
 }
 
 $stats = $this->get_cron_stats();
+
+if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
+    $controls->add_message('If you experience problems with the scheduler, please install the plugin <a href="https://wordpress.org/plugins/wp-crontrol/" target="_blank">WP Crontrol</a> and check the Tools/Events page.');
+}
 ?>
 
 <style>
@@ -55,7 +59,7 @@ $stats = $this->get_cron_stats();
 
     <div id="tnp-heading">
 
-        <h2><?php esc_html_e('System', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('System', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
@@ -102,11 +106,12 @@ $stats = $this->get_cron_stats();
                             <tr>
                                 <td>Scheduler</td>
                                 <td class="status">
-                                    <?php $this->condition_flag($condition, 'https://www.thenewsletterplugin.com/documentation/delivery-and-spam/newsletter-delivery-engine/') ?>
+                                    <?php $this->condition_flag($condition) ?>
                                 </td>
                                 <td>
                                     <?php if ($condition == 0) { ?>
-                                        The cron system is NOT triggered enough often.
+                                    The cron system is NOT triggered enough often.<br>
+                                    <?php $controls->btn_link('https://www.thenewsletterplugin.com/documentation/delivery-and-spam/newsletter-delivery-engine/', 'How to solve'); ?>
                                     <?php } ?>
                                 </td>
                             </tr>
@@ -136,9 +141,6 @@ $stats = $this->get_cron_stats();
                                             break;
                                     }
                                     ?>
-                                    <br><br>
-                                    Always install the plugin <a href="https://wordpress.org/plugins/wp-crontrol/" target="_blank">WP Crontrol</a>
-                                    to have a view of the WP scheduler under Tools/Events.
                                 </td>
                             </tr>
                             <tr>

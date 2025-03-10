@@ -325,6 +325,13 @@ class NewsletterModuleBase {
         return $dummy_user;
     }
 
+    /**
+     * Returns ther meta value as int, null if not present.
+     *
+     * @param int $user_id
+     * @param string $key
+     * @return null|int
+     */
     function get_user_meta_int($user_id, $key) {
         $value = $this->get_user_meta($user_id, $key);
         if (is_null($value)) {
@@ -930,6 +937,18 @@ class NewsletterModuleBase {
         if ($email) {
             $url .= '&nek=' . urlencode($this->get_email_key($email));
         }
+        return $url;
+    }
+
+    function build_dummy_action_url($action) {
+        $url = $this->get_action_base_url();
+
+        $url = $this->add_qs($url, 'na=' . urlencode($action));
+        $language = $this->language();
+        if (empty($language)) {
+            $language = '0';
+        }
+        $url .= '&nk=0-' . $language;
         return $url;
     }
 

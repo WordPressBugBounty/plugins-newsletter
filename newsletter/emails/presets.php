@@ -53,7 +53,7 @@ $emails = $this->get_emails('composer_template');
 
     <div id="tnp-heading">
 
-        <h2><?php _e('Newsletters', 'newsletter') ?></h2>
+<!--        <h2><?php _e('Newsletters', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
     </div>
 

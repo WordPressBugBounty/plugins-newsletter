@@ -434,6 +434,10 @@ class NewsletterModule extends NewsletterModuleBase {
             list($id, $token) = explode('-', wp_unslash($_REQUEST['nk']), 2);
             if (current_user_can('administrator') && $id === '0') {
                 $user = $this->get_dummy_user();
+                if (!empty($token)) {
+                    $user->language = sanitize_key($token);
+                    $user->token = $token; // This keeps the language for the dummy user
+                }
                 return $user;
             }
         } elseif (isset($_COOKIE['newsletter'])) {
@@ -729,6 +733,8 @@ class NewsletterModule extends NewsletterModuleBase {
         if (empty($url)) {
             $url = Newsletter::instance()->get_newsletter_page_url($language);
         }
+
+
 
         return self::add_qs($url, $params, false);
     }

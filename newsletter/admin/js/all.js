@@ -306,9 +306,6 @@ jQuery.cookie = function (name, value, options) {
             }
             expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
         }
-        // CAUTION: Needed to parenthesize options.path and options.domain
-        // in the following expressions, otherwise they evaluate to undefined
-        // in the packed version for some reason...
         var path = options.path ? '; path=' + (options.path) : '';
         var domain = options.domain ? '; domain=' + (options.domain) : '';
         var secure = options.secure ? '; secure' : '';
@@ -382,78 +379,13 @@ function tnp_date_onchange(field) {
     //this.form.elements['options[" . esc_attr($name) . "]'].value = new Date(document.getElementById('" . esc_attr($name) . "_year').value, document.getElementById('" . esc_attr($name) . "_month').value, document.getElementById('" . esc_attr($name) . "_day').value, 12, 0, 0).getTime()/1000";
 }
 
-window.onload = function () {
-    jQuery('.tnp-counter-animation').each(function () {
-        var _this = jQuery(this);
-
-        var val = null;
-        if (!isFloat(_this.text())) {
-            val = {
-                parsed: parseInt(_this.text()),
-                rounded: function (value) {
-                    return Math.ceil(value);
-                }
-            };
-
-            if (_this.hasClass('percentage')) {
-                _this.css('min-width', '60px');
-            }
-        } else {
-            val = {
-                parsed: parseFloat(_this.text()),
-                rounded: function (value) {
-                    return value.toFixed(1);
-                }
-            };
-        }
-
-        jQuery({counter: 0}).animate({counter: val.parsed}, {
-            duration: 1000,
-            easing: 'swing',
-            step: function () {
-                _this.text(val.rounded(this.counter));
-            }
-        });
-
-        function isFloat(value) {
-            return !isNaN(Number(value)) && Number(value).toString().indexOf('.') !== -1;
-        }
-
-    });
-
-    (function targetinFormOnChangeHandler() {
-
-        if (isNewsletterOptionsPage()) {
-
-            var newsletterStatusScheduleValue = jQuery('#tnp-nl-status .tnp-nl-status-schedule-value');
-
-            jQuery('#newsletter-form').change(function (event) {
-
-                if (isElementInsideTargettingTab(event.target)) {
-                    newsletterStatusScheduleValue.text(tnp_translations['save_to_update_counter']);
-                }
-
-                function isElementInsideTargettingTab(element) {
-                    return jQuery(element).parents('#tabs-options').length === 1
-                }
-
-            });
-        }
-
-        function isNewsletterOptionsPage() {
-            return jQuery("#tnp-nl-status").length
-                    && jQuery("#newsletter-form").length;
-        }
-
-    })();
-
-};
-
 /**
  * Initialize the color pickers (is invoked on document load and on AJAX forms load in the composer.
  * https://seballot.github.io/spectrum/
  */
-function tnp_controls_init() {
+function tnp_controls_init(config) {
+    NewsletterControls.initialized = true;
+    console.log("Controls init", config);
     jQuery(".tnpc-color").spectrum({
         type: 'color',
         allowEmpty: true,
@@ -461,6 +393,27 @@ function tnp_controls_init() {
         showInput: true,
         preferredFormat: 'hex'
     });
+
+    jQuery("textarea.dynamic").focus(function () {
+        jQuery("textarea.dynamic").css("height", "50px");
+        jQuery(this).css("height", "400px");
+    });
+
+    jQuery(".tnp-accordion").accordion({collapsible: true, heightStyle: "content"});
+    if (!config.nested) {
+        tabs = jQuery("#tabs").tabs({
+            active: config.tab,
+            activate: function (event, ui) {
+                jQuery.cookie(config.tab_name, ui.newTab.index(), {expires: 1});
+            }
+        });
+        jQuery(".tnp-tabs").tabs({
+            active: config.tab,
+            activate: function (event, ui) {
+                jQuery.cookie(config.tab_name, ui.newTab.index(), {expires: 1});
+            }
+        });
+    }
 }
 
 function tnp_fields_media_mini_select(el) {
@@ -520,7 +473,89 @@ function tnp_lists_toggle(e) {
     jQuery('#' + e.id + '-notes .list_' + e.value).show();
 }
 
+function newsletter_media(name) {
+    var tnp_uploader = wp.media({
+        title: "Select an image",
+        button: {
+            text: "Select"
+        },
+        multiple: false
+    }).on("select", function () {
+        var media = tnp_uploader.state().get("selection").first();
+        document.getElementById(name + "_id").value = media.id;
+        jQuery("#" + name + "_id").trigger("change");
+        console.log(media.attributes);
+        if (media.attributes.url.substring(0, 0) == "/") {
+            media.attributes.url = NewsletterControls.site_url + media.attributes.url;
+        }
+        document.getElementById(name + "_url").value = media.attributes.url;
+
+        var img_url = media.attributes.url;
+        if (typeof media.attributes.sizes.medium !== "undefined")
+            img_url = media.attributes.sizes.medium.url;
+        if (img_url.substring(0, 0) == "/") {
+            img_url = NewsletterControls.site_url + img_url;
+        }
+        document.getElementById(name + "_img").src = img_url;
+        var alt = document.getElementById("options-" + name + "_alt");
+        if (alt) {
+            alt.value = media.attributes.alt;
+        }
+    }).open();
+}
+
+function newsletter_media_remove(name) {
+    if (confirm("Are you sure?")) {
+        document.getElementById(name + "_id").value = "";
+        document.getElementById(name + "_url").value = "";
+        document.getElementById(name + "_img").src = NewsletterControls.newsletter_url + '/admin/images/nomedia.png';
+        var alt = document.getElementById("options-" + name + "_alt");
+        if (alt) {
+            alt.value = "";
+        }
+    }
+}
+
+function newsletter_textarea_preview(id, header, footer) {
+    var d = document.getElementById(id + "-iframe").contentWindow.document;
+    d.open();
+    if (templateEditor) {
+        d.write(templateEditor.getValue());
+    } else {
+        d.write(header + document.getElementById(id).value + footer);
+    }
+    d.close();
+
+    var d = document.getElementById(id + "-iframe-phone").contentWindow.document;
+    d.open();
+    if (templateEditor) {
+        d.write(templateEditor.getValue());
+    } else {
+        d.write(header + document.getElementById(id).value + footer);
+    }
+    d.close();
+    //jQuery("#" + id + "-iframe-phone").toggle();
+    jQuery("#" + id + "-preview").toggle();
+}
+function tnp_select_images(state) {
+    if (!state.id) {
+        return state.text;
+    }
+    var $state = jQuery("<span class=\"tnp-select2-option\"><img style=\"height: 20px!important; position: relative; top: 5px\" src=\"" + state.element.getAttribute("image") + "\"> " + state.text + "</span>");
+    return $state;
+}
+function tnp_select_images_selection(state) {
+    if (!state.id) {
+        return state.text;
+    }
+    var $state = jQuery("<span class=\"tnp-select2-option\"><img style=\"height: 20px!important; position: relative; top: 5px\" src=\"" + state.element.getAttribute("image") + "\"> " + state.text + "</span>");
+    return $state;
+}
+
 const TNP = {
+    // Fields that control showing and hiding of other elements
+    showable_controllers: [],
+
     toast: function (message) {
         Toastify({
             text: message,
@@ -542,10 +577,57 @@ const TNP = {
             },
             //onClick: function () {} // Callback after click
         }).showToast();
+    },
+
+    init_showables: function () {
+        document.querySelectorAll('[data-show]').forEach(el => {
+            let parts = el.dataset.show.split(/([=><])/);
+            console.log('options-' + parts[0]);
+            let controller = document.getElementById('options-' + parts[0]);
+            TNP.process_showable(el, controller, parts[1], parts[2]);
+            if (!TNP.showable_controllers.includes(controller.id)) {
+                TNP.showable_controllers.push(controller.id);
+                jQuery(controller).on('change', TNP.process_showables);
+            }
+        });
+    },
+
+    process_showables: function () {
+        document.querySelectorAll('[data-show]').forEach(el => {
+            let parts = el.dataset.show.split(/([=><])/);
+            let controller = document.getElementById('options-' + parts[0]);
+            TNP.process_showable(el, controller, parts[1], parts[2]);
+        });
+    },
+
+    process_showable: function (el, controller, symbol, value) {
+        cvalue = controller.value;
+        if (cvalue === '')
+            cvalue = '0'; // Patch for selects with the first entry set to an empty key
+        if (controller.type === 'checkbox') {
+            if (controller.checked) {
+                jQuery(el).toggle(value == '1');
+            } else {
+                jQuery(el).toggle(value == '0');
+            }
+        } else {
+            switch (symbol) {
+                case '=':
+                    jQuery(el).toggle(cvalue == value);
+                    break;
+                case '<':
+                    jQuery(el).toggle(!isNaN(cvalue) && parseInt(cvalue) < parseInt(value));
+                    break;
+                case '>':
+                    jQuery(el).toggle(!isNaN(cvalue) && parseInt(cvalue) > parseInt(value));
+                    break;
+            }
+        }
     }
 }
 
 jQuery(function ($) {
     // jQuery modal library
     $.modal.defaults.fadeDuration = 250;
+    TNP.init_showables();
 });

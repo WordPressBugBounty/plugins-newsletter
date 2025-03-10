@@ -22,7 +22,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscribers-and-management/') ?>
-        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
     </div>
 

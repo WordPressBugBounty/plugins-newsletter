@@ -9,6 +9,7 @@ class NewsletterSubscription extends NewsletterModule {
 
     static $instance;
     var $popup_test = false;
+    var $popup_enabled = false;
 
     /**
      * @return NewsletterSubscription
@@ -45,8 +46,14 @@ class NewsletterSubscription extends NewsletterModule {
             add_filter('the_content', [$this, 'hook_the_content'], 99);
         }
 
+        if (class_exists('NewsletterLeads') && NewsletterLeads::$instance->popup_enabled) {
+            $this->popup_enabled = false;
+        } else {
+            $this->popup_enabled = !empty($this->get_option('enabled', 'popup'));
+        }
         $this->popup_test = isset($_GET['tnp-popup-test']) && Newsletter::instance()->is_allowed();
-        if (!empty($this->get_option('enabled', 'popup')) || $this->popup_test) {
+
+        if ($this->popup_enable || $this->popup_test) {
             add_action('wp_footer', [$this, 'hook_wp_footer'], 99);
             add_action('wp_enqueue_scripts', [$this, 'hook_wp_enqueue_scripts']);
         }
@@ -64,8 +71,7 @@ class NewsletterSubscription extends NewsletterModule {
         <div id="tnp-modal">
             <div id="tnp-modal-content">
                 <div id="tnp-modal-close">&times;</div>
-                <div id="tnp-modal-body">
-                </div>
+                <div id="tnp-modal-body"></div>
             </div>
         </div>
 
@@ -79,11 +85,7 @@ class NewsletterSubscription extends NewsletterModule {
     }
 
     function hook_wp_enqueue_scripts() {
-
         wp_enqueue_style('newsletter-popup', plugins_url('assets/popup.css', __FILE__), [], NEWSLETTER_VERSION);
-        if (is_rtl()) {
-            //wp_enqueue_style('newsletter-leads-rtl', plugins_url('newsletter-leads') . '/css/leads-rtl.css', [], $this->version);
-        }
     }
 
     function hook_newsletter_action_popup($action) {
@@ -118,8 +120,46 @@ class NewsletterSubscription extends NewsletterModule {
     }
 
     function hook_newsletter_action_dummy($action, $user, $email) {
+        if ('s' === $action) {
+            if (!$user) {
+                die('Subscriber not found.');
+            }
+            $this->switch_language($user->language);
+
+            // Per message custom URL from configuration (language variants could not be supported)
+            $page_id = $this->get_option('confirmation_id');
+            if (!empty($page_id)) {
+                if ($page_id === 'url') {
+                    $url = sanitize_url($this->get_option('confirmation_url'));
+                } else {
+                    $url = get_permalink((int) $page_id);
+                }
+            }
+
+            $url = Newsletter::instance()->build_message_url($url, 'confirmation', $user, $email);
+            $this->redirect($url);
+        }
+
         if ('c' === $action) {
-            $this->redirect($this->build_message_url(null, 'confirmed', $user));
+            if (!$user) {
+                die('Subscriber not found.');
+            }
+            $this->switch_language($user->language);
+
+            // Per message custom URL from configuration (language variants could not be supported)
+            $page_id = $this->get_option('confirmed_id');
+            if (!empty($page_id)) {
+                if ($page_id === 'url') {
+                    $url = sanitize_url($this->get_option('confirmed_url'));
+                } else {
+                    $url = get_permalink((int) $page_id);
+                }
+            }
+
+
+            //$url = apply_filters('newsletter_welcome_url', $url, $user);
+            $url = Newsletter::instance()->build_message_url($url, 'confirmed', $user, $email);
+            $this->redirect($url);
         }
     }
 
@@ -353,6 +393,9 @@ class NewsletterSubscription extends NewsletterModule {
             case 2: $subscription->welcome_email_id = -1;
         }
 
+        // Activation email code
+        $subscription->activation_email_id = 0;
+
 //        if ($this->get_option('autoresponder')) {
 //            $subscription->autoresponders = [$this->get_option('autoresponder')];
 //        }
@@ -498,6 +541,12 @@ class NewsletterSubscription extends NewsletterModule {
             $this->save_user_meta($user->id, 'welcome_email_id', $subscription->welcome_email_id);
         } else {
             $this->delete_user_meta($user->id, 'welcome_email_id');
+        }
+
+        if ($subscription->activation_email_id) {
+            $this->save_user_meta($user->id, 'activation_email_id', $subscription->activation_email_id);
+        } else {
+            $this->delete_user_meta($user->id, 'activation_email_id');
         }
 
         if ($subscription->welcome_page_id) {
@@ -771,27 +820,84 @@ class NewsletterSubscription extends NewsletterModule {
         return $this->get_main_option('noconfirmation') == 0;
     }
 
+    function get_default_confirmation_email_id($language = null) {
+        return $this->get_default_activation_email_id($language);
+    }
+
+    /**
+     * Returns the email to be used to create the confirmation message. A positive
+     * number indicates an email ID created with the composer, 0 indicates the standard
+     * simple text email and -1 indicates to not send the message (option usually
+     * not available for the confirmation email).
+     *
+     * @param string $language Code of the language for which return the information
+     * @return int
+     */
+    function get_default_activation_email_id($language = null) {
+        $this->switch_language($language);
+        $type = (int) $this->get_option('confirmation_email', 0);
+        switch ($type) {
+            // ID of an email created with the composer
+            case 1:
+                $email_id = (int) $this->get_option('confirmation_email_id');
+                break;
+
+            // Do not send indicator
+            case 2:
+                $email_id = -1;
+                break;
+
+            // Default simple test email indicator
+            default:
+                $email_id = 0;
+        }
+        $this->restore_language();
+
+        return $email_id;
+    }
+
+    function send_confirmation_email($user, $force = false) {
+        return $this->send_activation_email($user, $force);
+    }
+
     /**
      * Sends the activation email without conditions.
      *
+     * @deprecated
      * @param stdClass $user
      * @return bool
      */
     function send_activation_email($user, $force = false) {
 
-        if (!$force && !empty($this->options['confirmation_disabled'])) {
-            return true;
+        $email_id = $this->get_user_meta_int($user->id, 'confirmation_email_id');
+        if (is_null($email_id)) {
+            $email_id = $this->get_default_activation_email_id($user->language);
+        }
+
+        if ($email_id === -1) {
+            return false;
         }
 
         $this->switch_language($user->language);
 
-        $message = [];
-        $message['html'] = do_shortcode($this->get_text('confirmation_message'));
-        $message['text'] = $this->get_text_message('confirmation');
-        $subject = $this->get_text('confirmation_subject');
+        if ($email_id === 0) {
+            $message = [];
+            $message['html'] = do_shortcode($this->get_text('confirmation_message'));
+            $message['text'] = $this->get_text_message('confirmation');
+            $subject = $this->get_text('confirmation_subject');
 
-        $r = $this->mail($user, $subject, $message);
+            $r = $this->mail($user, $subject, $message);
+        } else {
 
+            $email = $this->get_email($email_id);
+            if ($email) {
+                NewsletterComposer::instance()->regenerate($email);
+                $r = Newsletter::instance()->send($email, [$user]);
+            } else {
+                $r = false;
+            }
+        }
+        $this->restore_language();
         return $r;
     }
 
@@ -827,24 +933,25 @@ class NewsletterSubscription extends NewsletterModule {
             return false;
         }
 
+        $this->switch_language($user->language);
         if ($email_id === 0) {
-            $this->switch_language($user->language);
             $message = [];
             $message['html'] = do_shortcode($this->get_text('confirmed_message'));
             $message['text'] = $this->get_text_message('confirmed');
             $subject = $this->get_text('confirmed_subject');
-            $this->restore_language();
 
             $r = $this->mail($user, $subject, $message);
-            return $r;
-        }
+        } else {
 
-        $email = $this->get_email($email_id);
-        if ($email) {
-            $r = Newsletter::instance()->send($email, [$user]);
-            return $r;
+            $email = $this->get_email($email_id);
+            if ($email) {
+                NewsletterComposer::instance()->regenerate($email);
+                $r = Newsletter::instance()->send($email, [$user]);
+            } else
+                $r = false;
         }
-        return false;
+        $this->restore_language();
+        return $r;
     }
 
     /**
@@ -934,13 +1041,25 @@ class NewsletterSubscription extends NewsletterModule {
         }
         $this->switch_language($user->language);
         $url = '';
-        if (isset($_REQUEST['ncu'])) {
-            // Custom URL from the form
-            $url = sanitize_url($_REQUEST['ncu']);
+        $page_id = $this->get_user_meta($user->id, 'activation_page_id');
+        if ($page_id) {
+            $url = get_permalink($page_id);
         } else {
-            // Per message custom URL from configuration (language variants could not be supported)
-            $url = sanitize_url($this->get_option('confirmation_url'));
+            if (isset($_REQUEST['ncu'])) {
+                // Custom URL from the form
+                $url = sanitize_url($_REQUEST['ncu']);
+            } else {
+                $page_id = $this->get_option('confirmation_id');
+                if (!empty($page_id)) {
+                    if ($page_id === 'url') {
+                        $url = sanitize_url($this->get_option('confirmation_url'));
+                    } else {
+                        $url = get_permalink((int) $page_id);
+                    }
+                }
+            }
         }
+        $url = apply_filters('newsletter_confirmation_url', $url, $user);
         $url = $this->build_message_url($url, 'confirmation', $user, $email);
         $this->redirect($url);
     }
@@ -1020,14 +1139,20 @@ class NewsletterSubscription extends NewsletterModule {
 
         $buffer .= do_shortcode($content);
 
-        if (isset($attrs['button_label'])) {
-            $label = $attrs['button_label'];
-        } else {
-            $label = $this->get_form_text('subscribe');
-        }
+        // Check if a button has been added (bad code)
+        if (strpos($buffer, 'type="submit"') || strpos($buffer, 'type="button"')) {
 
-        if (!empty($label)) {
-            $buffer .= $this->get_button($attrs);
+        } else {
+
+            if (isset($attrs['button_label'])) {
+                $label = $attrs['button_label'];
+            } else {
+                $label = $this->get_form_text('subscribe');
+            }
+
+            if (!empty($label)) {
+                $buffer .= $this->get_button($attrs);
+            }
         }
 
         $buffer .= '</form>';
@@ -1219,6 +1344,10 @@ class NewsletterSubscription extends NewsletterModule {
         $name = $attrs['name'];
 
         $buffer = '';
+
+        if ($name == 'button' || $name == 'submit') {
+            return $this->get_button($attrs);
+        }
 
         if ($name == 'email') {
             $placeholder = $attrs['placeholder'] ?? $this->get_form_text('email_placeholder');
@@ -1480,6 +1609,14 @@ class NewsletterSubscription extends NewsletterModule {
         return $pre_html . $buffer . $post_html;
     }
 
+    /**
+     * Creates the button element. The DIV wrapper control is used by the
+     * minimal form layout.
+     *
+     * @param array $attrs
+     * @param bool $wrapper
+     * @return string
+     */
     function get_button($attrs, $wrapper = true) {
         // Prepare the button attrbutes
         $button_style = '';
@@ -1831,15 +1968,25 @@ class NewsletterSubscription extends NewsletterModule {
 
         $admin_notice = '';
         if (current_user_can('administrator')) {
+            switch ($key) {
+                case 'confirmation':
+                    $url = admin_url('admin.php?page=newsletter_subscription_confirmation');
+                    break;
+                case 'confirmed':
+                    $url = admin_url('admin.php?page=newsletter_subscription_welcome');
+                    break;
+                default:
+                    $url = admin_url('admin.php?page=newsletter_subscription_options');
+            }
+
             if ($this->is_multilanguage()) {
                 $language = $this->language();
                 if (empty($language)) {
                     $language = 'all';
                 }
-                $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. <a href="' . admin_url('admin.php?page=newsletter_subscription_options&lang=' . urlencode($language)) . '" target="_blank">Edit this content</a>.</p>';
-            } else {
-                $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. <a href="' . admin_url('admin.php?page=newsletter_subscription_options') . '" target="_blank">Edit this content</a>.</p>';
+                $url .= '&lang=' . urlencode($language);
             }
+            $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. <a href="' . esc_attr($url) . '" target="_blank">Edit this content</a>.</p>';
         }
 
         return $admin_notice . $text;

@@ -38,7 +38,7 @@ if ($controls->is_action()) {
 
     <div id="tnp-heading">
         <?php //$controls->title_help('/profile-page')  ?>
-        <h2><?php esc_html_e('Newsletters', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Newsletters', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>

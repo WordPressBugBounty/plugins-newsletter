@@ -122,7 +122,7 @@ if ($controls->is_action('change_status')) {
 
     <div id="tnp-heading">
 
-        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>-->
 
         <?php include __DIR__ . '/nav.php' ?>
     </div>
@@ -166,7 +166,7 @@ if ($controls->is_action('change_status')) {
                                 <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE); ?>
                             </td>
                             <td nowrap>
-                                <?php $controls->button_confirm('remove_all', __('Delete all', 'newsletter'), __('Are you sure you want to remove ALL subscribers?', 'newsletter')); ?>
+                                <?php $controls->button_confirm_secondary('remove_all', __('Delete all', 'newsletter'), __('Are you sure you want to remove ALL subscribers?', 'newsletter')); ?>
                             </td>
                         </tr>
                         <tr>
@@ -175,7 +175,7 @@ if ($controls->is_action('change_status')) {
                                 <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='C'"); ?>
                             </td>
                             <td nowrap>
-                                <?php $controls->button_confirm('unconfirm_all', __('Unconfirm all', 'newsletter')); ?>
+                                <?php $controls->button_confirm_secondary('unconfirm_all', __('Unconfirm all', 'newsletter')); ?>
                             </td>
                         </tr>
                         <tr>
@@ -184,8 +184,8 @@ if ($controls->is_action('change_status')) {
                                 <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='S'"); ?>
                             </td>
                             <td nowrap>
-                                <?php $controls->button_confirm('remove_unconfirmed', __('Delete all', 'newsletter')); ?>
-                                <?php $controls->button_confirm('confirm_all', __('Confirm all', 'newsletter'), __('Are you sure you want to mark ALL subscribers as confirmed?', 'newsletter')); ?>
+                                <?php $controls->button_confirm_secondary('remove_unconfirmed', __('Delete all', 'newsletter')); ?>
+                                <?php $controls->button_confirm_secondary('confirm_all', __('Confirm all', 'newsletter'), __('Are you sure you want to mark ALL subscribers as confirmed?', 'newsletter')); ?>
                             </td>
                         </tr>
                         <tr>
@@ -194,7 +194,7 @@ if ($controls->is_action('change_status')) {
                                 <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='U'"); ?>
                             </td>
                             <td>
-                                <?php $controls->button_confirm('remove_unsubscribed', __('Delete all', 'newsletter')); ?>
+                                <?php $controls->button_confirm_secondary('remove_unsubscribed', __('Delete all', 'newsletter')); ?>
                             </td>
                         </tr>
 
@@ -204,7 +204,7 @@ if ($controls->is_action('change_status')) {
                                 <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='B'"); ?>
                             </td>
                             <td>
-                                <?php $controls->button_confirm('remove_bounced', __('Delete all', 'newsletter')); ?>
+                                <?php $controls->button_confirm_secondary('remove_bounced', __('Delete all', 'newsletter')); ?>
                             </td>
                         </tr>
 
@@ -214,7 +214,7 @@ if ($controls->is_action('change_status')) {
                                 <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='P'"); ?>
                             </td>
                             <td>
-                                <?php $controls->button_confirm('remove_complained', __('Delete all', 'newsletter')); ?>
+                                <?php $controls->button_confirm_secondary('remove_complained', __('Delete all', 'newsletter')); ?>
                             </td>
                         </tr>
                         <tr>
@@ -227,7 +227,7 @@ if ($controls->is_action('change_status')) {
                                 <?php $controls->user_status('status_2'); ?>
                             </td>
                             <td>
-                                <?php $controls->button_confirm('change_status', __('Change', 'newsletter')); ?>
+                                <?php $controls->button_confirm_secondary('change_status', __('Change', 'newsletter')); ?>
                             </td>
                         </tr>
 
@@ -258,7 +258,7 @@ if ($controls->is_action('change_status')) {
 
                             </td>
                             <td>
-                                <?php $controls->btn('update_inactive', __('Update', 'newsletter'), ['confirm' => true]); ?>
+                                <?php $controls->button_confirm_secondary('update_inactive', __('Update', 'newsletter')); ?>
                             </td>
                         </tr>
 
@@ -286,9 +286,9 @@ if ($controls->is_action('change_status')) {
 
                             <td>
                                 <?php $controls->lists_select('list') ?>
-                                <?php $controls->button_confirm('list_add', 'Activate for everyone'); ?>
-                                <?php $controls->button_confirm('list_remove', 'Deactivate for everyone'); ?>
-                                <?php $controls->button_confirm('list_delete', 'Delete everyone in that list'); ?>
+                                <?php $controls->button_confirm_secondary('list_add', 'Activate for everyone'); ?>
+                                <?php $controls->button_confirm_secondary('list_remove', 'Deactivate for everyone'); ?>
+                                <?php $controls->button_confirm_secondary('list_delete', 'Delete everyone in that list'); ?>
                                 <p class="description">
                                     If you choose to <strong>delete</strong> users in a list, they will be
                                     <strong>physically deleted</strong> from the database (no way back).
@@ -301,7 +301,7 @@ if ($controls->is_action('change_status')) {
                                 <?php $controls->select('list_action', array('move' => 'Change', 'add' => 'Add')); ?>
                                 <?php esc_html_e('all subscribers in', 'newsletter') ?> <?php $controls->lists_select('list_1'); ?>
                                 <?php esc_html_e('to', 'newsletter') ?> <?php $controls->lists_select('list_2'); ?>
-                                <?php $controls->button_confirm('list_manage', '&raquo;'); ?>
+                                <?php $controls->button_confirm_secondary('list_manage', '&raquo;'); ?>
 
                             </td>
                         </tr>
@@ -309,16 +309,12 @@ if ($controls->is_action('change_status')) {
 
                             <td>
                                 <?php esc_html_e('Add to list', 'newsletter') ?>
-                                <?php $controls->lists_select('list_3') ?> <?php esc_html_e('subscribers without a list', 'newsletter') ?> <?php $controls->button_confirm('list_none', '&raquo;'); ?>
+                                <?php $controls->lists_select('list_3') ?> <?php esc_html_e('subscribers without a list', 'newsletter') ?>
+                                    <?php $controls->button_confirm_secondary('list_none', '&raquo;'); ?>
                             </td>
                         </tr>
 
                     </table>
-
-
-
-
-
 
                 </div>
 

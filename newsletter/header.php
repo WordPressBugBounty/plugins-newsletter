@@ -62,6 +62,25 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
 
             </ul>
         </li>
+
+        <li><a href="#"><i class="fas fa-edit"></i> <?php esc_html_e('Forms', 'newsletter') ?></a>
+            <ul>
+
+                <li>
+                    <a href="?page=newsletter_subscription_sources"><?php esc_html_e('All', 'newsletter') ?></a>
+                </li>
+                <li>
+                    <a href="?page=newsletter_subscription_form"><?php esc_html_e('Standard', 'newsletter') ?></a>
+                </li>
+                <li>
+                    <a href="?page=newsletter_subscription_popup"><?php esc_html_e('Popup', 'newsletter') ?></a>
+                </li>
+                <li>
+                    <a href="?page=newsletter_subscription_inject"><?php esc_html_e('Inside posts', 'newsletter') ?></a>
+                </li>
+            </ul>
+        </li>
+
         <li><a href="#"><i class="fas fa-list"></i> <?php esc_html_e('Subscription', 'newsletter') ?></a>
             <ul>
 
@@ -69,9 +88,9 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                     <a href="?page=newsletter_subscription_options"><?php esc_html_e('Settings', 'newsletter') ?></a>
                 </li>
 
-                <li>
+<!--                <li>
                     <a href="?page=newsletter_subscription_sources"><?php esc_html_e('Forms', 'newsletter') ?></a>
-                </li>
+                </li>-->
 
                 <li>
                     <a href="?page=newsletter_subscription_lists"><?php esc_html_e('Lists', 'newsletter') ?></a>
@@ -386,17 +405,18 @@ if (NEWSLETTER_DEBUG || NEWSLETTER_PAGE_WARNING) {
 <?php } ?>
 
 <?php
-if (!defined('NEWSLETTER_CRON_WARNINGS') || NEWSLETTER_CRON_WARNINGS) {
+if (isset($_GET['debug']) || !defined('NEWSLETTER_CRON_WARNINGS') || NEWSLETTER_CRON_WARNINGS) {
     $x = NewsletterSystemAdmin::instance()->get_job_status();
-    if ($x !== NewsletterSystemAdmin::JOB_OK) {
-        echo '<div class="tnp-notice tnp-notice-warning">There are issues with the delivery engine. Please <a href="?page=newsletter_system_scheduler">check them here</a>.</div>';
+    if (isset($_GET['debug']) || $x !== NewsletterSystemAdmin::JOB_OK) {
+        echo '<div class="tnp-notice tnp-notice-warning">The WordPress scheduler is not working properly: that affects the newsletter sending and other site tasks.<br>';
+        echo '<a class="button button-secondary" href="?page=newsletter_system_scheduler">See possible solutions</a></div>';
     }
 }
 ?>
 
 <?php
 $hook_paused = get_option('wp_crontrol_paused');
-if (isset($hook_paused['newsletter']) && $hook_paused['newsletter']) {
+if (isset($_GET['debug']) || isset($hook_paused['newsletter']) && $hook_paused['newsletter']) {
     echo '<div class="tnp-notice tnp-notice-error">The delivery engine has been paused using WP Crontrol. Please <a href="tools.php?page=crontrol_admin_manage_page">reactivate the <code>newsletter</code> hook</a>.</div>';
 }
 

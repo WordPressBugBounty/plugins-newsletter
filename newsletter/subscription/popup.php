@@ -15,6 +15,11 @@ if (!$controls->is_action()) {
         NewsletterMainAdmin::instance()->set_completed_step('forms');
     }
 }
+
+$leads_active = class_exists('NewsletterLeads') && NewsletterLeads::$instance->popup_enabled;
+if ($leads_active) {
+    $controls->warnings[] = 'The Newsletter Leads Addon is active, we recommend to configure the popup on that addon page';
+}
 ?>
 
 <div class="wrap" id="tnp-wrap">
@@ -23,8 +28,8 @@ if (!$controls->is_action()) {
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription') ?>
-        <h2><?php esc_html_e('Standard Form', 'newsletter') ?></h2>
-        <?php include __DIR__ . '/nav-form.php' ?>
+<!--        <h2><?php esc_html_e('Forms', 'newsletter') ?></h2>-->
+        <?php include __DIR__ . '/nav-forms.php' ?>
     </div>
 
     <div id="tnp-body">
@@ -37,33 +42,48 @@ if (!$controls->is_action()) {
             When closed it shows up again after 30 days.
         </p>
         <p>
-            More options are available with the <a href="<?php echo esc_attr(Newsletter\Integrations::get_leads_url())?>" target="_blank">Leads Addon</a>.
+            More options are available with the <a href="<?php echo esc_attr(Newsletter\Integrations::get_leads_url()) ?>" target="_blank">Leads Addon</a>.
         </p>
 
 
         <form action="" method="post">
             <?php $controls->init(); ?>
 
-            <table class="form-table">
-                <tr>
-                    <th><?php esc_html_e('Enabled', 'newsletter') ?></th>
-                    <td>
-                        <?php $controls->checkbox2('enabled'); ?>
-                    </td>
-                </tr>
-                <tr>
-                    <th><?php esc_html_e('Preview', 'newsletter'); ?></th>
-                    <td>
-                        <a href="<?php echo esc_attr($this->add_qs(home_url('/'), 'tnp-popup-test=1')) ?>" target="_blank">See it online</a>
-                    </td>
-                </tr>
-                <tr>
-                    <th><?php esc_html_e('Shown before the form', 'newsletter'); ?></th>
-                    <td>
-                        <?php $controls->wp_editor('text', ['editor_height' => 150], ['body_background' => '#ccc']); ?>
-                    </td>
-                </tr>
-            </table>
+            <div id="tabs">
+                <ul>
+                    <li><a href="#tabs-settings"><?php esc_html_e('Settings', 'newsletter') ?></a></li>
+                    <?php if (NEWSLETTER_DEBUG) { ?>
+                        <li><a href="#tabs-debug">Debug</a></li>
+                    <?php } ?>
+                </ul>
+
+                <div id="tabs-settings">
+                    <table class="form-table">
+                        <tr>
+                            <th><?php esc_html_e('Enabled', 'newsletter') ?></th>
+                            <td>
+                                <?php $controls->yesno('enabled'); ?>
+                                <a href="<?php echo esc_attr($this->add_qs(home_url('/'), 'tnp-popup-test=1')) ?>" target="_blank"><?php esc_html_e('Preview', 'newsletter') ?></a>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><?php esc_html_e('Shown before the form', 'newsletter'); ?></th>
+                            <td>
+                                <?php $controls->wp_editor('text', ['editor_height' => 150], ['body_background' => '#ccc']); ?>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <?php if (NEWSLETTER_DEBUG) { ?>
+                    <div id="tabs-debug">
+                        <?php //$controls->button_reset(); ?>
+                        <pre><?php echo esc_html(json_encode($this->get_db_options('popup', $language), JSON_PRETTY_PRINT)) ?></pre>
+                    </div>
+                <?php } ?>
+            </div>
+
 
             <p>
                 <?php $controls->button_save(); ?>

@@ -115,7 +115,7 @@ if (is_wp_error($license_data)) {
     $controls->errors .= esc_html($license_data->get_error_message());
 }
 
-$batch_max = floor($controls->data['scheduler_max'] / 12);
+
 ?>
 
 <?php include NEWSLETTER_INCLUDES_DIR . '/codemirror.php'; ?>
@@ -142,7 +142,7 @@ $batch_max = floor($controls->data['scheduler_max'] / 12);
     <div id="tnp-heading">
         <?php $controls->title_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration') ?>
 
-        <h2><?php esc_html_e('Settings', 'newsletter'); ?></h2>
+<!--        <h2><?php esc_html_e('Settings', 'newsletter'); ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
@@ -196,10 +196,6 @@ $batch_max = floor($controls->data['scheduler_max'] / 12);
                                 </td>
                             </tr>
 
-
-
-
-
                             <tr>
                                 <th><?php esc_html_e('License key', 'newsletter') ?></th>
                                 <td>
@@ -219,7 +215,7 @@ $batch_max = floor($controls->data['scheduler_max'] / 12);
                             <tr>
                                 <th>
                                     <?php esc_html_e('Return path', 'newsletter') ?>
-                                    <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#return-path') ?>
+                                    <?php $controls->field_help('/installation/newsletter-configuration/#return-path') ?>
                                 </th>
                                 <td>
                                     <?php $controls->text_email('return_path', 40); ?>
@@ -229,7 +225,7 @@ $batch_max = floor($controls->data['scheduler_max'] / 12);
                             <tr>
                                 <th>
                                     <?php esc_html_e('Reply to', 'newsletter') ?>
-                                    <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#reply-to') ?>
+                                    <?php $controls->field_help('/installation/newsletter-configuration/#reply-to') ?>
                                 </th>
                                 <td>
                                     <?php $controls->text_email('reply_to', 40); ?>
@@ -240,7 +236,7 @@ $batch_max = floor($controls->data['scheduler_max'] / 12);
                         <tr>
                             <th>
                                 <?php esc_html_e('Public page', 'newsletter') ?>
-                                <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#dedicated-page') ?>
+                                <?php $controls->field_help('/installation/newsletter-configuration/#dedicated-page') ?>
                             </th>
                             <td>
 
@@ -275,13 +271,14 @@ $batch_max = floor($controls->data['scheduler_max'] / 12);
                             <tr>
                                 <th>
                                     <?php esc_html_e('Max emails per hour', 'newsletter') ?>
-                                    <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#speed') ?>
+                                    <?php $controls->field_help('/installation/newsletter-configuration/#speed') ?>
                                 </th>
                                 <td>
                                     <?php $controls->text('scheduler_max', 5); ?> (min. 12)
                                     <p class="description">
                                         <a href="?page=newsletter_system_delivery#tnp-speed">See the collected statistics</a>
 
+                                        <?php $batch_max = floor($controls->data['scheduler_max'] / 12); ?>
                                         <?php if ($batch_max < 5) { ?>
                                         <br>
                                             The delivery engines runs every 5 minutes (12 runs per hour). With that setting you'll have:
@@ -298,7 +295,7 @@ $batch_max = floor($controls->data['scheduler_max'] / 12);
                             <tr>
                                 <th>
                                     <?php esc_html_e('Max emails per second', 'newsletter') ?>
-                                    <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#speed') ?>
+                                    <?php $controls->field_help('/installation/newsletter-configuration/#speed') ?>
                                 </th>
                                 <td>
                                     <?php $controls->text('max_per_second', 5); ?>

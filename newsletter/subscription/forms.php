@@ -21,7 +21,7 @@ if ($controls->is_action('save')) {
     <div id="tnp-heading">
 
         <?php $controls->title_help('/subscription/newsletter-forms/') ?>
-        <h2><?php esc_html_e('Forms', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Forms', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav-forms.php' ?>
 
     </div>

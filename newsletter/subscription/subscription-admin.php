@@ -48,6 +48,7 @@ class NewsletterSubscriptionAdmin extends NewsletterModuleAdmin {
         $this->add_admin_page('index', __('Overview', 'newsletter'));
         $this->add_admin_page('customfields', __('Custom fields', 'newsletter'));
         $this->add_admin_page('welcome', 'Welcome email');
+        $this->add_admin_page('confirmation', 'Confirmation');
         $this->add_admin_page('autoresponder', 'Welcome series');
         $this->add_admin_page('debug', 'Debug');
     }

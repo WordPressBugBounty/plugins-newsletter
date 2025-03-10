@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.7.2
-Stable tag: 8.7.1
+Stable tag: 8.7.2
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -123,17 +123,30 @@ Thank you, The Newsletter Team
 
 == Screenshots ==
 
-1. The responsive email Drag & Drop composer
+1. The responsive email Drag and Drop composer
 2. The plugin dashboard
 3. The Reports extension
 
 == Changelog ==
 
+= 8.7.2 =
+
+* Added custom confirmation email
+* Removed old code and reorganized the packaged templates
+* Revisited the subscription, confirmation and welcome configuration
+* Reorganized some admin pages
+* Changed scheduler related messages
+* Added preview to the confirmation page
+* Added the forms menu to make the configuration clearer
+* Fixed unsubscription page preview with multilanguage plugins
+* Fixed profile edit page preview with multilanguage plugins
+* Added a few new values to the system page
+
 = 8.7.1 =
 
 * Cleaned up custom css on main configuration (available only to administrators)
 * Fixed error on System page when DB_CHARSET is not defined
-* WP 6.7 check
+* WP 6.7.2 check
 
 = 8.7.0 =
 
@@ -142,6 +155,9 @@ Thank you, The Newsletter Team
 = 8.6.9 =
 
 * Fixed tracking of action links with the ajax format
+* Fixed referrer
+* Added support for upcoming custom activation email
+* Added support for upcoming email series in/out
 
 = 8.6.8 =
 

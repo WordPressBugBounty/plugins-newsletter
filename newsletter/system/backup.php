@@ -11,7 +11,7 @@ if (isset($_GET['id'])) {
 
 $items = $wpdb->get_results("select option_name from {$wpdb->options} where option_name like 'newsletter_backup_%' order by option_name");
 
-if ($controls->is_action('delete_logs')) {
+if ($controls->is_action('delete')) {
 
 }
 ?>
@@ -26,7 +26,7 @@ if ($controls->is_action('delete_logs')) {
 
     <div id="tnp-heading">
 
-        <h2><?php esc_html_e('Settings backup', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Settings backup', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
@@ -55,7 +55,7 @@ if ($controls->is_action('delete_logs')) {
             </div>
 
             <div class="tnp-buttons">
-                <?php $controls->button('delete_logs', 'Delete all'); ?>
+                <?php $controls->button('delete', 'Delete all'); ?>
             </div>
 
         </form>

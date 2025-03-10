@@ -26,7 +26,7 @@ if ($controls->is_action('delete_logs')) {
 
     <div id="tnp-heading">
 
-        <h2><?php _e('System', 'newsletter') ?></h2>
+<!--        <h2><?php _e('System', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>

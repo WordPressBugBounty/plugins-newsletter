@@ -15,12 +15,15 @@ jQuery.fn.perform_delete = function () {
 
 // add edit button
 jQuery.fn.add_block_edit = function () {
+    console.log('Add block edit');
     this.append('<div class="tnpc-row-edit-block" title="Edit"><img src="' + TNP_PLUGIN_URL + '/emails/tnp-composer/_assets/edit.png" width="32"></div>');
     this.find('.tnpc-row-edit-block').perform_block_edit();
 }
 
 // edit block
 jQuery.fn.perform_block_edit = function () {
+
+    console.log('Perform block edit');
 
     jQuery(".tnpc-row-edit-block").click(function (e) {
         e.preventDefault()
@@ -221,6 +224,7 @@ function init_builder_area() {
                 }).fail(function () {
                     alert("Block rendering failed.");
                     loading_row.remove();
+                }).always(function () {
                 });
             }
         }
@@ -777,11 +781,15 @@ jQuery(function () {
 
     (function sendATestIIFE($) {
 
-        var testNewsletterWithEmailFormId = '#test-newsletter-form';
-        var testNewsletterWithEmailForm = document.querySelector(testNewsletterWithEmailFormId);
-        testNewsletterWithEmailForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            var testEmail = testNewsletterWithEmailForm.querySelector('input[name="email"]').value;
+        let el = document.getElementById('test-newsletter-form');
+
+        if (!el) {
+            return;
+        }
+
+        el.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            var testEmail = el.querySelector('input[name="email"]').value;
 
             let form = document.getElementById("tnpc-form");
             tnpc_save(form);
@@ -853,6 +861,7 @@ jQuery(function () {
 
 
         $('#tnpc-view-mode').on('click', function () {
+            console.log('change view mode');
             if (status === 'desktop') {
                 status = 'mobile';
                 document.getElementById('tnpc-view-mode-icon').className = 'fas fa-mobile';

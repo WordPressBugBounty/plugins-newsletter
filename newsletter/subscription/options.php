@@ -6,6 +6,11 @@
 defined('ABSPATH') || exit;
 
 if ($controls->is_action()) {
+    if (NEWSLETTER_DEBUG && $controls->is_action('reset')) {
+        $this->reset_options();
+        $controls->js_redirect('?page=' . sanitize_key($_GET['page']));
+    }
+
     if ($controls->is_action('save')) {
         foreach ($controls->data as $k => $v) {
             if (strpos($k, '_custom') > 0) {
@@ -17,15 +22,7 @@ if ($controls->is_action()) {
             }
         }
 
-        $controls->data['confirmed_message'] = NewsletterModule::clean_url_tags($controls->data['confirmed_message']);
-        $controls->data['confirmed_text'] = NewsletterModule::clean_url_tags($controls->data['confirmed_text']);
-        $controls->data['confirmation_text'] = NewsletterModule::clean_url_tags($controls->data['confirmation_text']);
-        $controls->data['confirmation_message'] = NewsletterModule::clean_url_tags($controls->data['confirmation_message']);
-
-        $controls->data['confirmed_url'] = trim($controls->data['confirmed_url']);
-        $controls->data['confirmation_url'] = trim($controls->data['confirmation_url']);
-
-        $this->save_options($controls->data, '', $language);
+        $this->merge_options($controls->data, '', $language);
         NewsletterMainAdmin::instance()->set_completed_step('notification');
         $controls->add_toast_saved();
     }
@@ -78,7 +75,7 @@ if ($controls->is_action()) {
     $controls->data = $this->get_options('', $language);
 }
 
-foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmation_message', 'subscription_text', 'error_text'] as $key) {
+foreach (['subscription_text', 'error_text'] as $key) {
     if (!empty($controls->data[$key])) {
         $controls->data[$key . '_custom'] = '1';
     }
@@ -91,7 +88,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription') ?>
-        <h2><?php _e('Subscription', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Subscription', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
     </div>
 
@@ -101,16 +98,10 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
 
         <form method="post" action="">
             <?php $controls->init(); ?>
-            <?php $controls->hidden('welcome_email_id'); ?>
-            <?php $controls->hidden('welcome_email'); ?>
-            <?php $controls->hidden('confirmed_message'); ?>
-            <?php $controls->hidden('confirmed_subject'); ?>
 
             <div id="tabs">
                 <ul>
                     <li><a href="#tabs-subscription"><?php esc_html_e('Subscription', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-4"><?php esc_html_e('Welcome', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-3"><?php esc_html_e('Activation', 'newsletter') ?></a></li>
                     <li class="tnp-tabs-advanced"><a href="#tabs-advanced"><?php esc_html_e('Advanced', 'newsletter') ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
@@ -130,8 +121,8 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                             <th><?php esc_html_e('Subscription page', 'newsletter') ?></th>
                             <td>
 
-                                <?php $controls->checkbox2('subscription_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
-                                <div data-bind="options-subscription_text_custom">
+                                <?php $controls->checkbox2('subscription_text_custom', 'Customize'); ?>
+                                <div data-show="subscription_text_custom=1">
                                     <?php $controls->wp_editor('subscription_text', ['editor_height' => 150], ['default' => $this->get_default_text('subscription_text')]); ?>
                                     <p class="description">
                                         Remember to add at least the <code>[newsletter_form]</code> shortcode
@@ -139,7 +130,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                                         Remove the shortcode if you don't want to show the subscription form.
                                     </p>
                                 </div>
-                                <div data-bind="!options-subscription_text_custom" class="tnpc-default-text">
+                                <div data-show="subscription_text_custom=0" class="tnpc-default-text">
                                     <?php echo wp_kses_post($this->get_default_text('subscription_text')) ?>
                                 </div>
 
@@ -157,7 +148,6 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                             <tr>
                                 <th>
                                     When confirmed
-                                    <?php //esc_html_e('Repeated subscriptions', 'newsletter') ?>
                                 </th>
                                 <td>
                                     <?php
@@ -168,17 +158,17 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                                         '3' => __('Allowed (double opt-in)', 'newsletter')
                                     ]);
                                     ?>
-                                    <br><br>
+                                    <div data-show="multiple=0" style="margin-top: 1rem;">
 
-                                    <?php $controls->checkbox2('error_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
-                                    <div data-bind="options-error_text_custom">
-                                        <?php $controls->wp_editor('error_text', ['editor_height' => 150], ['default' => $this->get_default_text('error_text')]); ?>
-                                    </div>
-                                    <div data-bind="!options-error_text_custom" class="tnpc-default-text">
-                                        <?php echo wp_kses_post($this->get_default_text('error_text')) ?>
-                                    </div>
+                                        <?php $controls->checkbox2('error_text_custom', __('Customize', 'newsletter')); ?>
+                                        <div data-show="error_text_custom=1">
+                                            <?php $controls->wp_editor('error_text', ['editor_height' => 150], ['default' => $this->get_default_text('error_text')]); ?>
+                                        </div>
+                                        <div data-show="error_text_custom=0" class="tnpc-default-text">
+                                            <?php echo wp_kses_post($this->get_default_text('error_text')) ?>
+                                        </div>
 
-                                    <p class="description">Shown only when "not allowed" is selected<p>
+                                    </div>
                                 </td>
                             </tr>
 
@@ -218,97 +208,6 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
 
                 </div>
 
-
-                <div id="tabs-3">
-
-                    <?php $this->language_notice(); ?>
-
-                    <p><?php esc_html_e('Only for double opt-in mode.', 'newsletter') ?></p>
-
-
-                    <table class="form-table">
-                        <tr>
-                            <th><?php esc_html_e('Activation page content', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->checkbox2('confirmation_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
-                                <div data-bind="options-confirmation_text_custom">
-                                    <?php $controls->wp_editor('confirmation_text', ['editor_height' => 150], ['default' => $this->get_default_text('confirmation_text')]); ?>
-                                </div>
-                                <div data-bind="!options-confirmation_text_custom" class="tnpc-default-text">
-                                    <?php echo wp_kses_post($this->get_default_text('confirmation_text')) ?>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th><?php esc_html_e('Alternative activation page', 'newsletter'); ?></th>
-                            <td>
-                                <?php $controls->text('confirmation_url', 70, 'https://...'); ?>
-                            </td>
-                        </tr>
-
-
-                        <!-- CONFIRMATION EMAIL -->
-                        <tr>
-                            <th><?php esc_html_e('Activation email', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->text('confirmation_subject', 70, $this->get_default_text('confirmation_subject')); ?>
-                                <br><br>
-                                <?php $controls->checkbox2('confirmation_message_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
-                                <div data-bind="options-confirmation_message_custom">
-                                    <?php $controls->wp_editor('confirmation_message', ['editor_height' => 150], ['default' => $this->get_default_text('confirmation_message')]); ?>
-                                </div>
-                                <div data-bind="!options-confirmation_message_custom" class="tnpc-default-text">
-                                    <?php echo wp_kses_post($this->get_default_text('confirmation_message')) ?>
-                                </div>
-
-                                <br>
-                                <?php $controls->btn('test-confirmation', __('Test', 'newsletter'), ['secondary' => true]); ?>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-
-
-                <div id="tabs-4">
-
-                    <?php $this->language_notice(); ?>
-
-                    <?php if (current_user_can('administrator')) { ?>
-                        <a href="<?php echo esc_attr($this->build_action_url('c')); ?>&nk=0-0" target="_blank">Preview online</a>
-                    <?php } ?>
-                    <table class="form-table">
-                        <tr>
-                            <th><?php esc_html_e('Welcome page content', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->checkbox2('confirmed_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
-                                <div data-bind="options-confirmed_text_custom">
-                                    <?php $controls->wp_editor('confirmed_text', ['editor_height' => 150], ['default' => $this->get_default_text('confirmed_text')]); ?>
-                                </div>
-                                <div data-bind="!options-confirmed_text_custom" class="tnpc-default-text">
-                                    <?php echo wp_kses_post($this->get_default_text('confirmed_text')) ?>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th><?php esc_html_e('Custom welcome page', 'newsletter') ?></th>
-                            <td>
-                                <?php $controls->page_or_url('confirmed'); ?>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th><?php esc_html_e('Conversion tracking code', 'newsletter') ?>
-                                <?php $controls->help('/subscription#conversion') ?></th>
-                            <td>
-                                <?php $controls->textarea('confirmed_tracking'); ?>
-                            </td>
-                        </tr>
-                    </table>
-
-                </div>
-
                 <div id="tabs-advanced">
 
                     <?php $this->language_notice(); ?>
@@ -335,6 +234,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
 
                 <?php if (NEWSLETTER_DEBUG) { ?>
                     <div id="tabs-debug">
+                        <?php $controls->button_reset(); ?>
                         <pre><?php echo esc_html(json_encode($this->get_db_options('', $language), JSON_PRETTY_PRINT)) ?></pre>
                     </div>
                 <?php } ?>

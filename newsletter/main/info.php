@@ -22,7 +22,7 @@ if (!$controls->is_action()) {
 
     <div id="tnp-heading">
 
-        <h2><?php esc_html_e('Settings', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Settings', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>

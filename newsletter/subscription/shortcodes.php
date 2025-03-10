@@ -12,7 +12,7 @@ defined('ABSPATH') || exit;
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription') ?>
-        <h2><?php _e('Forms', 'newsletter') ?></h2>
+<!--        <h2><?php _e('Forms', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav-forms.php' ?>
 
     </div>
@@ -44,6 +44,5 @@ defined('ABSPATH') || exit;
 
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

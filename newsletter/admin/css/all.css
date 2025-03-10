@@ -1229,7 +1229,7 @@ span.tnp-user-status {
     display: block;
     padding: 10px 10px;
     text-decoration: none;
-    font-size: 1rem;
+    font-size: .9rem;
 }
 
 #tnp-menu ul li a:focus {
@@ -1356,7 +1356,7 @@ span.tnp-user-status {
     padding-left: 20px;
     padding-right: 20px;
     border-bottom: 1px solid #d6d6d6;
-    padding-bottom: .6rem;
+    /*padding-bottom: .6rem;*/
     background-color: #f8f8f8;
 
 }
@@ -1367,8 +1367,7 @@ span.tnp-user-status {
     font-size: .9rem;
     line-height: normal;
     vertical-align: middle;
-    font-weight: bold;
-    font-weight: normale;
+    font-weight: normal;
     padding: 0;
     margin: 0px;
     margin-bottom: .5rem;
@@ -1522,7 +1521,8 @@ span.tnp-user-status {
 #tnp-heading .tnp-nav li a ,
 #tnp-heading .tnp-nav li a:focus,
 #tnp-heading .tnp-nav li a:visited,
-#tnp-heading .tnp-nav li a:active {
+#tnp-heading .tnp-nav li a:active,
+#tnp-heading .tnp-nav li.tnp-nav-title {
     font-size: 1rem;
     color: var(--tnp-text) !important;
     /*color: #ddd !important;*/
@@ -1534,6 +1534,26 @@ span.tnp-user-status {
     /*border-left: 1px solid #999;*/
     outline: 0;
     box-shadow: none;
+}
+
+#tnp-heading .tnp-nav li.tnp-nav-title {
+    color: var(--tnp-title);
+    font-size: .8rem;
+    /*line-height: normal;*/
+    /*vertical-align: middle;*/
+    font-weight: normal;
+    padding: 0;
+    margin: 0px;
+    /*margin-bottom: .5rem;*/
+    text-transform: uppercase;
+    background-color: var(--tnp-green);
+    color: #fff !important;
+    margin-right: 1rem;
+    padding: 5px;
+    border-top-right-radius: 1000px;
+    border-bottom-right-radius: 1000px;
+    padding-right: .8rem;
+    padding-left: .5rem;
 }
 
 #tnp-heading .tnp-nav li.active {
@@ -1549,13 +1569,13 @@ span.tnp-user-status {
     border-bottom: 3px solid var(--tnp-title);
 }
 
-#tnp-heading .tnp-nav-title {
+/*#tnp-heading .tnp-nav-title {
     background-color: var(--tnp-orange) !important;
     text-transform: uppercase;
     font-size: .9rem;
     font-weight: normal !important;
     color: #fff !important;
-}
+}*/
 
 #tnp-heading .tnp-nav span.tnp-pro-badge {
     background-color: #000;
@@ -1830,13 +1850,18 @@ span.tnp-user-status {
     max-width: 100%;
 }
 
+/*#tnp-body #tabs>div,
+#tnp-body .tnp-tabs>div
+{
+    display: none;
+}*/
+
 #tnp-body li.ui-tabs-tab {
     margin-top: 0;
 }
 
 
 /* Navigation */
-
 #tnp-body .ui-tabs .ui-tabs-nav {
     padding: 0;
     margin: 0;
@@ -1847,6 +1872,10 @@ span.tnp-user-status {
     border-bottom-right-radius: 0;
     width: fit-content;
     border-bottom: 1px solid #ddd;
+}
+
+#tnp-body .ui-tabs .ui-tabs-nav li {
+    margin-right: 0;
 }
 
 #tnp-body .ui-tabs .ui-tabs-nav .ui-tabs-tab {
@@ -1917,6 +1946,12 @@ span.tnp-user-status {
     padding-left: 16px;
     padding-right: 16px;
     margin-bottom: 16px;
+}
+
+/* Fixes H3 when the composer is inside a standard admin page... */
+#tnp-body .ui-accordion h3.ui-accordion-header {
+    font-size: 100%;
+    font-weight: normal;
 }
 
 /* Classes used by controls. Should be prefixed with "tnpc-" */
@@ -2252,11 +2287,56 @@ span.tnp-user-status {
 }
 
 /* Buttons */
-.tnpc-button, .tnpc-button:visited, .tnpc-button:hover, .tnpc-button:active {
+#tnp-body .tnpc-button,
+#tnp-body .tnpc-button:visited,
+#tnp-body .tnpc-button:hover,
+#tnp-body .tnpc-button:active {
+    display: inline-block;
     min-width: 3em;
     text-align: center;
     color: #fff!important;
     width: auto;
+    border-radius: 1000px !important;
+    border: none;
+    background-color: var(--tnp-blue-dark);
+    font-size: .9rem !important;
+    padding: 0 12px !important;
+    margin: 0;
+    margin-right: 3px;
+    font-weight: normal;
+    vertical-align: bottom;
+    box-shadow: none;
+    min-height: 30px;
+    line-height: 30px; /* for links */
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+#tnp-body .tnpc-button:hover {
+        filter: brightness(120%);
+}
+
+#tnp-body .tnpc-button.tnpc-button-secondary,
+#tnp-body .tnpc-button.tnpc-button-secondary:visited,
+#tnp-body .tnpc-button.tnpc-button-secondary:hover,
+#tnp-body .tnpc-button.tnpc-button-secondary:active {
+    background-color: var(--tnp-gray-light);
+}
+
+#tnp-body .tnpc-button.tnpc-button-tertiary,
+#tnp-body .tnpc-button.tnpc-button-tertiary:visited,
+#tnp-body .tnpc-button.tnpc-button-tertiary:hover,
+#tnp-body .tnpc-button.tnpc-button-tertiary:active {
+    background-color: var(--tnp-gray-lighter) !important;
+    color: var(--tnp-gray-dark) !important;
+    border: 1px solid var(--tnp-gray) !important;
+}
+
+#tnp-body .tnpc-button.tnpc-button-delete,
+#tnp-body .tnpc-button.tnpc-button-delete:visited,
+#tnp-body .tnpc-button.tnpc-button-delete:hover,
+#tnp-body .tnpc-button.tnpc-button-delete:active {
+    background-color: var(--tnp-red-dark);
 }
 
 /* Lists select with triggers */

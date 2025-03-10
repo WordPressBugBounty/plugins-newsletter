@@ -19,7 +19,7 @@ if (class_exists('NewsletterExtensions')) {
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription') ?>
-        <h2><?php esc_html_e('Forms', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Forms', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav-forms.php' ?>
     </div>
 
@@ -61,10 +61,46 @@ if (class_exists('NewsletterExtensions')) {
 
                     <tr>
                         <td>Newsletter</td>
-                        <td>Popup</td>
+                        <td>Simple popup</td>
 
                         <td style="white-space: nowrap">
                             <?php $controls->button_icon_configure('?page=newsletter_subscription_popup') ?>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Leads Addon</td>
+                        <td>Popup</td>
+                        <td style="white-space: nowrap">
+                            <?php if (class_exists('NewsletterLeads')) { ?>
+                                <?php $controls->button_icon_configure('?page=newsletter_leads_index') ?>
+                            <?php } else { ?>
+                                <?php $controls->btn_link($extensions_url . '#newsletter-leads', 'Addon required', ['tertiary' => true, 'target' => '_blank']) ?>
+                            <?php } ?>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Leads Addon</td>
+                        <td>Topbar</td>
+                        <td style="white-space: nowrap">
+                            <?php if (class_exists('NewsletterLeads')) { ?>
+                                <?php $controls->button_icon_configure('?page=newsletter_leads_topbar') ?>
+                            <?php } else { ?>
+                                <?php $controls->btn_link($extensions_url . '#newsletter-leads', 'Addon required', ['tertiary' => true, 'target' => '_blank']) ?>
+                            <?php } ?>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Leads Addon</td>
+                        <td>Injection on posts' content</td>
+                        <td style="white-space: nowrap">
+                            <?php if (class_exists('NewsletterLeads')) { ?>
+                                <?php $controls->button_icon_configure('?page=newsletter_leads_inject') ?>
+                            <?php } else { ?>
+                                <?php $controls->btn_link($extensions_url . '#newsletter-leads', 'Addon required', ['tertiary' => true, 'target' => '_blank']) ?>
+                            <?php } ?>
                         </td>
                     </tr>
 

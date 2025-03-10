@@ -9,6 +9,10 @@ include_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
 $controls = new NewsletterControls();
 
 $items = $wpdb->get_results("select * from {$wpdb->options} where option_name like 'newsletter_subscription%' order by option_name");
+array_walk($items, function ($item) {
+    $item->option_name = strtoupper(substr($item->option_name, 24));
+    if (empty($item->option_name)) $item->option_name = 'Main';
+});
 ?>
 
 <div class="wrap" id="tnp-wrap">
@@ -29,13 +33,13 @@ $items = $wpdb->get_results("select * from {$wpdb->options} where option_name li
 
             <ul>
                 <?php foreach ($items as $item) { ?>
-                    <li><a href="#tabs-<?php echo esc_attr($item->option_name) ?>"><?php echo esc_html(substr($item->option_name, 24)) ?></a></li>
+                    <li><a href="#tabs-<?php echo esc_attr($item->option_name) ?>"><?php echo esc_html($item->option_name); ?></a></li>
                 <?php } ?>
             </ul>
 
             <?php foreach ($items as $item) { ?>
                 <div id="tabs-<?php echo esc_attr($item->option_name) ?>">
-                    <pre style="white-space: wrap" wrap="on"><?php echo esc_html(json_encode(maybe_unserialize($item->option_value), JSON_PRETTY_PRINT)) ?></pre>
+                    <pre><?php echo esc_html(json_encode(maybe_unserialize($item->option_value), JSON_PRETTY_PRINT)) ?></pre>
                 </div>
 
             <?php } ?>

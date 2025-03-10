@@ -40,16 +40,7 @@ foreach (['unsubscribe_text', 'error_text', 'unsubscribed_text', 'unsubscribed_m
     }
 }
 
-$one_step = false; //$controls->data['mode'] == '1';
 ?>
-
-<?php if ($controls->data['mode'] == '1') { ?>
-    <style>
-        .tnp-extended {
-            display: none;
-        }
-    </style>
-<?php } ?>
 
 <div class="wrap" id="tnp-wrap">
 
@@ -57,7 +48,7 @@ $one_step = false; //$controls->data['mode'] == '1';
 
     <div id="tnp-heading">
         <?php $controls->title_help('/cancellation') ?>
-        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/../users/nav.php' ?>
     </div>
 
@@ -68,28 +59,10 @@ $one_step = false; //$controls->data['mode'] == '1';
         <form method="post" action="">
             <?php $controls->init(); ?>
 
-            <p>
-                <?php //$controls->select('mode', ['1' => 'One-step', '2' => 'Two-step (recommended)'], null, ['onchange' => 'this.form.act.value="change";this.form.submit()']); ?>
-                <?php if (current_user_can('administrator')) { ?>
-                <a href="<?php echo esc_attr($this->build_action_url('u')); ?>&nk=0-0" target="_blank">Preview online</a>
-                <?php } ?>
-                <?php if ($one_step) { ?>
-                <div class="tnpc-hint">
-                    Single step lowers the protection against mail scanner and unwanted unsubscriptions. You're always conformant
-                    to the One-Click-Un subscribe standard since the Newsletter plugin implements the
-                    <a href="https://www.rfc-editor.org/rfc/rfc8058.txt" target="_blank">RFC 8058</a> and the
-                    <a href="https://support.google.com/a/answer/14229414" target="_blank">Google Guidelines</a>.
-                </div>
-            <?php } ?>
-            </p>
-
-
             <div class="tnp-tabs">
 
                 <ul>
-                    <?php if (!$one_step) { ?>
                         <li><a href="#tabs-cancellation"><?php esc_html_e('Confirm', 'newsletter') ?></a></li>
-                    <?php } ?>
                     <li><a href="#tabs-goodbye"><?php esc_html_e('Goodbye', 'newsletter') ?></a></li>
                     <li><a href="#tabs-reactivation"><?php esc_html_e('Resubscribe', 'newsletter') ?></a></li>
                     <li><a href="#tabs-advanced" style="font-style: italic"><?php esc_html_e('Advanced', 'newsletter') ?></a></li>
@@ -98,7 +71,7 @@ $one_step = false; //$controls->data['mode'] == '1';
                     <?php } ?>
                 </ul>
 
-                <?php if (!$one_step) { ?>
+
                     <div id="tabs-cancellation">
                         <?php $this->language_notice(); ?>
                         <table class="form-table">
@@ -117,10 +90,6 @@ $one_step = false; //$controls->data['mode'] == '1';
 
                         </table>
                     </div>
-                <?php } else { ?>
-                    <?php $controls->hidden('unsubscribe_text_custom') ?>
-                    <?php $controls->hidden('unsubscribe_text') ?>
-                <?php } ?>
 
                 <div id="tabs-goodbye">
 
@@ -159,6 +128,10 @@ $one_step = false; //$controls->data['mode'] == '1';
                                 <div data-bind="!options-unsubscribed_message_custom" class="tnpc-default-text">
                                     <?php echo wp_kses_post($this->get_default_text('unsubscribed_message')) ?>
                                 </div>
+
+                                <p class="description">
+                                    Sending a goodbye email is no longer a best practice.
+                                </p>
 
                             </td>
                         </tr>
@@ -209,6 +182,7 @@ $one_step = false; //$controls->data['mode'] == '1';
                                 </td>
                             </tr>
                         </table>
+
                         <h3>List-Unsubscribe headers</h3>
                         <table class="form-table">
                             <tr>
@@ -250,6 +224,9 @@ $one_step = false; //$controls->data['mode'] == '1';
 
             <p>
                 <?php $controls->button_save() ?>
+                <?php if (current_user_can('administrator')) { ?>
+                <?php $controls->btn_link($this->build_dummy_action_url('u'), __('Preview', 'newsletter'), ['tertiary' => true, 'target' => '_blank']); ?>
+                <?php } ?>
             </p>
         </form>
 

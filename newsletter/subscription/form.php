@@ -43,8 +43,8 @@ $main_options = $this->get_main_options('form');
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription') ?>
-        <h2><?php esc_html_e('Standard Form', 'newsletter') ?></h2>
-        <?php include __DIR__ . '/nav-form.php' ?>
+<!--        <h2><?php esc_html_e('Forms', 'newsletter') ?></h2>-->
+        <?php include __DIR__ . '/nav-forms.php' ?>
 
     </div>
 
@@ -53,7 +53,8 @@ $main_options = $this->get_main_options('form');
         <?php $controls->show(); ?>
 
         <p>
-            The standard subscription form settings.
+            Configure the standard form displayed on the subscription page, popup, post injection, with the
+            plain <code>[newesletter_form]</code> shortcode, and so on.
             See it on <a href="<?php echo esc_attr(Newsletter::instance()->get_newsletter_page_url()) ?>" target="_blank">the Newsletter public page</a>.
         </p>
 

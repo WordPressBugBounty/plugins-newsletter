@@ -6,9 +6,8 @@ class NewsletterComposer {
     var $logger;
     var $blocks = null;
     var $templates = null;
-
-    //const presets = ['halloween', 'zen', 'black-friday', "cta", "invite", "announcement", "posts", "sales", "product", "tour", "simple"];
-    const presets = ['welcome-1', 'valentine', 'black-friday', 'black-friday-2', "event", 'halloween', 'zen', "cta", "announcement", "posts", "sales", "product", "tour", "simple"];
+    static $default_templates = ['zen', 'valentine', 'event', 'black-friday', 'black-friday-2', 'welcome-1', 'halloween', 'confirmation-1', 'welcome-2'];
+    static $old_default_templates = ['announcement', 'cta', 'invite', 'posts', 'product', 'sales', 'simple', 'tour'];
 
     /**
      *
@@ -283,31 +282,12 @@ class NewsletterComposer {
         return $css;
     }
 
-    function get_preset_from_file($id, $dir = null) {
-
-        $templates = $this->get_templates();
-        if (isset($templates[$id])) {
-            return $templates[$id];
-        }
-
-        if (is_null($dir)) {
-            $dir = NEWSLETTER_DIR . '/emails/presets';
-        }
-
-        $id = NewsletterModule::sanitize_file_name($id);
-
-        if (!is_dir($dir . '/' . $id) || !in_array($id, self::presets)) {
-            return array();
-        }
-
-        $json_content = file_get_contents("$dir/$id/preset.json");
-        $json_content = str_replace("{placeholder_base_url}", plugins_url('newsletter') . '/emails/presets', $json_content);
-        $json = json_decode($json_content);
-        $json->icon = Newsletter::plugin_url() . "/emails/presets/$id/icon.png?ver=2";
-
-        return $json;
-    }
-
+    /**
+     * Creates a template object using the content of a template folder.
+     *
+     * @param string $dir
+     * @return Newsletter\Composer\Template|\WP_Error
+     */
     function build_template($dir) {
         $dir = realpath($dir);
         $dir = wp_normalize_path($dir);
@@ -320,6 +300,7 @@ class NewsletterComposer {
         $wp_content_dir = wp_normalize_path(realpath(WP_CONTENT_DIR));
 
         $relative_dir = substr($dir, strlen($wp_content_dir));
+
         $file = basename($dir);
 
         $template_url = content_url($relative_dir);
@@ -329,27 +310,50 @@ class NewsletterComposer {
         if (!$data) {
             return new WP_Error('1', 'Unable to decode the template JSON in ' . $dir);
         }
+        $data->dir = $dir;
         $data->icon = $template_url . "/icon.png?ver=2";
         $data->id = sanitize_key(basename($dir));
         $data->url = $template_url;
+        if (empty($data->name)) {
+            $data->name = $data->subject;
+        }
 
         return $data;
     }
 
+    /**
+     * Returns all the available email templates.
+     *
+     * @return Newsletter\Composer\Template[]
+     */
     function get_templates() {
 
+        // Caching
         if (!is_null($this->templates)) {
             return $this->templates;
         }
+
         $this->templates = [];
+
+        // Let addons, themes, plugins add their own templates
         do_action('newsletter_register_templates');
 
-        foreach (TNP_Composer::$template_dirs as $dir) {
+        // Builds the packaged templates folder list, they have priority since we don't
+        // want them to be overriden.
+        $default_dirs = array_map(function ($item) {
+            return NEWSLETTER_DIR . '/emails/templates/' . $item;
+        }, self::$default_templates);
+
+        $dirs = array_merge(TNP_Composer::$template_dirs, $default_dirs);
+
+        foreach ($dirs as $dir) {
             $template = $this->build_template($dir);
             if (is_wp_error($template)) {
                 $this->logger->error($template);
                 continue;
             }
+
+            // Add the template only if the ID (folder name) is not already present
             if (!isset($this->templates[$template->id])) {
                 $this->templates[$template->id] = $template;
             } else {
@@ -357,56 +361,43 @@ class NewsletterComposer {
             }
         }
 
+        // Old presets to be converted or deleted
+        foreach (self::$old_default_templates as $id) {
+
+            if (isset($this->templates[$id])) {
+                continue;
+            }
+            $file = NEWSLETTER_DIR . '/emails/presets/' . $id . '/preset.json';
+
+            $json = file_get_contents($file);
+            $json = str_replace("{placeholder_base_url}", plugins_url('newsletter') . '/emails/presets', $json);
+            $data = json_decode($json);
+            if (!$data) {
+                continue;
+            }
+
+            $data->id = $id;
+            $data->dir = NEWSLETTER_DIR . '/emails/presets/' . $id;
+            $data->icon = Newsletter::plugin_url() . "/emails/presets/$id/icon.png?ver=2";
+
+            $this->templates[$id] = $data;
+        }
+
         return $this->templates;
     }
 
     /**
+     * Returns a single template by its ID (folder name)
      *
-     * @param string $dir
-     * @return type
-     *
-     * @deprecated
+     * @param string $id
+     * @return Newsletter\Composer\Template
      */
-    function scan_presets_dir($dir = null) {
-
-        if (is_null($dir)) {
-            $dir = __DIR__ . '/presets';
-        }
-
-        if (!is_dir($dir)) {
-            return array();
-        }
-
-        $handle = opendir($dir);
-        $list = array();
-        $relative_dir = substr($dir, strlen(WP_CONTENT_DIR));
-        while ($file = readdir($handle)) {
-
-            if ($file == '.' || $file == '..')
-                continue;
-
-            // The block unique key, we should find out how to build it, maybe an hash of the (relative) dir?
-            $preset_id = sanitize_key($file);
-
-            $full_file = $dir . '/' . $file . '/preset.json';
-
-            if (!is_file($full_file)) {
-                continue;
-            }
-
-            $icon = content_url($relative_dir . '/' . $file . '/icon.png');
-
-            $list[$preset_id] = $icon;
-        }
-        closedir($handle);
-        return $list;
+    function get_template($id) {
+        $templates = $this->get_templates();
+        return $templates[$id] ?? null;
     }
 
-    private function is_a_tnp_default_preset($preset_id) {
-        return in_array($preset_id, self::presets);
-    }
-
-    function extract_composer_options($email) {
+    static function extract_composer_options($email) {
         $composer = ['width' => 600];
         foreach ($email->options as $k => $v) {
             if (strpos($k, 'composer_') === 0) {
@@ -414,107 +405,6 @@ class NewsletterComposer {
             }
         }
         return $composer;
-    }
-
-    function get_preset_composer_options($preset_id) {
-        $templates = $this->get_templates();
-        if (isset($templates[$preset_id])) {
-            return (array) $templates[$preset_id]->settings;
-        }
-
-        if ($this->is_a_tnp_default_preset($preset_id)) {
-            $preset = $this->get_preset_from_file($preset_id);
-            if (!empty($preset->version) && $preset->version == 2) {
-                return (array) $preset->settings;
-            }
-
-            // Preset version 1 haven't global options
-            $composer = [];
-            $options = TNP_Composer::get_global_style_defaults();
-            foreach ($options as $k => $v) {
-                if (strpos($k, 'options_composer_') === 0) {
-                    $composer[substr($k, 17)] = $v;
-                }
-            }
-            return $composer;
-        }
-
-        // Get preset from db
-        $preset_email = NewsletterEmails::instance()->get_email($preset_id);
-        $global_options = $this->extract_composer_options($preset_email);
-
-        return $global_options;
-    }
-
-    /**
-     *
-     * @param mixed $preset_id
-     * @return string
-     *
-     * @todo Decouple from NewsletterEmailsAdmin
-     */
-    function get_preset_content($preset_id) {
-
-        $content = '';
-
-        // Templates in json format registered by plugins, addons, themes, ...
-        $templates = $this->get_templates();
-        if (isset($templates[$preset_id])) {
-            $composer = (array) $templates[$preset_id]->settings;
-            foreach ($templates[$preset_id]->blocks as $item) {
-                $options = (array) $item;
-                foreach ($options as &$o) {
-                    if (is_object($o)) {
-                        $o = (array) $o;
-                    }
-                }
-                ob_start();
-                $this->render_block($item->block_id, true, $options, [], $composer);
-                $content .= trim(ob_get_clean());
-            }
-            return $content;
-        }
-
-
-        // Default packaged templates
-        if ($this->is_a_tnp_default_preset($preset_id)) {
-
-            // Get preset from file
-            $preset = $this->get_preset_from_file($preset_id);
-
-            if (!empty($preset->version) && $preset->version == 2) {
-                $composer = (array) $preset->settings;
-                foreach ($preset->blocks as $item) {
-                    $options = (array) $item;
-                    foreach ($options as &$o) {
-                        if (is_object($o)) {
-                            $o = (array) $o;
-                        }
-                    }
-                    ob_start();
-                    $this->render_block($item->block_id, true, $options, [], $composer);
-                    $content .= trim(ob_get_clean());
-                    //die($content);
-                }
-            } else {
-                $composer = $this->get_preset_composer_options($preset_id);
-                foreach ($preset->blocks as $item) {
-                    ob_start();
-                    $this->render_block($item->block, true, (array) $item->options, [], $composer);
-                    $content .= trim(ob_get_clean());
-                }
-            }
-        } else {
-            // Templates saved as emails
-            $email = NewsletterEmailsAdmin::instance()->get_email($preset_id);
-            if ($email) {
-                $composer = $this->extract_composer_options($email);
-                $result = $this->regenerate_blocks($email->message, [], $composer);
-                $content = $result['content'];
-            }
-        }
-
-        return $content;
     }
 
     /**
@@ -526,42 +416,68 @@ class NewsletterComposer {
      * @param string $dir Folder containing the template (at minimim the template.json file)
      * @return \WP_Error|\TNP_Email
      */
-    function build_email_from_template($dir) {
+    function build_email_from_template($id) {
 
-        $dir = wp_normalize_path($dir);
-        $dir = realpath($dir);
-        $dir = untrailingslashit($dir);
-
-        $file = $dir . '/template.json';
-
-        if (!file_exists($file)) {
-            return new WP_Error('missing', 'The template.json file is missing');
-        }
-
-        // TODO: Checks? Which ones?
-
-        $template = json_decode(file_get_contents($file));
-        $content = '';
-        $composer = (array) $template->settings;
-        foreach ($template->blocks as $item) {
-            $options = (array) $item;
-            // Convert structured options to array (the json is decoded as "object")
-            foreach ($options as &$o) {
-                if (is_object($o)) {
-                    $o = (array) $o;
-                }
-            }
-            ob_start();
-            $this->render_block($item->block_id, true, $options, [], $composer);
-            $content .= trim(ob_get_clean());
+        $template = $this->get_template($id);
+        if (!$template) {
+            return new WP_Error('missing', 'Template not found: ' . $id);
         }
 
         $email = new TNP_Email();
         $email->editor = TNP_Email::EDITOR_COMPOSER;
-        $email->options['composer'] = $composer;
-        $email->subject = $template->subject ?? '[missing subject]';
+        $email->track = Newsletter::instance()->get_option('track');
+        $email->type = $template->type ?? 'message';
+        $content = '';
+
+        // Manage the old format untile we get rid of it definitively
+        $old = strpos($template->dir, '/emails/presets/') !== false;
+        if (!$old) {
+            foreach ($template->settings ?? [] as $k => $v) {
+                $email->options['composer_' . $k] = $v;
+            }
+            $email->options['preheader'] = $template->snippet ?? '';
+            $email->subject = $template->subject ?? '[missing subject]';
+
+            $content = '';
+            foreach ($template->blocks as $item) {
+                $options = (array) $item;
+                // Convert structured options to array (the json is decoded as "object")
+                foreach ($options as &$o) {
+                    if (is_object($o)) {
+                        $o = (array) $o;
+                    }
+                }
+                ob_start();
+                $this->render_block($item->block_id, true, $options, [], (array) $template->settings);
+                $content .= trim(ob_get_clean());
+            }
+        } else {
+
+            $email->subject = $template->name ?? '[missing subject]';
+            // Preset version 1 haven't global options
+            $composer = [];
+            $options = TNP_Composer::get_global_style_defaults();
+            foreach ($options as $k => $v) {
+                if (strpos($k, 'options_composer_') === 0) {
+                    $email->options[substr($k, 8)] = $v;
+                    $composer[substr($k, 17)] = $v;
+                }
+            }
+
+            foreach ($template->blocks as $item) {
+                ob_start();
+                $this->render_block($item->block, true, (array) $item->options, [], $composer);
+                $content .= trim(ob_get_clean());
+            }
+        }
+
+        $content = str_replace('{blog_title}', html_entity_decode(get_bloginfo('name')), $content);
+        $content = str_replace('{blog_description}', get_option('blogdescription'), $content);
+
         $email->message = TNP_Composer::get_html_open($email) . TNP_Composer::get_main_wrapper_open($email) .
                 $content . TNP_Composer::get_main_wrapper_close($email) . TNP_Composer::get_html_close($email);
+
+        $email->subject = str_replace('{blog_title}', html_entity_decode(get_bloginfo('name')), $email->subject);
 
         return $email;
     }
@@ -746,7 +662,7 @@ class NewsletterComposer {
 
         if (!empty($options['block_background_2'])) {
             $options['block_background_2'] = sanitize_hex_color($options['block_background_2']);
-            $angle = (int)($options['block_background_angle'] ?? 180);
+            $angle = (int) ($options['block_background_angle'] ?? 180);
             $background_style .= 'background: linear-gradient(' . $angle . 'deg, ' . $block_background . ' 0%, ' . $options['block_background_2'] . '  100%);';
         }
 
@@ -824,8 +740,12 @@ class NewsletterComposer {
      */
     function to_json($email) {
         $data = ['version' => 2];
-        $data['settings'] = $this->extract_composer_options($email);
         $data['subject'] = $email->subject;
+        $data['snippet'] = $email->options['preheader'];
+        $data['type'] = $email->type;
+        $data['name'] = $email->type;
+
+        $data['settings'] = $this->extract_composer_options($email);
 
         preg_match_all('/data-json="(.*?)"/m', $email->message, $matches, PREG_PATTERN_ORDER);
 
@@ -834,7 +754,7 @@ class NewsletterComposer {
             $a = html_entity_decode($match, ENT_QUOTES, 'UTF-8');
             $data['blocks'][] = self::options_decode($a);
         }
-        echo json_encode($data, JSON_PRETTY_PRINT);
+        echo wp_json_encode($data, JSON_PRETTY_PRINT);
     }
 
     /**
@@ -939,5 +859,65 @@ class NewsletterComposer {
         $this->logger->debug('Blocks regeneration completed');
 
         return $result;
+    }
+
+    /**
+     *
+     * @param NewsletterControls $controls
+     * @param TNP_Email $email
+     */
+    static function update_controls($controls, $email = null) {
+
+        // Controls for a new email (which actually does not exist yet
+        if (!empty($email)) {
+
+            foreach ($email->options as $name => $value) {
+                $controls->data['options_' . $name] = $value;
+            }
+
+            $controls->data['message'] = TNP_Composer::unwrap_email($email->message);
+            $controls->data['subject'] = $email->subject;
+            $controls->data['updated'] = $email->updated;
+        }
+
+        if (!empty($email->options['sender_email'])) {
+            $controls->data['sender_email'] = $email->options['sender_email'];
+        } else {
+            $controls->data['sender_email'] = Newsletter::instance()->get_sender_email();
+        }
+
+        if (!empty($email->options['sender_name'])) {
+            $controls->data['sender_name'] = $email->options['sender_name'];
+        } else {
+            $controls->data['sender_name'] = Newsletter::instance()->get_sender_name();
+        }
+
+        $controls->data = array_merge(TNP_Composer::get_global_style_defaults(), $controls->data);
+    }
+
+    /**
+     * Update an email using the data captired by the NewsletterControl object
+     * processing the composer fields.
+     *
+     * @param TNP_Email $email
+     * @param NewsletterControls $controls
+     */
+    static function update_email($email, $controls) {
+        if (isset($controls->data['subject'])) {
+            $email->subject = wp_strip_all_tags($controls->data['subject']);
+        }
+
+        // They should be only composer options
+        foreach ($controls->data as $name => $value) {
+            if (strpos($name, 'options_') === 0) {
+                $email->options[substr($name, 8)] = wp_strip_all_tags($value);
+            }
+        }
+
+        $email->editor = NewsletterEmails::EDITOR_COMPOSER;
+        $message = $controls->data['message'];
+
+        $email->message = TNP_Composer::get_html_open($email) . TNP_Composer::get_main_wrapper_open($email) .
+                $message . TNP_Composer::get_main_wrapper_close($email) . TNP_Composer::get_html_close($email);
     }
 }

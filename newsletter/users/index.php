@@ -132,7 +132,7 @@ $utc = new DateTimeZone('UTC');
     <div id="tnp-heading">
 
         <?php $controls->title_help('/subscribers-and-management/') ?>
-        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>
+<!--        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
@@ -230,9 +230,9 @@ $utc = new DateTimeZone('UTC');
                         <td style="white-space: nowrap">
 
                             <?php if ($s->status == "C") { ?>
-                                <?php $controls->btn('resend_welcome', '', ['secondary' => true, 'data' => $s->id, 'icon' => 'fa-redo', 'confirm' => true, 'title' => __('Resend welcome', 'newsletter')]); ?>
+                                <?php $controls->btn('resend_welcome', '', ['secondary' => true, 'data' => $s->id, 'icon' => 'fa-redo', 'confirm' => true, 'title' => __('Resend the welcome email', 'newsletter')]); ?>
                             <?php } else { ?>
-                                <?php $controls->btn('resend', '', ['secondary' => true, 'data' => $s->id, 'icon' => 'fa-redo', 'confirm' => true, 'title' => __('Resend activation', 'newsletter')]); ?>
+                                <?php $controls->btn('resend', '', ['secondary' => true, 'data' => $s->id, 'icon' => 'fa-redo', 'confirm' => true, 'title' => __('Resend the confirmaton email', 'newsletter')]); ?>
                             <?php } ?>
 
                             <?php $controls->button_icon_delete($s->id); ?>

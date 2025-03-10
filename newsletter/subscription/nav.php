@@ -2,12 +2,13 @@
 $p = $_GET['page'];
 ?>
 <ul class="tnp-nav">
-    <!--<li class="tnp-nav-title">Subscription</li>-->
+    <li class="tnp-nav-title"><?php esc_html_e('Subscription', 'newsletter') ?></li>
     <!--<li class="<?php echo $p === 'newsletter_subscription_index'?'active':''?>"><a href="?page=newsletter_subscription_index">Overview</a></li>-->
     <li class="<?php echo $p === 'newsletter_subscription_form'?'active':''?>"><a href="?page=newsletter_subscription_form">Form</a></li>
     <!--<li class="<?php echo $p === 'newsletter_subscription_sources'?'active':''?>"><a href="?page=newsletter_subscription_sources">Forms</a></li>-->
-    <li class="<?php echo $p === 'newsletter_subscription_options'?'active':''?>"><a href="?page=newsletter_subscription_options">Settings and messages</a></li>
-    <li class="<?php echo $p === 'newsletter_subscription_welcome'?'active':''?>"><a href="?page=newsletter_subscription_welcome">Welcome email</a></li>
+    <li class="<?php echo $p === 'newsletter_subscription_options'?'active':''?>"><a href="?page=newsletter_subscription_options">Settings</a></li>
+    <li class="<?php echo $p === 'newsletter_subscription_confirmation'?'active':''?>"><a href="?page=newsletter_subscription_confirmation">Confirmation</a></li>
+    <li class="<?php echo $p === 'newsletter_subscription_welcome'?'active':''?>"><a href="?page=newsletter_subscription_welcome">Welcome</a></li>
     <?php if (false && class_exists('NewsletterAutoresponder')) { ?>
     <li class="<?php echo $p === 'newsletter_autoresponder_subscription_index'?'active':''?>"><a href="?page=newsletter_autoresponder_subscription_index">Welcome series</a></li>
     <?php } else { ?>
