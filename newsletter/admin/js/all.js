@@ -383,7 +383,7 @@ function tnp_date_onchange(field) {
  * Initialize the color pickers (is invoked on document load and on AJAX forms load in the composer.
  * https://seballot.github.io/spectrum/
  */
-function tnp_controls_init(config) {
+function tnp_controls_init(config = {}) {
     NewsletterControls.initialized = true;
     console.log("Controls init", config);
     jQuery(".tnpc-color").spectrum({
