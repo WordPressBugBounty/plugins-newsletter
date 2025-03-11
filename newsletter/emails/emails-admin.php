@@ -172,7 +172,7 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         ob_start();
         $controls->init(['nested' => true]); // To avoid conflict with master form...
         echo '<input type="hidden" name="action" value="tnpc_render">';
-        echo '<input type="hidden" name="id" value="' . esc_attr($block_id) . '">';
+        echo '<input type="hidden" name="id" value="' . esc_attr($block['id']) . '">';
         echo '<input type="hidden" name="context_type" value="' . esc_attr($context['type']) . '">';
         wp_nonce_field('save');
         $inline_edits = '';
