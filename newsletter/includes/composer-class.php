@@ -758,13 +758,11 @@ class NewsletterComposer {
     }
 
     /**
-     * Regenerates a saved composed email rendering each block. Regeneration is
-     * conditioned (possibly) by the context. The context is usually passed to blocks
+     * Regenerates a saved email refreshing each block. Regeneration is
+     * conditioned by the context. The context is usually passed to blocks
      * so they can act in the right manner.
      *
      * $context contains a type and, for automated, the last_run.
-     *
-     * $email can actually be even a string containing the full newsletter HTML code.
      *
      * @param TNP_Email $email
      * @return string

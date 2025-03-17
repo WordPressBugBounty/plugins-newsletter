@@ -271,6 +271,9 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         // just using a number...). I don't like this.
         if (is_numeric($id)) {
             $email = $this->get_email($id);
+            if ($email) {
+                NewsletterComposer::instance()->regenerate($email);
+            }
         }
 
         if (!$email) {

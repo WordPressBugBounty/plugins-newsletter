@@ -610,6 +610,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
     var $index_page = null;
     var $edit_page = null;
     var $welcome_page = null;
+    var $confirmation_page = null;
     var $logs_page = null;
     var $dir = '';
     var $forms = null; // For caching
@@ -632,6 +633,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
             $this->index_page = 'newsletter_' . $this->menu_slug . '_index';
             $this->edit_page = 'newsletter_' . $this->menu_slug . '_edit';
             $this->welcome_page = 'newsletter_' . $this->menu_slug . '_welcome';
+            $this->confirmation_page = 'newsletter_' . $this->menu_slug . '_confirmation';
             $this->logs_page = 'newsletter_' . $this->menu_slug . '_logs';
 
             // Auto add a menu entry
@@ -771,6 +773,25 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
                         }
 
                         require $this->dir . '/admin/welcome.php';
+                    }
+            );
+        }
+
+        /** @since 8.7.5 */
+        if (file_exists($this->dir . '/admin/confirmation.php')) {
+            add_submenu_page('admin.php', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->confirmation_page,
+                    function () {
+
+                        require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+                        $controls = new NewsletterControls();
+
+                        $form = $this->get_form(sanitize_key($_GET['id'] ?? ''));
+                        if (!$form) {
+                            echo 'Form not found';
+                            return;
+                        }
+
+                        require $this->dir . '/admin/confirmation.php';
                     }
             );
         }

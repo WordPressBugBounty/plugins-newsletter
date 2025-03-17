@@ -126,7 +126,7 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
             $options = [];
         }
         $old_options = $this->get_options($sub, $language);
-        $this->save_options(array_merge($old_options, $options), $sub, null, $language);
+        $this->save_options(array_merge($old_options, $options), $sub, $language);
     }
 
     function admin_menu() {
