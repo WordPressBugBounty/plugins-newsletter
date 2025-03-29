@@ -4,13 +4,13 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.7.5
+  Version: 8.7.6
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
   Text Domain: newsletter
   License: GPLv2 or later
-  Requires at least: 5.1
+  Requires at least: 5.6
   Requires PHP: 7.0
 
   Copyright 2009-2025 The Newsletter Team (email: info@thenewsletterplugin.com, web: https://www.thenewsletterplugin.com)
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.7.5');
+define('NEWSLETTER_VERSION', '8.7.6');
 
 global $wpdb, $newsletter;
 
@@ -432,7 +432,9 @@ class Newsletter extends NewsletterModule {
 
         $user = $this->get_current_user();
 
-        if ($user && $user->language) {
+        // When the key is "subscription", the subscription form is shown and we do not use the language
+        // of the current subscriber (maybe identify by the logged in administrator).
+        if ($message_key !== 'subscription' && $user && $user->language) {
             $this->switch_language($user->language);
         }
 
@@ -669,8 +671,9 @@ class Newsletter extends NewsletterModule {
 
             if (empty($users)) {
                 $this->logger->info(__METHOD__ . '> No more users, set as sent');
-                $wpdb->query("update " . NEWSLETTER_EMAILS_TABLE . " set status='sent', total=sent where id=" . $email->id . " limit 1");
-                do_action('newsletter_ended_sending_newsletter', $email);
+                $wpdb->query("update " . NEWSLETTER_EMAILS_TABLE . " set status='sent', total=sent where id=" . ((int)$email->id) . " limit 1");
+                //do_action('newsletter_ended_sending_newsletter', $email);
+                do_action('newsletter_send_end', $email);
                 return true;
             }
         } else {

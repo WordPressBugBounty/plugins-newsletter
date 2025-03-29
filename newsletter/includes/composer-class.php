@@ -788,8 +788,10 @@ class NewsletterComposer {
         $email->message = TNP_Composer::get_html_open($email) . TNP_Composer::get_main_wrapper_open($email) .
                 $result['content'] . TNP_Composer::get_main_wrapper_close($email) . TNP_Composer::get_html_close($email);
 
-        if (!empty($result['subject'])) {
-            $email->subject = $result['subject'];
+        if ($context['type'] === 'automated') {
+            if (!empty($result['subject'])) {
+                $email->subject = $result['subject'];
+            }
         }
 
         $this->logger->debug('Regeneration completed');

@@ -47,7 +47,7 @@ class NewsletterFields {
      * @return array
      */
     public function _merge_base_attrs($attrs) {
-        return array_merge(['description' => '', 'label' => '', 'help_url' => ''], $attrs);
+        return array_merge(['description' => '', 'label' => ''], $attrs);
     }
 
     /** Adds some basic attributes and the provided default ones.
@@ -57,7 +57,7 @@ class NewsletterFields {
      * @return array
      */
     public function _merge_attrs($attrs, $defaults = []) {
-        return array_merge(['description' => '', 'label' => '', 'help_url' => ''], $defaults, $attrs);
+        return array_merge(['description' => '', 'label' => ''], $defaults, $attrs);
     }
 
     /**

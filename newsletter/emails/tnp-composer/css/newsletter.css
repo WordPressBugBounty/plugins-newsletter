@@ -14,6 +14,9 @@ img.aligncenter { display: block; margin: 0 auto;}
 figcaption { display: block; }
 @media screen and (max-width: 525px) {
     .wrapper { padding-left: var(--body_padding_left); padding-right: var(--body_padding_right); padding-bottom: var(--body_padding_bottom); padding-top: var(--body_padding_top);}
+    .m-d-block {display: block}
+    .m-d-none {display: none; visibility: hidden; color: transparent;}
+    .m-pb-1 { padding-bottom: 16px!important; }
     .p-0 { padding: 0 !important; }
     .pt-1, .padding-top-15 { padding-top: 15px!important; }
     .pb-1, .padding-bottom-15 { padding-bottom: 15px!important; }

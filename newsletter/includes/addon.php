@@ -23,7 +23,7 @@ class NewsletterAddon {
                 update_option('newsletter_' . $name . '_version', $version, false);
             }
         }
-        add_action('newsletter_init', array($this, 'init'));
+        add_action('newsletter_init', [$this, 'init']);
         //Load translations from specific addon /languages/ directory
         load_plugin_textdomain('newsletter-' . $this->name, false, 'newsletter-' . $this->name . '/languages/');
 
@@ -55,7 +55,11 @@ class NewsletterAddon {
         if (is_admin()) {
             if ($this->is_allowed()) {
                 add_action('admin_menu', [$this, 'admin_menu'], $this->menu_priority);
+                // Should be registered only on our admin page, need to fix the $is_admin_page evaluation moment on
+                // NewsletterAdmin class.
+                add_action('newsletter_menu', [$this, 'newsletter_menu']);
 
+                // TODO: remove when all addon has been updated
                 if (method_exists($this, 'settings_menu')) {
                     add_filter('newsletter_menu_settings', [$this, 'settings_menu']);
                 }
@@ -68,13 +72,15 @@ class NewsletterAddon {
         }
     }
 
+    /**
+     * To be overridden by the single addon.
+     */
     function weekly_check() {
-        $logger = $this->get_logger();
-        $logger->info('Weekly check for ' . $this->name);
+        // To be implemented by the single addon
     }
 
     /**
-     * To be overridden.
+     * To be overridden by the single addon.
      *
      * @return array
      */
@@ -101,10 +107,29 @@ class NewsletterAddon {
 
     }
 
-//    function settings_menu($entries) {
-//    }
-//    function subscribers_menu($entries) {
-//    }
+    function newsletter_menu() {
+
+    }
+
+    function add_settings_menu_page($title, $url) {
+        NewsletterAdmin::$menu['settings'][] = ['label' => $title, 'url' => $url];
+    }
+
+    function add_subscription_menu_page($title, $url) {
+        NewsletterAdmin::$menu['subscription'][] = ['label' => $title, 'url' => $url];
+    }
+
+    function add_newsletters_menu_page($title, $url) {
+        NewsletterAdmin::$menu['newsletters'][] = ['label' => $title, 'url' => $url];
+    }
+
+    function add_subscribers_menu_page($title, $url) {
+        NewsletterAdmin::$menu['subscribers'][] = ['label' => $title, 'url' => $url];
+    }
+
+    function add_forms_menu_page($title, $url) {
+        NewsletterAdmin::$menu['forms'][] = ['label' => $title, 'url' => $url];
+    }
 
     function get_current_language() {
         return Newsletter::instance()->get_current_language();
@@ -116,6 +141,10 @@ class NewsletterAddon {
 
     function is_allowed() {
         return Newsletter::instance()->is_allowed();
+    }
+
+    function is_admin_page() {
+        return NewsletterAdmin::instance()->is_admin_page();
     }
 
     function get_languages() {
@@ -165,9 +194,6 @@ class NewsletterAddon {
             return;
         }
         $this->options = $this->get_option_array('newsletter_' . $this->name, []);
-        if (!is_array($this->options)) {
-            $this->options = [];
-        }
     }
 
     function get_option_array($name) {
@@ -207,7 +233,7 @@ class NewsletterAddon {
     }
 
     function merge_defaults($defaults) {
-        $options = get_option('newsletter_' . $this->name, []);
+        $options = $this->get_option_array('newsletter_' . $this->name, []);
         $options = array_merge($defaults, $options);
         $this->save_options($options);
     }
@@ -330,9 +356,12 @@ class NewsletterMailerAddon extends NewsletterAddon {
         if (is_admin() && !empty($this->menu_title) && !empty($this->dir) && current_user_can('administrator')) {
             $this->index_page = 'newsletter_' . $this->menu_slug . '_index';
             $this->logs_page = 'newsletter_' . $this->menu_slug . '_logs';
-            add_action('admin_menu', [$this, 'hook_admin_menu'], 101);
-            add_filter('newsletter_menu_settings', [$this, 'hook_newsletter_menu_settings']);
         }
+    }
+
+    function upgrade($first_install = false) {
+        parent::upgrade($first_install);
+        $this->merge_defaults(['turbo' => 0, 'enabled' => 0]);
     }
 
     function deactivate() {
@@ -342,12 +371,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
         wp_clear_scheduled_hook('newsletter_' . $this->name . '_bounce');
     }
 
-    function hook_newsletter_menu_settings($entries) {
-        $entries[] = ['label' => $this->menu_title, 'url' => '?page=' . $this->index_page];
-        return $entries;
-    }
-
-    function hook_admin_menu() {
+    function admin_menu() {
 
         add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . esc_html($this->menu_title) . '</span>', 'manage_options', $this->index_page,
                 function () {
@@ -372,6 +396,10 @@ class NewsletterMailerAddon extends NewsletterAddon {
                     }
             );
         }
+    }
+
+    function newsletter_menu() {
+        $this->add_settings_menu_page($this->menu_title, '?page=' . $this->index_page);
     }
 
     function set_warnings($controls) {
@@ -427,7 +455,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
         $logger->info($email . ' bounced');
         $user = Newsletter::instance()->get_user($email);
         if (!$user) {
-            Newsletter\Logs::add($this->name, $email . ' - ' . $type . ' bounce - no subscriber found');
+            Newsletter\Logs::add($this->name, $email . ' - ' . $type . ' bounce - no subscriber found', 0, $data);
             $logger->info($email . ' not found');
             return;
         }
@@ -435,7 +463,15 @@ class NewsletterMailerAddon extends NewsletterAddon {
         Newsletter::instance()->set_user_status($user, TNP_User::STATUS_BOUNCED);
         Newsletter::instance()->add_user_log($user, $this->name);
         Newsletter\Logs::add($this->name, $email . ' - ' . $type . ' bounce', 0, $data);
-        do_action('newsletter_user_complained', $user);
+        do_action('newsletter_user_bounced', $user);
+    }
+
+    function set_bounced_hard($email, $data = '') {
+        $this->set_bounced($email, 'permanent', $data);
+    }
+
+    function set_bounced_soft($email, $data = '') {
+        $this->set_bounced($email, 'transient', $data);
     }
 
     /**
@@ -447,7 +483,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
         $logger->info($email . ' complained');
         $user = Newsletter::instance()->get_user($email);
         if (!$user) {
-            Newsletter\Logs::add($this->name, $email . ' - complaint - no subscriber found');
+            Newsletter\Logs::add($this->name, $email . ' - complaint - no subscriber found', 0, $data);
             $logger->info($email . ' not found');
             return;
         }
@@ -467,7 +503,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
         $logger->info($email . ' unsubscribed');
         $user = Newsletter::instance()->get_user($email);
         if (!$user) {
-            Newsletter\Logs::add($this->name, $email . ' - unsubscribe - no subscriber found');
+            Newsletter\Logs::add($this->name, $email . ' - unsubscribe - no subscriber found', 0, $data);
             $logger->info($email . ' not found');
             return;
         }
@@ -524,7 +560,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
      * @since 8.5.2
      */
     function webhook_log($description, $data = null) {
-        Newsletter\Logs::add($this->name . '-webhook', $description, 0, $data);
+        Newsletter\Logs::add($this->name, $description, 0, $data);
     }
 
     /**
@@ -636,12 +672,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
             $this->confirmation_page = 'newsletter_' . $this->menu_slug . '_confirmation';
             $this->logs_page = 'newsletter_' . $this->menu_slug . '_logs';
 
-            // Auto add a menu entry
-            if (!empty($this->menu_title) && !empty($this->dir)) {
-                add_action('admin_menu', [$this, 'hook_admin_menu'], 101);
-                add_filter('newsletter_menu_subscription', [$this, 'hook_newsletter_menu_subscription']);
-            }
-            add_filter('newsletter_lists_notes', array($this, 'hook_newsletter_lists_notes'), 10, 2);
+            add_filter('newsletter_lists_notes', [$this, 'hook_newsletter_lists_notes'], 10, 2);
         }
     }
 
@@ -690,9 +721,20 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
         return $list;
     }
 
-    function get_default_subscription($form_options) {
+    /**
+     * Basic subscription object to collect the data and option of a 3rd party form
+     * integration.
+     *
+     * @param type $form_options
+     * @return type
+     */
+    function get_default_subscription($form_options, $form_id = null) {
         $subscription = NewsletterSubscription::instance()->get_default_subscription();
         $subscription->floodcheck = false;
+
+        if ($form_id) {
+            $subscription->data->referrer = sanitize_key($this->name . '-' . $form_id);
+        }
 
         // 'welcome_email' is a flag indicating what to use for that email (0- default, 1 - custom, 2 - don't send)
         if (!empty($form_options['welcome_email'])) {
@@ -703,8 +745,9 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
             }
         }
 
+        // Not for 3rd party form integration
         if (!empty($form_options['welcome_page_id'])) {
-            $subscription->welcome_page_id = (int)$form_options['welcome_page_id'];
+            $subscription->welcome_page_id = (int) $form_options['welcome_page_id'];
         }
 
         if (!empty($form_options['confirmation_email'])) {
@@ -715,8 +758,9 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
             }
         }
 
+        // Not for 3rd party form integration
         if (!empty($form_options['confirmation_page_id'])) {
-            $subscription->confirmation_page_id = (int)$form_options['confirmation_page_id'];
+            $subscription->confirmation_page_id = (int) $form_options['confirmation_page_id'];
         }
 
         if (!empty($form_options['status'])) {
@@ -731,12 +775,11 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
         return $subscription;
     }
 
-    function hook_newsletter_menu_subscription($entries) {
-        $entries[] = ['label' => $this->menu_title, 'url' => '?page=' . $this->index_page];
-        return $entries;
+    function newsletter_menu() {
+        $this->add_subscription_menu_page($this->menu_title, '?page=' . $this->index_page);
     }
 
-    function hook_admin_menu() {
+    function admin_menu() {
         add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->index_page,
                 function () {
                     require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';

@@ -51,7 +51,7 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer, ['scale' => 
 
     <tr>
         <td width="100%" align="center" dir="<?php echo $dir ?>" style="padding-top: 24px">
-            <?php echo implode('<span inline-class="text">&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</span>', $links) ?>
+            <?php echo implode('<span inline-class="text" class="m-d-none">&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;</span>', $links) ?>
         </td>
     </tr>
 

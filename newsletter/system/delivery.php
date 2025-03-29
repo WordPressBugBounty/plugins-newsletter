@@ -32,6 +32,7 @@ if ($controls->is_action('test')) {
             $options['mail'] = 1;
 
             $controls->messages .= 'A test email has been sent.<br>';
+            $controls->messages .= 'Mailer: ' . esc_html($mailer->get_description()) . '<br>';
             $controls->messages .= 'If you did not receive the message in your mailbox within 5 minutes '
                     . '(check also the spam folder), please contact your hosting provider.<br>'
                     . '<a href="https://www.thenewsletterplugin.com/documentation/?p=15170" target="_blank"><strong>Read more here</strong></a>.';
@@ -43,11 +44,14 @@ if ($controls->is_action('test')) {
 
             $controls->errors .= '<strong>FAILED</strong> (' . esc_html($r->get_error_message()) . ')<br>';
 
+            $controls->errors .= 'Mailer: ' . esc_html($mailer->get_description()) . '<br>';
+
             if (!empty($newsletter->options['return_path'])) {
                 $controls->errors .= '- Try to remove the return path on main settings.<br>';
             }
 
-            $controls->errors .= '<a href="https://www.thenewsletterplugin.com/documentation/?p=15170" target="_blank"><strong>' . __('Read more', 'newsletter') . '</strong></a>.';
+            $controls->errors .= '<a href="https://www.thenewsletterplugin.com/documentation/?p=15170" target="_blank"><strong>' . __('Read more', 'newsletter') . '</strong></a>.<br>';
+            $controls->errors .= 'PLEASE REPORT ALL THE DATA ON THIS PAGE WHEN ASKING FOR SUPPORT, THANK YOU'.
 
             $parts = explode('@', $newsletter->get_sender_email());
             $sitename = strtolower($_SERVER['SERVER_NAME']);

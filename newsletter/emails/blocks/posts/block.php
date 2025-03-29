@@ -181,7 +181,7 @@ if (!empty($options['reverse'])) {
     $posts = array_reverse($posts);
 }
 
-if ($posts) {
+if ($context['type'] === 'automated' && $posts) {
     $out['subject'] = $posts[0]->post_title;
 }
 

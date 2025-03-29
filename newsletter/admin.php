@@ -18,6 +18,8 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
 
     static $instance = null;
 
+    static $menu = ['settings' => [], 'subscription' => [], 'newsletters' => [], 'forms' => [], 'subscribers' => []];
+
     /**
      *
      * @return NewsletterAdmin
@@ -141,8 +143,9 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
 
     function hook_admin_init() {
         // Verificare il contesto
-        if (isset($_GET['page']) && $_GET['page'] === 'newsletter_main_welcome')
+        if (isset($_GET['page']) && $_GET['page'] === 'newsletter_main_welcome') {
             return;
+        }
         if (get_option('newsletter_show_welcome')) {
             delete_option('newsletter_show_welcome');
             wp_redirect(admin_url('admin.php?page=newsletter_main_welcome'));

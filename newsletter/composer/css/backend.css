@@ -39,6 +39,10 @@
     max-width: 100%!important;
 }
 
+#tnpb-content.tnp-view-mobile .m-d-block {display: block}
+#tnpb-content.tnp-view-mobile .m-d-none {display: none; visibility: hidden; color: transparent;}
+#tnpb-content.tnp-view-mobile .m-pb-1 { padding-bottom: 16px!important; }
+
 #tnpb-content.tnp-view-mobile .p-0 {
     padding: 0 !important;
 }

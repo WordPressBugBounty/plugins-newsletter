@@ -72,7 +72,7 @@
             "block_padding_right": 0,
             "block_padding_left": 0,
             "button_label": "Subscribe me now",
-            "button_url": "{subscription_confirmation_url}",
+            "button_url": "{subscription_confirm_url}",
             "button_font_family": "",
             "button_font_size": "",
             "button_font_weight": "",

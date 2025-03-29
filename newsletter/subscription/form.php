@@ -54,7 +54,7 @@ $main_options = $this->get_main_options('form');
 
         <p>
             Configure the standard form displayed on the subscription page, popup, post injection, with the
-            plain <code>[newesletter_form]</code> shortcode, and so on.
+            plain <code>[newsletter_form]</code> shortcode, and so on.
             See it on <a href="<?php echo esc_attr(Newsletter::instance()->get_newsletter_page_url()) ?>" target="_blank">the Newsletter public page</a>.
         </p>
 

@@ -9,8 +9,10 @@ $user_count = Newsletter::instance()->get_user_count();
 
 $is_administrator = current_user_can('administrator');
 
+do_action('newsletter_menu'); // New way to add menu entries
+
 function newsletter_print_entries($group) {
-    $entries = apply_filters('newsletter_menu_' . $group, []);
+    $entries = apply_filters('newsletter_menu_' . $group, NewsletterAdmin::$menu[$group] ?? []);
     if (!$entries) {
         return;
     }

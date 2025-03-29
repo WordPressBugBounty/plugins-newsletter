@@ -104,13 +104,13 @@ $options = array_merge($options, $styles[$block_style] ?? []);
 
 $links = [];
 if ($options['unsubscribe_enabled']) {
-    $links[] = '<a inline-class="text" href="{unsubscription_url}" target="_blank">' . esc_html($options['unsubscribe']) . '</a>';
+    $links[] = '<a inline-class="text" href="{unsubscription_url}" target="_blank" class="m-d-block m-pb-1">' . esc_html($options['unsubscribe']) . '</a>';
 }
 if ($options['profile_enabled']) {
-    $links[] = '<a inline-class="text" href="{profile_url}" target="_blank">' . esc_html($options['profile']) . '</a>';
+    $links[] = '<a inline-class="text" href="{profile_url}" target="_blank" class="m-d-block m-pb-1">' . esc_html($options['profile']) . '</a>';
 }
 if ($options['view_enabled']) {
-    $links[] = '<a inline-class="text" href="{email_url}" target="_blank">' . esc_html($options['view']) . '</a>';
+    $links[] = '<a inline-class="text" href="{email_url}" target="_blank" class="m-d-block m-pb-1">' . esc_html($options['view']) . '</a>';
 }
 
 $show_company = !empty($options['show_company']);
