@@ -15,7 +15,7 @@ jQuery.fn.perform_delete = function () {
 
 // add edit button
 jQuery.fn.add_block_edit = function () {
-    console.log('Add block edit');
+    //console.log('Add block edit');
     this.append('<div class="tnpc-row-edit-block" title="Edit"><img src="' + TNP_PLUGIN_URL + '/emails/tnp-composer/_assets/edit.png" width="32"></div>');
     this.find('.tnpc-row-edit-block').perform_block_edit();
 }
@@ -23,7 +23,7 @@ jQuery.fn.add_block_edit = function () {
 // edit block
 jQuery.fn.perform_block_edit = function () {
 
-    console.log('Perform block edit');
+    //console.log('Perform block edit');
 
     jQuery(".tnpc-row-edit-block").click(function (e) {
         e.preventDefault()
@@ -861,7 +861,7 @@ jQuery(function () {
 
 
         $('#tnpc-view-mode').on('click', function () {
-            console.log('change view mode');
+            //console.log('change view mode');
             if (status === 'desktop') {
                 status = 'mobile';
                 document.getElementById('tnpc-view-mode-icon').className = 'fas fa-mobile';

@@ -121,14 +121,14 @@ foreach (['confirmation_message', 'confirmation_text'] as $key) {
                                 <?php $controls->page_or_url('confirmation'); ?>
                             </td>
                         </tr>
-                        <tr data-show="confirmation_id=0">
+                        <tr data-tnpshow="confirmation_id=0">
                             <th><?php esc_html_e('Page content', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->checkbox2('confirmation_text_custom', __('Customize', 'newsletter')); ?>
-                                <div data-show="confirmation_text_custom=1">
+                                <div data-tnpshow="confirmation_text_custom=1">
                                     <?php $controls->wp_editor('confirmation_text', ['editor_height' => 150], ['default' => $this->get_default_text('confirmation_text')]); ?>
                                 </div>
-                                <div data-show="confirmation_text_custom=0" class="tnpc-default-text">
+                                <div data-tnpshow="confirmation_text_custom=0" class="tnpc-default-text">
                                     <?php echo wp_kses_post($this->get_default_text('confirmation_text')) ?>
                                 </div>
                             </td>
@@ -153,7 +153,7 @@ foreach (['confirmation_message', 'confirmation_text'] as $key) {
 
                     <?php
                     $controls->button_icon_statistics(NewsletterStatisticsAdmin::instance()->get_statistics_url($controls->data['confirmation_email_id']),
-                            ['secondary' => true, 'target' => '_blank', 'data-show' => 'confirmation_email=1'])
+                            ['secondary' => true, 'target' => '_blank', 'data-tnpshow' => 'confirmation_email=1'])
                     ?>
 
                     <?php $controls->button_save() ?>
@@ -164,11 +164,11 @@ foreach (['confirmation_message', 'confirmation_text'] as $key) {
                         [#<?php echo (int) $controls->data['confirmation_email_id']; ?>]
                     <?php } ?>
 
-                    <div id="tnp-composer-confirmation" style="display: none" data-show="confirmation_email=1">
+                    <div id="tnp-composer-confirmation" style="display: none" data-tnpshow="confirmation_email=1">
                         <?php $controls->composer_v3(true, false); ?>
                     </div>
 
-                    <div id="tnp-standard-confirmation" style="display: none" data-show="confirmation_email=0">
+                    <div id="tnp-standard-confirmation" style="display: none" data-tnpshow="confirmation_email=0">
 
                         <table class="form-table">
                             <tr>
@@ -178,11 +178,11 @@ foreach (['confirmation_message', 'confirmation_text'] as $key) {
                                     <br><br>
                                     <?php $controls->checkbox2('confirmation_message_custom', 'Customize'); ?>
 
-                                    <div data-show="confirmation_message_custom=1">
+                                    <div data-tnpshow="confirmation_message_custom=1">
                                         <?php $controls->wp_editor('confirmation_message', ['editor_height' => 150], ['default' => $this->get_default_text('confirmation_message')]); ?>
                                     </div>
 
-                                    <div data-show="confirmation_message_custom=0" class="tnpc-default-text">
+                                    <div data-tnpshow="confirmation_message_custom=0" class="tnpc-default-text">
                                         <?php echo wp_kses_post($this->get_default_text('confirmation_message')) ?>
                                     </div>
 

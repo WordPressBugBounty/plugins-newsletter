@@ -197,7 +197,7 @@ const NewsletterComposer = {
                 if (el) {
                     el.value = value;
                 } else {
-                    console.log('options-options_' + key + ' not found');
+                    //console.log('options-options_' + key + ' not found');
                 }
         }
         //tnp_controls_init();

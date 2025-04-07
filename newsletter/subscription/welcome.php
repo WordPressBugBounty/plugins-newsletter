@@ -116,14 +116,14 @@ foreach (['confirmed_message', 'confirmed_text'] as $key) {
 
                             </td>
                         </tr>
-                        <tr data-show="confirmed_id=0">
+                        <tr data-tnpshow="confirmed_id=0">
                             <th><?php esc_html_e('Page content', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->checkbox2('confirmed_text_custom', 'Customize'); ?>
-                                <div data-show="confirmed_text_custom=1">
+                                <div data-tnpshow="confirmed_text_custom=1">
                                     <?php $controls->wp_editor('confirmed_text', ['editor_height' => 150], ['default' => $this->get_default_text('confirmed_text')]); ?>
                                 </div>
-                                <div data-show="confirmed_text_custom=0" class="tnpc-default-text">
+                                <div data-tnpshow="confirmed_text_custom=0" class="tnpc-default-text">
                                     <?php echo wp_kses_post($this->get_default_text('confirmed_text')) ?>
                                 </div>
                             </td>
@@ -131,7 +131,7 @@ foreach (['confirmed_message', 'confirmed_text'] as $key) {
 
 
 
-                        <tr data-show="confirmed_id=0">
+                        <tr data-tnpshow="confirmed_id=0">
                             <th><?php esc_html_e('Conversion tracking code', 'newsletter') ?>
                                 <?php $controls->help('/subscription#conversion') ?></th>
                             <td>
@@ -161,7 +161,7 @@ foreach (['confirmed_message', 'confirmed_text'] as $key) {
                     ?>
                     <?php
                     $controls->button_icon_statistics(NewsletterStatisticsAdmin::instance()->get_statistics_url($controls->data['welcome_email_id']),
-                            ['secondary' => true, 'id' => 'tnp-stats-button', 'target' => '_blank', 'data-show' => 'welcome_email=1'])
+                            ['secondary' => true, 'id' => 'tnp-stats-button', 'target' => '_blank', 'data-tnpshow' => 'welcome_email=1'])
                     ?>
                     <?php $controls->button_save() ?>
                     <?php if (NEWSLETTER_DEBUG) { ?>
@@ -171,11 +171,11 @@ foreach (['confirmed_message', 'confirmed_text'] as $key) {
                     <?php } ?>
 
 
-                    <div id="tnp-composer-welcome" style="display: none" data-show="welcome_email=1">
+                    <div id="tnp-composer-welcome" style="display: none" data-tnpshow="welcome_email=1">
                         <?php $controls->composer_v3(true, false); ?>
                     </div>
 
-                    <div id="tnp-standard-welcome" style="display: none" data-show="welcome_email=0">
+                    <div id="tnp-standard-welcome" style="display: none" data-tnpshow="welcome_email=0">
                         <table class="form-table">
                             <tr>
                                 <td>
@@ -184,11 +184,11 @@ foreach (['confirmed_message', 'confirmed_text'] as $key) {
                                     <br><br>
                                     <?php $controls->checkbox2('confirmed_message_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
 
-                                    <div data-show="confirmed_message_custom=1">
+                                    <div data-tnpshow="confirmed_message_custom=1">
                                         <?php $controls->wp_editor('confirmed_message', ['editor_height' => 150], ['default' => $this->get_default_text('confirmed_message')]); ?>
                                     </div>
 
-                                    <div data-show="confirmed_message_custom=0" class="tnpc-default-text">
+                                    <div data-tnpshow="confirmed_message_custom=0" class="tnpc-default-text">
                                         <?php echo wp_kses_post($this->get_default_text('confirmed_message')) ?>
                                     </div>
 

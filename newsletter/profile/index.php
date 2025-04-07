@@ -73,7 +73,7 @@ foreach (['text'] as $key) {
                                 </p>-->
                             </td>
                         </tr>
-                        <tr data-show="page_id=0">
+                        <tr data-tnpshow="page_id=0">
                             <th>
                                 <?php esc_html_e('Page content', 'newsletter') ?>
                             </th>

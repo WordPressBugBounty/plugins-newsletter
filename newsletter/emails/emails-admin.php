@@ -522,9 +522,11 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
     private function set_test_subject_to($email) {
         if ($email->subject == '') {
             $email->subject = 'Dummy subject, it was empty (remember to set it)';
-        } else {
-            //$email->subject = $email->subject;
         }
+        if (!defined('NEWSLETTER_TEST_SUBJECT_POSTFIX')) {
+            define('NEWSLETTER_TEST_SUBJECT_POSTFIX', ' [PREVIEW]');
+        }
+        $email->subject = $email->subject . NEWSLETTER_TEST_SUBJECT_POSTFIX;
     }
 
     private function make_dummy_subscriber() {

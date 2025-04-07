@@ -385,7 +385,7 @@ function tnp_date_onchange(field) {
  */
 function tnp_controls_init(config = {}) {
     NewsletterControls.initialized = true;
-    console.log("Controls init", config);
+    //console.log("Controls init", config);
     jQuery(".tnpc-color").spectrum({
         type: 'color',
         allowEmpty: true,
@@ -484,7 +484,7 @@ function newsletter_media(name) {
         var media = tnp_uploader.state().get("selection").first();
         document.getElementById(name + "_id").value = media.id;
         jQuery("#" + name + "_id").trigger("change");
-        console.log(media.attributes);
+        //console.log(media.attributes);
         if (media.attributes.url.substring(0, 0) == "/") {
             media.attributes.url = NewsletterControls.site_url + media.attributes.url;
         }
@@ -580,9 +580,9 @@ const TNP = {
     },
 
     init_showables: function () {
-        document.querySelectorAll('[data-show]').forEach(el => {
-            let parts = el.dataset.show.split(/([=><])/);
-            console.log('options-' + parts[0]);
+        document.querySelectorAll('[data-tnpshow]').forEach(el => {
+            let parts = el.dataset.tnpshow.split(/([=><])/);
+            //console.log('options-' + parts[0]);
             let controller = document.getElementById('options-' + parts[0]);
             TNP.process_showable(el, controller, parts[1], parts[2]);
             if (!TNP.showable_controllers.includes(controller.id)) {
@@ -593,14 +593,17 @@ const TNP = {
     },
 
     process_showables: function () {
-        document.querySelectorAll('[data-show]').forEach(el => {
-            let parts = el.dataset.show.split(/([=><])/);
+        document.querySelectorAll('[data-tnpshow]').forEach(el => {
+            let parts = el.dataset.tnpshow.split(/([=><])/);
             let controller = document.getElementById('options-' + parts[0]);
             TNP.process_showable(el, controller, parts[1], parts[2]);
         });
     },
 
     process_showable: function (el, controller, symbol, value) {
+        if (!controller) {
+            return;
+        }
         cvalue = controller.value;
         if (cvalue === '')
             cvalue = '0'; // Patch for selects with the first entry set to an empty key

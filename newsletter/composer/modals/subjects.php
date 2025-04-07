@@ -3,7 +3,7 @@
         jQuery("#tnp-edit-subjects-list a").click(function (e) {
             e.preventDefault();
             jQuery("#options-subject").val(this.innerText);
-            console.log(jQuery("#options-subject"));
+            //console.log(jQuery("#options-subject"));
             $.modal.close();
         });
 

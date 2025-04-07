@@ -782,8 +782,8 @@ class NewsletterControls {
         if (!empty($attrs['preview_url']) && current_user_can('administrator')) {
             $this->btn_link($attrs['preview_url'], __('Preview', 'newsletter'), ['tertiary' => true, 'target' => '_blank']);
         }
-        echo '<p class="description" data-show="', esc_attr($name), '_id=0">The public page is set on general Setting page.</p>';
-        echo '<div data-show="', esc_attr($name), '_id=url" style="margin-top: 1rem;">';
+        echo '<p class="description" data-tnpshow="', esc_attr($name), '_id=0">The public page is set on general Setting page.</p>';
+        echo '<div data-tnpshow="', esc_attr($name), '_id=url" style="margin-top: 1rem;">';
         $this->text($name . '_url', ['placeholder' => 'https://']);
         echo '</div>';
     }
@@ -1124,8 +1124,8 @@ class NewsletterControls {
         if (!empty($attrs['target'])) {
             echo ' target="', esc_attr($attrs['target']), '"';
         }
-        if (!empty($attrs['data-show'])) {
-            echo ' data-show="', esc_attr($attrs['data-show']), '"';
+        if (!empty($attrs['data-tnpshow'])) {
+            echo ' data-tnpshow="', esc_attr($attrs['data-tnpshow']), '"';
         }
         echo '>';
         if (!empty($attrs['icon'])) {

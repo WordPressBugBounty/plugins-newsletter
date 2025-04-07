@@ -12,6 +12,7 @@ class NewsletterAddon {
     var $version;
     var $labels;
     var $menu_priority = 100;
+    var $weekly_check = true;
 
     public function __construct($name, $version = '0.0.0', $dir = '') {
         $this->name = $name;
@@ -27,7 +28,7 @@ class NewsletterAddon {
         //Load translations from specific addon /languages/ directory
         load_plugin_textdomain('newsletter-' . $this->name, false, 'newsletter-' . $this->name . '/languages/');
 
-        if (is_admin() && !wp_next_scheduled('newsletter_addon_' . $this->name)) {
+        if ($this->weekly_check && is_admin() && !wp_next_scheduled('newsletter_addon_' . $this->name)) {
             wp_schedule_event(time() + HOUR_IN_SECONDS, 'weekly', 'newsletter_addon_' . $this->name);
         }
 
@@ -544,7 +545,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
 
     /**
      * The logger (on file) for tracking the webhook activity.
-     *
+     * @return NewsletterLogger
      * @since 8.5.2
      */
     function get_webhook_logger() {

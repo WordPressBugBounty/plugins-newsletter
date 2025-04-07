@@ -91,7 +91,7 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
 //            $this->add_menu_page('automation', 'Automation <span class="tnp-sidemenu-badge">Pro</span>');
 //        }
 
-        if (NEWSLETTER_DEBUG || !class_exists('NewsletterAutomated')) {
+        if (NEWSLETTER_DEBUG || !class_exists('NewsletterAutomated') && Newsletter\License::is_free()) {
             $this->add_menu_page('automated', 'Automated <span class="tnp-sidemenu-badge">Pro</span>');
             $this->add_admin_page('automatedindex', 'Automated');
             $this->add_admin_page('automatededit', 'Automated edit');
@@ -99,7 +99,7 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
             $this->add_admin_page('automatedtemplate', 'Automated template');
         }
 
-        if (NEWSLETTER_DEBUG || !class_exists('NewsletterAutoresponder')) {
+        if (NEWSLETTER_DEBUG || !class_exists('NewsletterAutoresponder') && Newsletter\License::is_free()) {
             $this->add_menu_page('autoresponder', 'Autoresponder <span class="tnp-sidemenu-badge">Pro</span>');
             $this->add_admin_page('autoresponderindex', 'Autoresponder');
             $this->add_admin_page('autoresponderedit', 'Automated edit');

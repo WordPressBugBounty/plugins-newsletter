@@ -122,7 +122,7 @@ foreach (['subscription_text', 'error_text'] as $key) {
                             <td>
 
                                 <?php $controls->checkbox2('subscription_text_custom', 'Customize'); ?>
-                                <div data-show="subscription_text_custom=1">
+                                <div data-tnpshow="subscription_text_custom=1">
                                     <?php $controls->wp_editor('subscription_text', ['editor_height' => 150], ['default' => $this->get_default_text('subscription_text')]); ?>
                                     <p class="description">
                                         Remember to add at least the <code>[newsletter_form]</code> shortcode
@@ -130,7 +130,7 @@ foreach (['subscription_text', 'error_text'] as $key) {
                                         Remove the shortcode if you don't want to show the subscription form.
                                     </p>
                                 </div>
-                                <div data-show="subscription_text_custom=0" class="tnpc-default-text">
+                                <div data-tnpshow="subscription_text_custom=0" class="tnpc-default-text">
                                     <?php echo wp_kses_post($this->get_default_text('subscription_text')) ?>
                                 </div>
 
@@ -158,13 +158,13 @@ foreach (['subscription_text', 'error_text'] as $key) {
                                         '3' => __('Allowed (double opt-in)', 'newsletter')
                                     ]);
                                     ?>
-                                    <div data-show="multiple=0" style="margin-top: 1rem;">
+                                    <div data-tnpshow="multiple=0" style="margin-top: 1rem;">
 
                                         <?php $controls->checkbox2('error_text_custom', __('Customize', 'newsletter')); ?>
-                                        <div data-show="error_text_custom=1">
+                                        <div data-tnpshow="error_text_custom=1">
                                             <?php $controls->wp_editor('error_text', ['editor_height' => 150], ['default' => $this->get_default_text('error_text')]); ?>
                                         </div>
-                                        <div data-show="error_text_custom=0" class="tnpc-default-text">
+                                        <div data-tnpshow="error_text_custom=0" class="tnpc-default-text">
                                             <?php echo wp_kses_post($this->get_default_text('error_text')) ?>
                                         </div>
 
