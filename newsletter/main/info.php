@@ -220,6 +220,12 @@ if (!$controls->is_action()) {
                                     <?php $controls->text('bluesky_url', 40); ?>
                                 </td>
                             </tr>
+                            <tr>
+                                <th>Spotify</th>
+                                <td>
+                                    <?php $controls->text('spotify_url', 40); ?>
+                                </td>
+                            </tr>
 
                         </table>
                     <?php } ?>

@@ -22,6 +22,7 @@ if ($controls->is_action()) {
             }
         }
 
+        $controls->data = wp_kses_post_deep($controls->data);
         $this->merge_options($controls->data, '', $language);
         NewsletterMainAdmin::instance()->set_completed_step('notification');
         $controls->add_toast_saved();

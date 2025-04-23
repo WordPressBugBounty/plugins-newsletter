@@ -264,7 +264,7 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
 </div>
 
 <?php
-$news = NewsletterMainAdmin::instance()->get_news();
+$news = Newsletter\News::get_news();
 ?>
 
 <?php foreach ($news as $n) { ?>

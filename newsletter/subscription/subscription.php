@@ -240,6 +240,7 @@ class NewsletterSubscription extends NewsletterModule {
 
                     $this->set_user_cookie($user);
 
+                    // The confirmation can be required by re-subscriptons or other conditions
                     if ($user->_activation) {
                         $this->redirect_to_confirmation($user, $email);
                     } else {
@@ -429,7 +430,7 @@ class NewsletterSubscription extends NewsletterModule {
             $antispam = NewsletterAntispam::instance();
             $res = $antispam->is_spam($subscription, true);
             if (is_wp_error($res)) {
-                Newsletter\Logs::add('antispam', $res->get_error_code() . ' - ' . $res->get_error_message());
+                Newsletter\Logs::add('antispam', $res->get_error_code() . ' - ' . $res->get_error_message(), 0, $res->get_error_data());
                 return new WP_Error('spam', $res->get_error_message());
             }
         }
@@ -1128,11 +1129,15 @@ class NewsletterSubscription extends NewsletterModule {
         $action = esc_attr($this->build_action_url('s'));
         $class = esc_attr($attrs['class']);
         $style = esc_attr($attrs['style']);
+        if (!empty($attrs['ajax'])) {
+            $class .= ' tnp-ajax';
+        }
 
         $buffer = '<form method="post" action="' . $action . '" class="' . $class . '" style="' . $style . '"';
         if (!empty($attrs['id'])) {
             $buffer .= ' id="' . esc_attr($attrs['id']) . '"';
         }
+
         $buffer .= '>' . "\n";
 
         $buffer .= $this->get_form_hidden_fields($attrs);
@@ -1686,6 +1691,10 @@ class NewsletterSubscription extends NewsletterModule {
 
         if (!empty($attrs['id'])) {
             $buffer .= ' id="' . esc_attr($attrs['id']) . '"';
+        }
+
+        if (!empty($attrs['ajax'])) {
+            $buffer .= ' class="tnp-ajax"';
         }
 
         $buffer .= '>' . "\n";

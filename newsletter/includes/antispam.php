@@ -59,11 +59,12 @@ class NewsletterAntispam {
         $user_agent = wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? '');
         // phpcs:ignore:WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
         $referrer = wp_unslash($_SERVER['HTTP_REFERER'] ?? '');
-        if ($this->is_spam_by_akismet($email, $full_name, $ip, $user_agent, $referrer)) {
+        $res = $this->is_spam_by_akismet($email, $full_name, $ip, $user_agent, $referrer);
+        if ($res !== false) {
             $this->logger->fatal($email . ' - ' . $ip . ' - Akismet blocked');
 
             if ($return_wp_error)
-                return new WP_Error('akismet', 'Spam detected by Akismet');
+                return new WP_Error('akismet', 'Spam detected by Akismet for:' . $ip . ' or ' . $email, $res);
             else
                 return true;
         }
@@ -191,7 +192,7 @@ class NewsletterAntispam {
         $response = Akismet::http_post($request, 'comment-check');
 
         if ($response && $response[1] == 'true') {
-            return true;
+            return $response;
         }
         return false;
     }

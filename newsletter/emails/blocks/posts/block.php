@@ -182,7 +182,8 @@ if (!empty($options['reverse'])) {
 }
 
 if ($context['type'] === 'automated' && $posts) {
-    $out['subject'] = $posts[0]->post_title;
+    // There are blogs where the post title is html encoded, maybe old databases?
+    $out['subject'] = html_entity_decode($posts[0]->post_title, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, 'UTF-8');
 }
 
 $current_language = Newsletter::instance()->get_current_language();

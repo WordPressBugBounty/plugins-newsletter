@@ -63,9 +63,8 @@ if (!$controls->is_action()) {
             }
         }
 
-        delete_transient("tnp_extensions_json");
-        //delete_transient('newsletter_license_data');
-        update_option('newsletter_news_updated', 0, false);
+        Newsletter\Addons::clear();
+        Newsletter\News::clear();
         update_option('newsletter_public_page_check', 0, false);
 
         License::update();

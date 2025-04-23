@@ -26,24 +26,16 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
 
             // Dismiss messages
             if (isset($_GET['dismiss'])) {
-                $dismissed = get_option('newsletter_dismissed');
-                if (!is_array($dismissed)) {
-                    $dismissed = [];
-                }
+                $dismissed = $this->get_option_array('newsletter_dismissed');
                 $dismissed[$_GET['dismiss']] = 1;
-                update_option('newsletter_dismissed', $dismissed);
+                update_option('newsletter_dismissed', $dismissed, false);
                 wp_safe_redirect(remove_query_arg(['dismiss', 'noheader', 'debug']));
                 exit();
             }
 
             // Dismiss news
             if (isset($_GET['news'])) {
-                $dismissed = get_option('newsletter_news_dismissed');
-                if (!is_array($dismissed)) {
-                    $dismissed = [];
-                }
-                $dismissed[] = strip_tags($_GET['news']);
-                update_option('newsletter_news_dismissed', $dismissed);
+                Newsletter\News::dismiss($_GET['news']);
                 wp_safe_redirect(remove_query_arg('news'));
                 exit();
             }
@@ -134,53 +126,6 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
         }
 
         return $post_states;
-    }
-
-    function get_news() {
-        $news = $this->get_option_array('newsletter_news');
-        $updated = (int) get_option('newsletter_news_updated');
-        if (!NEWSLETTER_DEBUG && $updated > time() - DAY_IN_SECONDS) {
-
-        } else {
-            // Introduce asynch...
-            if (NEWSLETTER_DEBUG) {
-                $url = "http://www.thenewsletterplugin.com/wp-content/news-test.json?ver=" . NEWSLETTER_VERSION;
-            } else {
-                $url = "http://www.thenewsletterplugin.com/wp-content/news.json?ver=" . NEWSLETTER_VERSION;
-            }
-            $response = wp_remote_get($url);
-            if (is_wp_error($response)) {
-                update_option('newsletter_news_updated', time());
-                return [];
-            }
-            if (wp_remote_retrieve_response_code($response) !== 200) {
-                update_option('newsletter_news_updated', time());
-                return [];
-            }
-            $news = json_decode(wp_remote_retrieve_body($response), true);
-
-            // Firewall returns an invalid response
-            if (!$news || !is_array($news)) {
-                $news = [];
-            }
-
-            update_option('newsletter_news', $news);
-            update_option('newsletter_news_updated', time());
-        }
-
-        $news_dismissed = $this->get_option_array('newsletter_news_dismissed');
-        $today = date('Y-m-d');
-        $list = [];
-        foreach ($news as $n) {
-            if (!NEWSLETTER_DEBUG) {
-                if ($today < $n['start'] || $today > $n['end'])
-                    continue;
-            }
-            if (in_array($n['id'], $news_dismissed))
-                continue;
-            $list[] = $n;
-        }
-        return $list;
     }
 
     /* Wrappers */

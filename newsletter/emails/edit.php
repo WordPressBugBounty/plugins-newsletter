@@ -3,6 +3,8 @@
 /* @var $controls NewsletterControls */
 defined('ABSPATH') || exit;
 
+global $wpdb;
+
 function tnp_prepare_controls($email, $controls) {
     $controls->data = $email;
 
@@ -159,14 +161,12 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
         unset($email['options']['lists_operator']);
         unset($email['options']['lists_exclude']);
         unset($email['options']['sex']);
-        for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
-            unset($email['options']["profile_$i"]);
-        }
-
-        // Patch for Geo addon to be solved with a filter
         unset($email['options']['countries']);
         unset($email['options']['regions']);
         unset($email['options']['cities']);
+        for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
+            unset($email['options']["profile_$i"]);
+        }
 
         foreach ($controls->data as $name => $value) {
             if (strpos($name, 'options_') === 0) {
@@ -191,16 +191,15 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
         }
 
 
-        $list_where = array();
-        if (isset($email['options']['lists']) && count($email['options']['lists'])) {
-            foreach ($email['options']['lists'] as $list) {
-                $list = (int) $list;
-                $list_where[] = 'list_' . $list . '=1';
-            }
+        $list_where = [];
+        $lists = $email['options']['lists'] ?? [];
+        foreach ($lists as $list) {
+            $list_where[] = 'list_' . ((int) $list) . '=1';
         }
 
-        if (!empty($list_where)) {
-            if (isset($email['options']['lists_operator']) && $email['options']['lists_operator'] == 'and') {
+        if ($list_where) {
+            $operator = $email['options']['lists_operator'] ?? '';
+            if ($operator === 'and') {
                 $query .= ' and (' . implode(' and ', $list_where) . ')';
             } else {
                 $query .= ' and (' . implode(' or ', $list_where) . ')';
@@ -208,36 +207,28 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
         }
 
         // Excluded lists
-        $list_where = array();
-        if (isset($email['options']['lists_exclude']) && count($email['options']['lists_exclude'])) {
-            foreach ($email['options']['lists_exclude'] as $list) {
-                $list = (int) $list;
-                $list_where[] = 'list_' . $list . '=0';
-            }
+        $list_where = [];
+        $lists = $email['options']['lists_exclude'] ?? [];
+        foreach ($lists as $list) {
+            $list_where[] = 'list_' . ((int) $list) . '=0';
         }
-        if (!empty($list_where)) {
+
+        if ($list_where) {
             // Must not be in one of the excluded lists
             $query .= ' and (' . implode(' and ', $list_where) . ')';
         }
 
         // Gender
-        if (isset($email['options']['sex'])) {
-            $sex = $email['options']['sex'];
-            if (is_array($sex) && count($sex)) {
-                $query .= " and sex in (";
-                foreach ($sex as $x) {
-                    $query .= "'" . esc_sql((string) $x) . "', ";
-                }
-                $query = substr($query, 0, -2);
-                $query .= ")";
-            }
+        if (!empty($email['options']['sex'])) {
+            $query .= " and sex in ('" . implode("','", esc_sql($email['options']['sex'])) . "') ";
         }
 
         // Profile fields filter
-        $profile_clause = array();
-        for ($i = 1; $i <= 20; $i++) {
-            if (isset($email["options"]["profile_$i"]) && count($email["options"]["profile_$i"])) {
-                $profile_clause[] = 'profile_' . $i . " IN ('" . implode("','", esc_sql($email["options"]["profile_$i"])) . "') ";
+        $profile_clause = [];
+        for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
+            $values = $email["options"]["profile_$i"] ?? [];
+            if ($values) {
+                $profile_clause[] = 'profile_' . $i . " IN ('" . implode("','", esc_sql($values)) . "') ";
             }
         }
 
@@ -246,8 +237,30 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
         }
 
         // Temporary save to have an object and call the query filter
-        $e = Newsletter::instance()->save_email($email);
-        $query = apply_filters('newsletter_emails_email_query', $query, $e);
+        //$e = Newsletter::instance()->save_email($email);
+        //$query = apply_filters('newsletter_emails_email_query', $query, $e);
+
+        if (!empty($email["options"]['countries'])) {
+            $query .= " and country in ('" . implode("','", esc_sql($email["options"]['countries'])) . "')";
+        }
+
+        if (!empty($email["options"]['regions'])) {
+            $query .= " and region in ('" . implode("','", esc_sql($email["options"]['regions'])) . "')";
+        }
+
+        if (!empty($email["options"]['cities'])) {
+            $query .= " and city in ('" . implode("','", esc_sql($email["options"]['cities'])) . "')";
+        }
+
+        if (!empty($email["options"]['date_year']) && !empty($email["options"]['date_month']) && !empty($email["options"]['date_day'])) {
+
+            $year = (int) $email["options"]['date_year'];
+            $month = (int) $email["options"]['date_month'];
+            $day = (int) $email["options"]['date_day'];
+
+            $query .= " and created>'{$year}-{$month}-{$day}'";
+        }
+
 
         $email['query'] = $query;
         if ($email['status'] == 'sent') {
@@ -408,6 +421,7 @@ if ($email['status'] != 'sent') {
                 <ul>
                     <li><a href="#tabs-options"><?php esc_html_e('Targeting', 'newsletter') ?></a></li>
                     <li><a href="#tabs-ga">Google Analytics</a></li>
+                    <li><a href="#tabs-geo">Geolocation</a></li>
                     <li class="tnp-tabs-advanced"><a href="#tabs-advanced"><?php esc_html_e('Advanced', 'newsletter') ?></a></li>
                 </ul>
 
@@ -482,14 +496,26 @@ if ($email['status'] != 'sent') {
                         <?php } ?>
                     </table>
 
-                    <?php do_action('newsletter_emails_edit_target', $this->get_email($email_id), $controls) ?>
+                    <?php //do_action('newsletter_emails_edit_target', $this->get_email($email_id), $controls)  ?>
+
+                    <table class="form-table">
+                        <tr valign="top">
+                            <th>Subscribed after</th>
+                            <td>
+                                <?php $controls->date2('options_date'); ?>
+                            </td>
+                        </tr>
+                    </table>
 
                 </div>
 
                 <div id="tabs-ga">
                     <?php if (!class_exists('NewsletterAnalytics')) { ?>
-                        <p class="tnp-tab-notice">Google Analytics addon required.</p>
+                        <p class="tnp-tab-notice">
+                            Options effective with the Newsletter - Google Analytics Addon.
+                        </p>
                     <?php } ?>
+
                     <?php if (empty($email['track'])) { ?>
                         <p class="tnp-tab-warning">Tracking must be active to use Google Analytics.</p>
                     <?php } ?>
@@ -550,6 +576,81 @@ if ($email['status'] != 'sent') {
 
                     </table>
                 </div>
+
+
+                <div id="tabs-geo">
+                    <?php if (!class_exists('NewsletterGeo')) { ?>
+                        <p class="tnp-tab-notice">
+                            Options effective with the Newsletter - Geo Addon.
+                        </p>
+                    <?php } ?>
+
+                    <?php
+                    $subscriber_status = 'C';
+                    if (!empty($email->options['status'])) {
+                        $subscriber_status = $email->options['status'];
+                    }
+
+                    $list = $wpdb->get_results($wpdb->prepare("select country, count(*) as total from " . NEWSLETTER_USERS_TABLE . " where status=%s and country<>'' group by country order by country", $subscriber_status));
+
+                    $countries = array('' => 'All');
+                    foreach ($list as $item) {
+                        if (empty($item->country))
+                            continue;
+                        if (empty($controls->countries[$item->country]))
+                            $countries[$item->country] = $item->country . ' (' . $item->total . ')';
+                        else
+                            $countries[$item->country] = $controls->countries[$item->country] . ' (' . $item->total . ')';
+                    }
+
+                    $list = $wpdb->get_results($wpdb->prepare("select region, count(*) as total from " . NEWSLETTER_USERS_TABLE . " where status=%s and region<>'' group by region order by region", $subscriber_status));
+
+                    $regions = array();
+                    foreach ($list as $item) {
+                        if (empty($item->region))
+                            continue;
+                        $regions[$item->region] = $item->region . ' (' . $item->total . ')';
+                    }
+
+                    $list = $wpdb->get_results($wpdb->prepare("select city as city, count(*) as total from " . NEWSLETTER_USERS_TABLE . " where status=%s and city<>'' group by lower(city) order by lower(city)", $subscriber_status));
+
+                    $cities = array();
+                    foreach ($list as $item) {
+                        if (empty($item->city))
+                            continue;
+                        $cities[strtolower($item->city)] = $item->city . ' (' . $item->total . ')';
+                    }
+                    ?>
+
+                    <table class="form-table">
+                        <tr valign="top">
+                            <th>Country</th>
+                            <td>
+                                <?php $controls->select2('options_countries', $countries, null, true); ?>
+                                <p class="description">
+                                    Some country codes could have no meaning. Not all subscribers are resolved.<br>
+                                    If you're targeting not confirmed subscribers, save to get the correct country list.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr valign="top">
+                            <th>Regions</th>
+                            <td>
+                                <?php $controls->select2('options_regions', $regions, null, true); ?>
+                            </td>
+                        </tr>
+                        <tr valign="top">
+                            <th>Cities</th>
+                            <td>
+                                <?php $controls->select2('options_cities', $cities, null, true); ?>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+
+
+
 
                 <div id="tabs-advanced">
 
