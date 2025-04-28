@@ -53,7 +53,7 @@ class NewsletterSubscription extends NewsletterModule {
         }
         $this->popup_test = isset($_GET['tnp-popup-test']) && Newsletter::instance()->is_allowed();
 
-        if ($this->popup_enable || $this->popup_test) {
+        if ($this->popup_enabled || $this->popup_test) {
             add_action('wp_footer', [$this, 'hook_wp_footer'], 99);
             add_action('wp_enqueue_scripts', [$this, 'hook_wp_enqueue_scripts']);
         }
@@ -74,17 +74,15 @@ class NewsletterSubscription extends NewsletterModule {
                 <div id="tnp-modal-body"></div>
             </div>
         </div>
-
-        <script>
-            var tnp_popup_test = <?php echo $this->popup_test ? 'true' : 'false' ?>;
-            var tnp_popup_url = '<?php echo Newsletter::add_qs(home_url('/'), 'na=popup&language=' . rawurlencode($this->language())); ?>';
-            var tnp_popup_action = '<?php echo $this->build_action_url('sa'); ?>';
-        </script>
-        <script src="<?php echo esc_attr(plugins_url('assets/popup.js', __FILE__)) ?>" async></script>
         <?php
     }
 
     function hook_wp_enqueue_scripts() {
+        wp_enqueue_script('newsletter-popup', plugins_url('assets/popup.js', __FILE__), [], NEWSLETTER_VERSION, true);
+        $data = ['test' => $this->popup_test ? '1' : '0',
+            'action' => $this->build_action_url('sa'),
+            'url' => Newsletter::add_qs(home_url('/'), 'na=popup&language=' . rawurlencode($this->language()))];
+        wp_localize_script('newsletter-popup', 'newsletter_popup_data', $data);
         wp_enqueue_style('newsletter-popup', plugins_url('assets/popup.css', __FILE__), [], NEWSLETTER_VERSION);
     }
 
@@ -1803,7 +1801,7 @@ class NewsletterSubscription extends NewsletterModule {
         return $buffer;
     }
 
-    function get_form($number) {
+    function get_form($number, $attrs = []) {
         $options = $this->get_options('htmlforms');
 
         $form = $options['form_' . $number];
@@ -1811,6 +1809,7 @@ class NewsletterSubscription extends NewsletterModule {
         $form = do_shortcode($form);
 
         $action = $this->build_action_url('s');
+        $form .= $this->get_form_hidden_fields($attrs);
 
         if (stripos($form, '<form') === false) {
             $form = '<form method="post" action="' . esc_attr($action) . '">' . $form . '</form>';
@@ -1937,12 +1936,12 @@ class NewsletterSubscription extends NewsletterModule {
 
         // Custom form hand coded and saved in the custom forms option
         if (isset($attrs['form'])) {
-            return $this->get_form((int) $attrs['form']);
+            return $this->get_form((int) $attrs['form'], $attrs);
         }
 
         // Custom hand coded form (as above, new syntax)
         if (isset($attrs['number'])) {
-            return $this->get_form((int) $attrs['number']);
+            return $this->get_form((int) $attrs['number'], $attrs);
         }
 
         return $this->get_subscription_form(null, null, $attrs);

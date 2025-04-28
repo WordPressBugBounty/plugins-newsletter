@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.8
-Stable tag: 8.7.9
+Stable tag: 8.8.0
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -128,6 +128,11 @@ Thank you, The Newsletter Team
 3. The Reports extension
 
 == Changelog ==
+
+= 8.8.0 =
+
+* Added shortcode attributes support to old HTML forms
+* Improved popup code to be compatibile with js minifiers and lazy loading
 
 = 8.7.9 =
 

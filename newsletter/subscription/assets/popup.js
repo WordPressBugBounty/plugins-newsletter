@@ -10,13 +10,13 @@ const NewsletterPopup = {
         var c;
         for (var i = 0; i < cs.length; i++) {
             c = cs[i].split("=");
-            if (c[0] == name)
+            if (c[0] === name)
                 return c[1];
         }
         return def;
     },
     open: function () {
-        fetch(tnp_popup_url).then(data => {
+        fetch(newsletter_popup_data.url).then(data => {
             data.text().then(body => {
                 var modal_body = document.getElementById('tnp-modal-body');
                 modal_body.innerHTML = body;
@@ -34,7 +34,7 @@ const NewsletterPopup = {
         event.preventDefault();
         var form = document.getElementById('tnp-subscription-popup');
         const data = new FormData(form);
-        const response = await fetch(tnp_popup_action, {
+        const response = await fetch(newsletter_popup_data.action, {
             method: "POST",
             body: data,
         });
@@ -54,20 +54,32 @@ const NewsletterPopup = {
 //        }
     },
 
-}
+    run: function () {
+        let el = document.getElementById('tnp-modal-close');
+        if (!el) {
+            return;
+        }
+        document.getElementById('tnp-modal-close').addEventListener('click', this.close);
 
-//window.addEventListener('click', NewsletterPopup.outside_click);
-document.getElementById('tnp-modal-close').addEventListener('click', NewsletterPopup.close);
-
-if (tnp_popup_test) {
-    NewsletterPopup.open();
-} else {
-    if (NewsletterPopup.get_cookie("tnp-popup-closed", null) === null) {
-        var count = parseInt(NewsletterPopup.get_cookie("tnp-popup-count", 0)) + 1;
-        NewsletterPopup.set_cookie("tnp-popup-count", count, 30);
-        if (count >= 2) {
-            setTimeout(NewsletterPopup.open, 5000);
+        if (newsletter_popup_data.test === '1') {
+            this.open();
+        } else {
+            if (this.get_cookie('tnp-popup-closed', null) === null) {
+                var count = parseInt(this.get_cookie('tnp-popup-count', 0)) + 1;
+                this.set_cookie('tnp-popup-count', count, 30);
+                if (count >= 2) {
+                    setTimeout(this.open, 5 * 1000);
+                }
+            }
         }
     }
+
 }
 
+if (document.readyState !== 'loading') {
+    NewsletterPopup.run();
+} else {
+    document.addEventListener("DOMContentLoaded", function () {
+        NewsletterPopup.run();
+    });
+}
