@@ -682,6 +682,10 @@ class NewsletterSubscription extends NewsletterModule {
             $data->referrer = $posted['nr'];
         }
 
+        if (isset($posted['nfid'])) {
+            $subscription->form_id = sanitize_key($posted['nfid']);
+        }
+
         // From the antibot form
         if (isset($posted['nhr'])) {
             $data->http_referer = $posted['nhr'];
@@ -1249,6 +1253,10 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         $b .= '<input type="hidden" name="nlang" value="' . esc_attr($this->language()) . '">' . "\n";
+
+        if (isset($attrs['nfid'])) {
+            $b .= '<input type="hidden" name="nfid" value="' . esc_attr($attrs['nfid']) . '">' . "\n";
+        }
 
         // Beta
 //        if (isset($attrs['welcome_email_id'])) {
