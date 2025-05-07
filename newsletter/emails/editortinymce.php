@@ -10,8 +10,14 @@ $email_id = (int) $_GET['id'];
 if ($controls->is_action('save') || $controls->is_action('next') || $controls->is_action('test')) {
 
     $email['id'] = $email_id;
-    $email['message'] = $controls->data['message'];
-    $email['subject'] = $controls->data['subject'];
+
+    if (current_user_can('unfiltered_html')) {
+        $email['message'] = $controls->data['message'];
+    } else {
+        $email['message'] = wp_kses_post($controls->data['message']);
+    }
+
+    $email['subject'] = wp_strip_all_tags($controls->data['subject']);
     $this->save_email($email);
     if ($controls->is_action('next')) {
         $controls->js_redirect($this->get_admin_page_url('edit') . '&id=' . $email_id);
@@ -24,6 +30,11 @@ if ($controls->is_action('test')) {
 }
 
 $controls->data = $this->get_email($email_id, ARRAY_A);
+
+if (!current_user_can('unfiltered_html')) {
+    $controls->warnings[] = 'Your user cannot manage full HTML content, when saving the content will be filtered and get broken.';
+}
+
 ?>
 
 <style>

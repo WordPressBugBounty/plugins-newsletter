@@ -20,40 +20,6 @@ if ($controls->is_action()) {
         $controls->js_redirect($redirect);
     }
 
-    if ($controls->is_action('save_preset')) {
-        $logger->info('Saving new preset: ' . $controls->data['subject']);
-        // Create new preset email
-        $email = new stdClass();
-        TNP_Composer::update_email($email, $controls);
-        $email->type = NewsletterEmails::PRESET_EMAIL_TYPE;
-        $email->editor = NewsletterEmails::EDITOR_COMPOSER;
-        $email->subject = $controls->data['subject'];
-        $email->message = $controls->data['message'];
-
-        $email = Newsletter::instance()->save_email($email);
-
-        $redirect = $this->get_admin_page_url('composer');
-        $controls->js_redirect($redirect);
-
-        return;
-    }
-
-    if ($controls->is_action('update_preset')) {
-        $logger->info('Updating preset ' . $_POST['preset_id']);
-        $email = $this->get_email($_POST['preset_id']);
-        TNP_Composer::update_email($email, $controls);
-
-        $email->subject = $controls->data['subject'];
-
-        // We store only the blocks, after the TNP_Composer::update_email(...) call we have the full HTML
-        $email->message = $controls->data['message'];
-
-        $email = $this->save_email($email);
-
-        $redirect = $this->get_admin_page_url('composer');
-        $controls->js_redirect($redirect);
-    }
-
 
     if (empty($_GET['id'])) {
 

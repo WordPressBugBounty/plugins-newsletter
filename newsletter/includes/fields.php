@@ -247,6 +247,46 @@ class NewsletterFields {
         $this->_close();
     }
 
+        public function wp_editor_simple($name, $label = '', $attrs = []) {
+        global $wp_version;
+
+        $attrs = $this->_merge_attrs($attrs);
+        $this->_open();
+        $this->_label($label);
+        $value = $this->controls->get_value($name);
+        $name = esc_attr($name);
+
+        // Uhm...
+        if (is_array($value)) {
+            $value = implode("\n", $value);
+        }
+
+        echo '<textarea class="tnpf-wp-editor-simple" id="options-', $name, '" name="options[', $name, ']" style="width: 100%;height:150px">';
+        echo esc_html($value);
+        echo '</textarea>';
+
+        $content_style = 'body { font-family: sans-serif; font-size: 16px; color: ' . sanitize_hex_color($attrs['color']) . '; background-color: ' . sanitize_hex_color($attrs['background']) . ';}';
+
+        echo '<script>';
+
+        echo 'wp.editor.remove("options-', esc_js($name), '");';
+        echo 'wp.editor.initialize("options-', esc_js($name), '", { tinymce: {'
+        . 'content_style: "' . esc_js($content_style) . '",'
+        . 'forced_root_block: false,'
+        . 'toolbar1: "undo redo bold italic forecolor backcolor",'
+        . 'fontsize_formats: "11px 12px 14px 16px 18px 24px 36px 48px",'
+        . 'plugins: "link textcolor colorpicker lists wordpress charmap directionality",'
+        . 'default_link_target: "_blank",'
+        . 'relative_urls : false,'
+        . 'convert_urls: false,'
+        . 'init_instance_callback: function (editor) { editor.on("blur", function (e) { tinymce.triggerSave(); jQuery(editor.getElement()).trigger("change"); }); },'
+        . 'keep_styles: true'
+        . '}});';
+        echo '</script>';
+        $this->_description($attrs);
+        $this->_close();
+    }
+
     /**
      * Attributes:
      * - realod: when true is forces a submit of the form (used to change the form fields or values for example when changing layout or color scheme)

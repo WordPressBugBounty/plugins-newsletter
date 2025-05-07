@@ -47,21 +47,35 @@ if (!$controls->is_action()) {
         }
 
         $options = $this->get_options('', $language);
-        $options['confirmed_message'] = NewsletterModule::clean_url_tags($controls->data['confirmed_message']);
-        $options['confirmed_subject'] = $controls->data['confirmed_subject'];
 
-        $options['confirmed_text'] = $controls->data['confirmed_text'];
-        $options['confirmed_tracking'] = $controls->data['confirmed_tracking'];
-        $options['confirmed_id'] = $controls->data['confirmed_id'];
-        $options['confirmed_url'] = $controls->data['confirmed_url'];
-
-        $options['welcome_email'] = $controls->data['welcome_email'];
-
-        $this->save_options($options, '', $language);
+        // Process the email before filtering the options, otherwise the wp_kses_post() will
+        // break the email content.
         $email = Newsletter::instance()->get_email($options['welcome_email_id']);
         $email->track = Newsletter::instance()->get_option('track');
         NewsletterComposer::update_email($email, $controls);
         $email = NewsletterEmails::instance()->save_email($email);
+
+        // Save the unfiltered values
+        $tracking = $controls->data['confirmed_tracking'];
+
+        $controls->data = wp_kses_post_deep($controls->data);
+
+        // Let the administrator + other conditions to use JS. Explained by the plugins@wordpress.org staff on 2025-05-07.
+        $disallow_unfiltered_html = defined('DISALLOW_UNFILTERED_HTML') && DISALLOW_UNFILTERED_HTML;
+        if (current_user_can('unfiltered_html')) {
+            $controls->data['confirmed_tracking'] = $tracking;
+        }
+
+        $options['confirmed_message'] = NewsletterModule::clean_url_tags($controls->data['confirmed_message']);
+        $options['confirmed_subject'] = $controls->data['confirmed_subject'];
+        $options['confirmed_text'] = $controls->data['confirmed_text'];
+        $options['confirmed_tracking'] = $controls->data['confirmed_tracking'];
+        $options['confirmed_id'] = $controls->data['confirmed_id'];
+        $options['confirmed_url'] = $controls->data['confirmed_url'];
+        $options['welcome_email'] = $controls->data['welcome_email'];
+
+        $this->save_options($options, '', $language);
+
         $controls->add_toast_saved();
         $controls->data = $options;
         NewsletterComposer::update_controls($controls, $email);

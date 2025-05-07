@@ -70,8 +70,15 @@ if (!empty($controls->data['search_status'])) {
     }
 }
 
-if (!empty($controls->data['search_list'])) {
-    $where .= " and list_" . ((int) $controls->data['search_list']) . "=1";
+$search_list = (int) $controls->data['search_list'];
+if ($search_list) {
+    if ($search_list === -1) {
+        for ($i = 1; $i <= NEWSLETTER_LIST_MAX; $i++) {
+            $where .= ' and list_' . $i . '=0';
+        }
+    } else {
+        $where .= " and list_" . ((int) $controls->data['search_list']) . "=1";
+    }
 }
 
 $filtered = $where != 'where 1=1';
@@ -119,6 +126,9 @@ $controls->data['search_page']++;
 $lists = $this->get_lists();
 
 $utc = new DateTimeZone('UTC');
+
+$lists_options = $controls->get_list_options(__('Any list', 'newsletter'));
+$lists_options['-1'] = __('Without list', 'newsletter');
 ?>
 
 <style>
@@ -151,7 +161,7 @@ $utc = new DateTimeZone('UTC');
                 $controls->select('search_status', ['' => __('Any status', 'newsletter'), 'T' => __('Test subscribers', 'newsletter'), 'C' => TNP_User::get_status_label('C'),
                     'S' => TNP_User::get_status_label('S'), 'U' => TNP_User::get_status_label('U'), 'B' => TNP_User::get_status_label('B'), 'P' => TNP_User::get_status_label('P')]);
                 ?>
-                <?php $controls->lists_select('search_list', __('Any list', 'newsletter')); ?>
+                <?php $controls->select('search_list', $lists_options); ?>
 
                 <?php $controls->button('search', __('Search', 'newsletter')); ?>
                 <?php if ($where != "where 1=1") { ?>
@@ -163,7 +173,7 @@ $utc = new DateTimeZone('UTC');
 
                 <?php $controls->btn('first', '«', ['tertiary' => true]); ?>
                 <?php $controls->btn('prev', '‹', ['tertiary' => true]); ?>
-                <?php $controls->text('search_page', 3); ?> of <?php echo (int)($last_page + 1) ?> <?php $controls->btn('go', __('Go', 'newsletter'), ['secondary' => true]); ?>
+                <?php $controls->text('search_page', 3); ?> of <?php echo (int) ($last_page + 1) ?> <?php $controls->btn('go', __('Go', 'newsletter'), ['secondary' => true]); ?>
                 <?php $controls->btn('next', '›', ['tertiary' => true]); ?>
                 <?php $controls->btn('last', '»', ['tertiary' => true]); ?>
 
@@ -185,7 +195,7 @@ $utc = new DateTimeZone('UTC');
                         <th><?php esc_html_e('Status', 'newsletter') ?></th>
                         <th><?php esc_html_e('Date') ?></th>
                         <?php if ($is_multilanguage) { ?>
-                        <th><i class="fa fa-globe" aria-hidden="true"></i></th>
+                            <th><i class="fa fa-globe" aria-hidden="true"></i></th>
                         <?php } ?>
                         <th style="white-space: nowrap"><?php $controls->checkbox('show_lists', __('Lists', 'newsletter'), ['onchange' => 'this.form.act.value=\'go\'; this.form.submit()']) ?></th>
                         <th>&nbsp;</th>
@@ -208,20 +218,20 @@ $utc = new DateTimeZone('UTC');
                             <?php $controls->echo_date($s->created_at); ?>
                         </td>
                         <?php if ($is_multilanguage) { ?>
-                        <td>
-                            <?php echo esc_html($s->language); ?>
-                        </td>
+                            <td>
+                                <?php echo esc_html($s->language); ?>
+                            </td>
                         <?php } ?>
                         <td>
                             <?php if (!empty($controls->data['show_lists'])) { ?>
                                 <small><?php
-                                    foreach ($lists as $item) {
-                                        $l = 'list_' . $item->id;
-                                        if ($s->$l == 1)
-                                            echo esc_html($item->name) . '<br>';
-                                    }
-                                    ?></small>
-                            <?php } ?>
+                                foreach ($lists as $item) {
+                                    $l = 'list_' . $item->id;
+                                    if ($s->$l == 1)
+                                        echo esc_html($item->name) . '<br>';
+                                }
+                                ?></small>
+                                <?php } ?>
                         </td>
 
                         <td>

@@ -22,13 +22,14 @@ $defaults = array(
 $options = array_merge($defaults, $options);
 
 $title_style = TNP_Composer::get_title_style($options, '', $composer);
+$options['text'] = strip_tags($options['text'], '<br><span><b><strong><i><em>')
 ?>
 
 <style>
     .title {
-        <?php $title_style->echo_css() ?>
+        <?php $title_style->echo_css(); ?>
         padding: 0;
-        line-height: normal !important;
+        line-height: 150% !important;
         letter-spacing: normal;
     }
 </style>

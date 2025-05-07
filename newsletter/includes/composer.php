@@ -266,7 +266,12 @@ class TNP_Composer {
         }
 
         $email->editor = NewsletterEmails::EDITOR_COMPOSER;
-        $message = $controls->data['message'];
+
+        $message = str_replace([NewsletterComposer::OUTLOOK_START_IF, NewsletterComposer::OUTLOOK_END_IF], ['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], $controls->data['message']);
+
+        $message = wp_kses_post($message);
+
+        $message = str_replace(['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], [NewsletterComposer::OUTLOOK_START_IF, NewsletterComposer::OUTLOOK_END_IF], $message);
 
         $email->message = self::get_html_open($email) . self::get_main_wrapper_open($email) .
                 $message . self::get_main_wrapper_close($email) . self::get_html_close($email);
@@ -644,10 +649,10 @@ class TNP_Composer {
             $e = '';
             foreach ($chunks as &$chunk) {
                 $e .= '<div style="text-align:center;font-size:0;">';
-                $e .= '<!--[if mso]><table role="presentation" width="100%"><tr><![endif]-->';
+                $e .= NewsletterComposer::OUTLOOK_START_IF . '<table role="presentation" width="100%"><tr>' . NewsletterComposer::OUTLOOK_END_IF;
                 $i = 0;
                 foreach ($chunk as $idx => &$item) {
-                    $e .= '<!--[if mso]><td width="' . $td_widths[$i] . '%" style="width:' . $td_widths[$i] . '%;padding:' . $padding . 'px" valign="top"><![endif]-->';
+                    $e .= NewsletterComposer::OUTLOOK_START_IF . '<td width="' . $td_widths[$i] . '%" style="width:' . $td_widths[$i] . '%;padding:' . $padding . 'px" valign="top">' . NewsletterComposer::OUTLOOK_END_IF;
 
                     $e .= '<div class="max-width-100" style="width:100%;max-width:' . $column_widths[$i] . 'px;display:inline-block;vertical-align: top;box-sizing: border-box;">';
 
@@ -663,10 +668,10 @@ class TNP_Composer {
                     $e .= '</div>';
                     $e .= '</div>';
 
-                    $e .= '<!--[if mso]></td><![endif]-->';
+                    $e .= NewsletterComposer::OUTLOOK_START_IF . '</td>' . NewsletterComposer::OUTLOOK_END_IF;
                     $i++;
                 }
-                $e .= '<!--[if mso]></tr></table><![endif]-->';
+                $e .= NewsletterComposer::OUTLOOK_START_IF . '</tr></table>' . NewsletterComposer::OUTLOOK_END_IF;
                 $e .= '</div>';
             }
 

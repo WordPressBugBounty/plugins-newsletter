@@ -9,6 +9,10 @@ class NewsletterComposer {
     static $default_templates = ['zen', 'valentine', 'event', 'black-friday', 'black-friday-2', 'welcome-1', 'halloween', 'confirmation-1', 'welcome-2'];
     static $old_default_templates = ['announcement', 'cta', 'invite', 'posts', 'product', 'sales', 'simple', 'tour'];
 
+    const OUTLOOK_START_IF = '<!--[if mso | IE]>';
+    const OUTLOOK_END_IF = '<![endif]-->';
+
+
     /**
      *
      * @return NewsletterComposer
@@ -727,11 +731,12 @@ class NewsletterComposer {
     }
 
     static function get_outlook_wrapper_open($width = 600) {
-        return '<!--[if mso | IE]><table role="presentation" border="0" cellpadding="0" align="center" cellspacing="0" width="' . $width . '"><tr><td width="' . $width . '" style="vertical-align:top;width:' . $width . 'px;"><![endif]-->';
+        $width = (int) $width;
+        return self::OUTLOOK_START_IF . '<table role="presentation" border="0" cellpadding="0" align="center" cellspacing="0" width="' . $width . '"><tr><td width="' . $width . '" style="vertical-align:top;width:' . $width . 'px;">' . self::OUTLOOK_END_IF;
     }
 
     static function get_outlook_wrapper_close() {
-        return "<!--[if mso | IE]></td></tr></table><![endif]-->";
+        return self::OUTLOOK_START_IF . '</td></tr></table>' . self::OUTLOOK_END_IF;
     }
 
     /**
@@ -767,7 +772,7 @@ class NewsletterComposer {
      * @param TNP_Email $email
      * @return string
      */
-    function regenerate($email, $context = []) {
+    function regenerate($email, $context = [], $wp_error = false) {
 
         $this->logger->debug('Regenerating email ' . $email->id);
 
@@ -777,9 +782,14 @@ class NewsletterComposer {
 
         $composer = $this->extract_composer_options($email);
 
-        $result = $this->regenerate_blocks($email->message, $context, $composer);
+        $result = $this->regenerate_blocks($email->message, $context, $composer, $wp_error);
 
         // One block is signalling the email should not be regenerated (usually from Automated)
+        if (is_wp_error($result)) {
+            $this->logger->debug($result);
+            return $result;
+        }
+
         if ($result === false) {
             $this->logger->debug('A block stopped the regeneration');
             return false;
@@ -808,7 +818,7 @@ class NewsletterComposer {
      * @param array $composer
      * @return array content and subject or false
      */
-    function regenerate_blocks($content, $context = [], $composer = []) {
+    function regenerate_blocks($content, $context = [], $composer = [], $wp_error = false) {
         $this->logger->debug('Blocks regeneration started');
 
         $result = ['content' => '', 'subject' => ''];
@@ -824,7 +834,10 @@ class NewsletterComposer {
         // Compatibility
         $width = $composer['width'];
 
+        $count = 0;
         foreach ($matches[1] as $match) {
+            $count++;
+
             $a = html_entity_decode($match, ENT_QUOTES, 'UTF-8');
             $options = $this->options_decode($a);
 
@@ -838,9 +851,13 @@ class NewsletterComposer {
 
             ob_start();
             $out = $this->render_block($options['block_id'], true, $options, $context, $composer);
+            $block_html = ob_get_clean();
             if (is_array($out)) {
                 if ($out['return_empty_message'] || $out['stop']) {
-                    $this->logger->debug('The block stopped the regeneration');
+                    $this->logger->debug('The block ' . $count . ' stopped the regeneration');
+                    if ($wp_error) {
+                        return new WP_Error('stop', 'The block number ' . $count . ' stopped the generation');
+                    }
                     return false;
                 }
                 if ($out['skip']) {
@@ -852,7 +869,7 @@ class NewsletterComposer {
                     $result['subject'] = strip_tags($out['subject']);
                 }
             }
-            $block_html = ob_get_clean();
+
             $result['content'] .= $block_html;
         }
 
@@ -896,7 +913,7 @@ class NewsletterComposer {
     }
 
     /**
-     * Update an email using the data captired by the NewsletterControl object
+     * Update an email using the data captured by the NewsletterControl object
      * processing the composer fields.
      *
      * @param TNP_Email $email
@@ -915,7 +932,11 @@ class NewsletterComposer {
         }
 
         $email->editor = NewsletterEmails::EDITOR_COMPOSER;
-        $message = $controls->data['message'];
+        $message = str_replace([self::OUTLOOK_START_IF, self::OUTLOOK_END_IF], ['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], $controls->data['message']);
+
+        $message = wp_kses_post($message);
+
+        $message = str_replace(['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], [self::OUTLOOK_START_IF, self::OUTLOOK_END_IF], $message);
 
         $email->message = TNP_Composer::get_html_open($email) . TNP_Composer::get_main_wrapper_open($email) .
                 $message . TNP_Composer::get_main_wrapper_close($email) . TNP_Composer::get_html_close($email);

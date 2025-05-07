@@ -44,6 +44,16 @@ if (!$controls->is_action()) {
         }
 
         $options = $this->get_options('', $language);
+
+        // Process the email before filtering the options, otherwise the wp_kses_post() will
+        // break the email content.
+        $email = Newsletter::instance()->get_email($options['confirmation_email_id']);
+        $email->track = Newsletter::instance()->get_option('track');
+        NewsletterComposer::update_email($email, $controls);
+        $email = $this->save_email($email);
+
+        $controls->data = wp_kses_post_deep($controls->data);
+
         $options['confirmation_message'] = NewsletterModule::clean_url_tags($controls->data['confirmation_message']);
         $options['confirmation_subject'] = $controls->data['confirmation_subject'];
         $options['confirmation_email'] = $controls->data['confirmation_email'];
@@ -52,11 +62,6 @@ if (!$controls->is_action()) {
         $options['confirmation_url'] = $controls->data['confirmation_url'];
 
         $this->save_options($options, '', $language);
-
-        $email = Newsletter::instance()->get_email($options['confirmation_email_id']);
-        $email->track = Newsletter::instance()->get_option('track');
-        NewsletterComposer::update_email($email, $controls);
-        $email = $this->save_email($email);
 
         $controls->add_toast_saved();
         $controls->data = $options;
@@ -82,10 +87,10 @@ foreach (['confirmation_message', 'confirmation_text'] as $key) {
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_ADMIN_HEADER; ?>
+<?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
-        <?php $controls->title_help('/subscription') ?>
+<?php $controls->title_help('/subscription') ?>
 <!--        <h2><?php esc_html_e('Subscription', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
     </div>
@@ -93,15 +98,15 @@ foreach (['confirmation_message', 'confirmation_text'] as $key) {
     <div id="tnp-body">
 
 
-        <?php $controls->show(); ?>
+<?php $controls->show(); ?>
 
 
         <form method="post" action="">
-            <?php $controls->init(); ?>
+<?php $controls->init(); ?>
 
             <p>
 
-                <?php //esc_html_e('Only for double opt-in mode.', 'newsletter') ?></p>
+<?php //esc_html_e('Only for double opt-in mode.', 'newsletter')  ?></p>
             </p>
 
             <div id="tabs">
@@ -112,31 +117,31 @@ foreach (['confirmation_message', 'confirmation_text'] as $key) {
 
                 <div id="tabs-settings">
 
-                    <?php //$this->language_notice(); ?>
+<?php //$this->language_notice();  ?>
 
                     <table class="form-table">
                         <tr>
                             <th><?php esc_html_e('Confirmation page', 'newsletter'); ?></th>
                             <td>
-                                <?php $controls->page_or_url('confirmation'); ?>
+<?php $controls->page_or_url('confirmation'); ?>
                             </td>
                         </tr>
                         <tr data-tnpshow="confirmation_id=0">
                             <th><?php esc_html_e('Page content', 'newsletter') ?></th>
                             <td>
-                                <?php $controls->checkbox2('confirmation_text_custom', __('Customize', 'newsletter')); ?>
+<?php $controls->checkbox2('confirmation_text_custom', __('Customize', 'newsletter')); ?>
                                 <div data-tnpshow="confirmation_text_custom=1">
-                                    <?php $controls->wp_editor('confirmation_text', ['editor_height' => 150], ['default' => $this->get_default_text('confirmation_text')]); ?>
+                                <?php $controls->wp_editor('confirmation_text', ['editor_height' => 150], ['default' => $this->get_default_text('confirmation_text')]); ?>
                                 </div>
                                 <div data-tnpshow="confirmation_text_custom=0" class="tnpc-default-text">
-                                    <?php echo wp_kses_post($this->get_default_text('confirmation_text')) ?>
+<?php echo wp_kses_post($this->get_default_text('confirmation_text')) ?>
                                 </div>
                             </td>
                         </tr>
                     </table>
 
                     <p>
-                        <?php $controls->button_save() ?>
+<?php $controls->button_save() ?>
                         <?php if (current_user_can('administrator')) { ?>
                             <?php $controls->btn_link($this->build_dummy_action_url('s'), __('Preview', 'newsletter'), ['tertiary' => true, 'target' => '_blank']); ?>
                         <?php } ?>
@@ -147,7 +152,7 @@ foreach (['confirmation_message', 'confirmation_text'] as $key) {
 
                 <div id="tabs-email">
 
-                    <?php //$this->language_notice(); ?>
+<?php //$this->language_notice();  ?>
 
                     <?php $controls->select('confirmation_email', ['0' => __('Default', 'newsletter'), '1' => __('Composer', 'newsletter')]); ?>
 
@@ -165,7 +170,7 @@ foreach (['confirmation_message', 'confirmation_text'] as $key) {
                     <?php } ?>
 
                     <div id="tnp-composer-confirmation" style="display: none" data-tnpshow="confirmation_email=1">
-                        <?php $controls->composer_v3(true, false); ?>
+<?php $controls->composer_v3(true, false); ?>
                     </div>
 
                     <div id="tnp-standard-confirmation" style="display: none" data-tnpshow="confirmation_email=0">
@@ -174,16 +179,16 @@ foreach (['confirmation_message', 'confirmation_text'] as $key) {
                             <tr>
                                 <td>
 
-                                    <?php $controls->text('confirmation_subject', 70, $this->get_default_text('confirmation_subject')); ?>
+<?php $controls->text('confirmation_subject', 70, $this->get_default_text('confirmation_subject')); ?>
                                     <br><br>
                                     <?php $controls->checkbox2('confirmation_message_custom', 'Customize'); ?>
 
                                     <div data-tnpshow="confirmation_message_custom=1">
-                                        <?php $controls->wp_editor('confirmation_message', ['editor_height' => 150], ['default' => $this->get_default_text('confirmation_message')]); ?>
+<?php $controls->wp_editor('confirmation_message', ['editor_height' => 150], ['default' => $this->get_default_text('confirmation_message')]); ?>
                                     </div>
 
                                     <div data-tnpshow="confirmation_message_custom=0" class="tnpc-default-text">
-                                        <?php echo wp_kses_post($this->get_default_text('confirmation_message')) ?>
+<?php echo wp_kses_post($this->get_default_text('confirmation_message')) ?>
                                     </div>
 
                                 </td>

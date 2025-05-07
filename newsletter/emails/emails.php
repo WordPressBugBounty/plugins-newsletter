@@ -62,8 +62,8 @@ class NewsletterEmails extends NewsletterModule {
      * @param TNP_Email $email
      * @return string
      */
-    function regenerate($email, $context = []) {
-        return NewsletterComposer::instance()->regenerate($email, $context);
+    function regenerate($email, $context = [], $wp_error = false) {
+        return NewsletterComposer::instance()->regenerate($email, $context, $wp_error);
     }
 
     function remove_block_data($text) {
