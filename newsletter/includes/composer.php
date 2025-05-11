@@ -269,12 +269,21 @@ class TNP_Composer {
 
         $message = str_replace([NewsletterComposer::OUTLOOK_START_IF, NewsletterComposer::OUTLOOK_END_IF], ['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], $controls->data['message']);
 
+        add_filter('safe_style_css', ['TNP_Composer', 'hook_safe_style_css'], 9999);
         $message = wp_kses_post($message);
+        remove_filter('safe_style_css', ['TNP_Composer', 'hook_safe_style_css']);
 
         $message = str_replace(['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], [NewsletterComposer::OUTLOOK_START_IF, NewsletterComposer::OUTLOOK_END_IF], $message);
 
         $email->message = self::get_html_open($email) . self::get_main_wrapper_open($email) .
                 $message . self::get_main_wrapper_close($email) . self::get_html_close($email);
+    }
+
+    static function hook_safe_style_css($rules) {
+        $rules[] = 'display';
+        $rules[] = 'mso-padding-alt';
+        $rules[] = 'mso-line-height-rule';
+        return $rules;
     }
 
     /**
@@ -767,7 +776,7 @@ class TNP_Composer {
     }
 
     static function get_post_content($post) {
-       return $post->post_content;
+        return $post->post_content;
     }
 
     static function get_post_title($post) {

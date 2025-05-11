@@ -12,7 +12,6 @@ class NewsletterComposer {
     const OUTLOOK_START_IF = '<!--[if mso | IE]>';
     const OUTLOOK_END_IF = '<![endif]-->';
 
-
     /**
      *
      * @return NewsletterComposer
@@ -727,6 +726,8 @@ class NewsletterComposer {
      */
     function hook_safe_style_css($rules) {
         $rules[] = 'display';
+        $rules[] = 'mso-padding-alt';
+        $rules[] = 'mso-line-height-rule';
         return $rules;
     }
 
@@ -934,7 +935,9 @@ class NewsletterComposer {
         $email->editor = NewsletterEmails::EDITOR_COMPOSER;
         $message = str_replace([self::OUTLOOK_START_IF, self::OUTLOOK_END_IF], ['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], $controls->data['message']);
 
+        add_filter('safe_style_css', [$this, 'hook_safe_style_css'], 9999);
         $message = wp_kses_post($message);
+        remove_filter('safe_style_css', [$this, 'hook_safe_style_css']);
 
         $message = str_replace(['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], [self::OUTLOOK_START_IF, self::OUTLOOK_END_IF], $message);
 

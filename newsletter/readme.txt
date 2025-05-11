@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.8.1
-Stable tag: 8.8.2
+Stable tag: 8.8.3
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -128,6 +128,11 @@ Thank you, The Newsletter Team
 3. The Reports extension
 
 == Changelog ==
+
+= 8.8.3 =
+
+* Fixed the S. Valentine template
+* Fixed button padding lost when saving a newsletter
 
 = 8.8.2 =
 

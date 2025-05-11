@@ -82,7 +82,6 @@ header('Cache-Control: no-cache,no-store,private');
                 echo '<input type="hidden" name="nhr" value="' . esc_attr(sanitize_url($_SERVER['HTTP_REFERER'])) . '">';
             }
             echo '<input type="hidden" name="ts" value="' . time() . '">';
-            echo '</div>';
 
             if ($captcha) {
                 echo '<div class="tnp-captcha">';

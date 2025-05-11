@@ -26,22 +26,15 @@
             "block_padding_bottom": 15,
             "block_padding_right": 0,
             "block_padding_left": 0,
-            "placeholder": "{template_url}/valetine-1.png",
-            "image": {
-                "id": "1136",
-                "url": ""
-            },
-            "image-alt": "",
+            "placeholder": "{template_url}/valentine-1.png",
             "url": "",
-            "width": "0",
+            "width": "250",
             "align": "center",
             "block_background": "",
             "block_background_2": "",
             "block_width": "600",
             "block_align": "center",
             "inline_edits": "",
-            "placeholder": "",
-            "image-url": "",
             "block_id": "image"
         },
         {
@@ -106,8 +99,7 @@
             "block_padding_bottom": 15,
             "block_padding_right": 0,
             "block_padding_left": 0,
-            "placeholder": "{template_url}/valetine-2.jpg",
-            "image-alt": "",
+            "placeholder": "{template_url}/valentine-2.jpg",
             "url": "",
             "width": "0",
             "align": "center",
@@ -115,9 +107,6 @@
             "block_background_2": "",
             "block_width": "600",
             "block_align": "center",
-            "inline_edits": "",
-            "placeholder": "",
-            "image-url": "",
             "block_id": "image"
         },
         {
