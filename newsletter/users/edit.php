@@ -15,6 +15,8 @@ if (!$user) {
 
 if ($controls->is_action('save')) {
 
+    $controls->data = wp_kses_post_deep($controls->data);
+
     $email = $this->sanitize_email($controls->data['email']);
     if (empty($email)) {
         $controls->errors = esc_html__('Wrong email address', 'newsletter');

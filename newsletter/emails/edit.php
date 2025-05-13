@@ -127,6 +127,8 @@ if ($controls->is_action('html')) {
 
 if ($controls->is_action('test') || $controls->is_action('save') || $controls->is_action('send') || $controls->is_action('schedule')) {
 
+    $controls->data = wp_kses_post_deep($controls->data);
+    
     if ($email['updated'] != $controls->data['updated']) {
         $controls->errors = 'This newsletter has been modified by someone else. Cannot save.';
     } else {

@@ -52,7 +52,7 @@ class NewsletterWidgetMinimal extends WP_Widget {
     }
 
     function update($new_instance, $old_instance) {
-        return $new_instance;
+        $new_instance = wp_kses_post_deep($new_instance);
     }
 
     function form($instance) {
@@ -83,7 +83,7 @@ class NewsletterWidgetMinimal extends WP_Widget {
         <p>
             <?php esc_html_e('Automatically subscribe to', 'newsletter') ?>
             <br>
-             <?php
+            <?php
             $lists = Newsletter::instance()->get_lists_public();
             foreach ($lists as $list) {
                 ?>
@@ -96,9 +96,8 @@ class NewsletterWidgetMinimal extends WP_Widget {
 
         <?php
     }
-
 }
 
-add_action('widgets_init', function() {
+add_action('widgets_init', function () {
     return register_widget("NewsletterWidgetMinimal");
 });

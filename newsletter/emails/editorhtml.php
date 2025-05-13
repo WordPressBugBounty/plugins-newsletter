@@ -10,7 +10,7 @@ $email_id = (int) $_GET['id'];
 if ($controls->is_action('save') || $controls->is_action('next') || $controls->is_action('test')) {
     $email['id'] = $email_id;
 
-    if (current_user_can('unfiltered_html')) {
+    if ($this->is_html_allowed()) {
         $email['message'] = $controls->data['message'];
     } else {
         $email['message'] = wp_kses_post($controls->data['message']);
@@ -30,7 +30,7 @@ if ($controls->is_action('test')) {
 
 $controls->data = Newsletter::instance()->get_email($email_id, ARRAY_A);
 
-if (!current_user_can('unfiltered_html')) {
+if (!$this->is_html_allowed()) {
     $controls->warnings[] = 'Your user cannot manage full HTML content, when saving the content will be filtered and get broken.';
 }
 ?>

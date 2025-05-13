@@ -7,6 +7,11 @@ defined('ABSPATH') || exit;
 if (!$controls->is_action()) {
     $controls->data = $this->get_options('template', $language);
 } else {
+
+    if (!current_user_can('unfiltered_html')) {
+        die('Not allowed');
+    }
+
     if ($controls->is_action('save')) {
         $this->save_options($controls->data, 'template', $language);
         $controls->add_message_saved();
@@ -74,31 +79,47 @@ if (strpos($controls->data['template'], '{message}') === false) {
 
     <div id="tnp-heading">
 
-        <h2><?php _e('Messages template', 'newsletter') ?></h2>
-        <p>
-            Edit the default template of confirmation, welcome and cancellation emails. Add the {message} tag where you
-            want the specific message text to be included.
-        </p>
+        <h2><?php esc_html_e('Messages template', 'newsletter') ?></h2>
 
     </div>
 
     <div id="tnp-body">
 
-         <?php $controls->show(); ?>
+        <p>
+            The general email HTML template applied to confirmation and welcome messages. It's recommended to create
+            custom message on the Subscription configuration.
+        </p>
 
-        <form method="post" action="">
-            <?php $controls->init(); ?>
+        <p>
+            If you customize this template, add the {message} tag where you
+            want the specific message text to be included.
+        </p>
 
-            <?php $controls->textarea_preview('template', '100%', '700px'); ?>
-            <br><br>
-
-
-            <p>
-                <?php $controls->button_save(); ?>
-                <?php $controls->button_reset(); ?>
-                <?php $controls->button('test', 'Send a test'); ?>
+        <?php if (!current_user_can('unfiltered_html')) { ?>
+            <p style="font-weight: strong">
+                This configuration can be edited only by users with "unfiltered html" catabilities. On multisite installation
+                even the site administrator is missing that capiability.
             </p>
-        </form>
+
+        <?php } else { ?>
+
+            <?php $controls->show(); ?>
+
+            <form method="post" action="">
+                <?php $controls->init(); ?>
+
+                <?php $controls->textarea_preview('template', '100%', '700px'); ?>
+                <br><br>
+
+
+                <p>
+                    <?php $controls->button_save(); ?>
+                    <?php $controls->button_reset(); ?>
+                    <?php $controls->button('test', 'Send a test'); ?>
+                </p>
+            </form>
+
+        <?php } ?>
     </div>
 
     <?php include NEWSLETTER_ADMIN_FOOTER; ?>

@@ -35,6 +35,7 @@ if ($controls->is_action()) {
 
         $controls->data['address_blacklist'] = wp_parse_list($controls->data['address_blacklist']);
 
+        $controls->data = wp_kses_post_deep($controls->data);
         $this->save_main_options($controls->data, 'antispam');
         $controls->add_toast_saved();
     }

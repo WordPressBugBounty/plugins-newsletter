@@ -11,7 +11,7 @@ if ($controls->is_action('save') || $controls->is_action('next') || $controls->i
 
     $email['id'] = $email_id;
 
-    if (current_user_can('unfiltered_html')) {
+    if ($this->is_html_allowed()) {
         $email['message'] = $controls->data['message'];
     } else {
         $email['message'] = wp_kses_post($controls->data['message']);
@@ -31,10 +31,9 @@ if ($controls->is_action('test')) {
 
 $controls->data = $this->get_email($email_id, ARRAY_A);
 
-if (!current_user_can('unfiltered_html')) {
+if (!$this->is_html_allowed()) {
     $controls->warnings[] = 'Your user cannot manage full HTML content, when saving the content will be filtered and get broken.';
 }
-
 ?>
 
 <style>
@@ -91,7 +90,6 @@ if (!current_user_can('unfiltered_html')) {
                 tinyMCE.execCommand('mceInsertLink', false, media.attributes.url);
 
             } else {
-                debugger;
                 var display = tnp_uploader.state().display(media);
                 var url = media.attributes.sizes[display.attributes.size].url;
                 var width = media.attributes.sizes[display.attributes.size].width;

@@ -30,7 +30,6 @@ if (class_exists('NewsletterLeads')) {
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription') ?>
-<!--        <h2><?php esc_html_e('Forms', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav-forms.php' ?>
     </div>
 

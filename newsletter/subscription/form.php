@@ -24,6 +24,7 @@ if (!$controls->is_action()) {
                 }
             }
         }
+        $controls->data = wp_kses_post_deep($controls->data);
         $this->save_options($controls->data, 'form', $language);
         $controls->data = $this->get_options('form', $language);
         $controls->add_toast_saved();
@@ -43,7 +44,6 @@ $main_options = $this->get_main_options('form');
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription') ?>
-<!--        <h2><?php esc_html_e('Forms', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav-forms.php' ?>
 
     </div>

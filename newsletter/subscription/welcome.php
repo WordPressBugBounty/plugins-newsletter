@@ -60,8 +60,6 @@ if (!$controls->is_action()) {
 
         $controls->data = wp_kses_post_deep($controls->data);
 
-        // Let the administrator + other conditions to use JS. Explained by the plugins@wordpress.org staff on 2025-05-07.
-        $disallow_unfiltered_html = defined('DISALLOW_UNFILTERED_HTML') && DISALLOW_UNFILTERED_HTML;
         if (current_user_can('unfiltered_html')) {
             $controls->data['confirmed_tracking'] = $tracking;
         }

@@ -9,6 +9,9 @@ if (!$controls->is_action()) {
 }
 
 if ($controls->is_action('save')) {
+    if (!current_user_can('unfiltered_html')) {
+        $controls->data = wp_kses_post_deep($controls->data);
+    }
     $this->save_main_options($controls->data, 'htmlforms');
     $controls->add_toast_saved();
 }
@@ -21,7 +24,6 @@ if ($controls->is_action('save')) {
     <div id="tnp-heading">
 
         <?php $controls->title_help('/subscription/newsletter-forms/') ?>
-<!--        <h2><?php esc_html_e('Forms', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav-forms.php' ?>
 
     </div>

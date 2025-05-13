@@ -6,6 +6,11 @@ defined('ABSPATH') || exit;
 
 class Addons {
 
+    /**
+     * Get the latest addons information but keeping the old one if the update fails.
+     *
+     * @return \Newsletter\WP_Error|bool
+     */
     static function update() {
         update_option('newsletter_addons_updated', time(), false);
 

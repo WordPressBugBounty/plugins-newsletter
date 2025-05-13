@@ -18,7 +18,7 @@ if (!$controls->is_action()) {
                 }
             }
         }
-
+        $controls->data = wp_kses_post_deep($controls->data);
         $this->save_options($controls->data, 'lists', $language);
         $controls->add_toast_saved();
     }

@@ -81,6 +81,7 @@ class NewsletterWidget extends WP_Widget {
     }
 
     function update($new_instance, $old_instance) {
+        $new_instance = wp_kses_post_deep($new_instance);
         return $new_instance;
     }
 

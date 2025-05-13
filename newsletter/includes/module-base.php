@@ -39,6 +39,11 @@ class NewsletterModuleBase {
         return self::$is_allowed;
     }
 
+    function is_html_allowed() {
+        if (defined('NEWSLETTER_HTML_ALLOWED') && NEWSLETTER_HTML_ALLOWED) return true;
+        return current_user_can('unfiltered_html');
+    }
+
     function is_multilanguage() {
         return self::$is_multilanguage;
     }
