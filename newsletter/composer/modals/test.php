@@ -1,4 +1,4 @@
-<div id="test-newsletter-modal" aria-hidden="true" style="display: none">
+<div id="test-newsletter-modal" aria-hidden="true"  class="modal">
 
 
     <div id="test-newsletter-message">

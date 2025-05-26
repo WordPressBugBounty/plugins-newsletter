@@ -382,6 +382,8 @@ function tnpc_get_email_content_from_builder_area() {
 
     var $elMessage = jQuery("#tnpb-content").clone();
 
+    //console.log(document.getElementById('tnpb-content').innerHTML);
+
     $elMessage.find('.tnpc-row-delete').remove();
     $elMessage.find('.tnpc-row-edit-block').remove();
     $elMessage.find('.tnpc-row-clone').remove();

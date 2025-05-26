@@ -14,7 +14,13 @@ if (!$controls->is_action()) {
 
         if (!$language) {
 
+            $css = $controls->data['css'];
             $controls->data = wp_kses_post_deep($controls->data);
+            $controls->data['css'] = $css;
+
+            if (preg_match('#</?\w+#', $css)) {
+                $controls->errors .= __('Invalid CSS', 'newsletter') . '<br>';
+            }
 
             if (!$this->is_email($controls->data['sender_email'])) {
                 $controls->errors .= __('The sender email address is not correct.', 'newsletter') . '<br>';
@@ -113,8 +119,6 @@ $license_data = License::get_data();
 if (is_wp_error($license_data)) {
     $controls->errors .= esc_html($license_data->get_error_message());
 }
-
-
 ?>
 
 <?php include NEWSLETTER_INCLUDES_DIR . '/codemirror.php'; ?>
@@ -163,7 +167,7 @@ if (is_wp_error($license_data)) {
 
                 <ul>
                     <li><a href="#tabs-basic"><?php esc_html_e('Settings', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-speed"><?php esc_html_e('Delivery Speed', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-speed"><?php esc_html_e('Sending', 'newsletter') ?></a></li>
                     <li class="tnp-tabs-advanced"><a href="#tabs-advanced"><?php esc_html_e('Advanced', 'newsletter') ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
@@ -279,7 +283,7 @@ if (is_wp_error($license_data)) {
 
                                         <?php $batch_max = floor($controls->data['scheduler_max'] / 12); ?>
                                         <?php if ($batch_max < 5) { ?>
-                                        <br>
+                                            <br>
                                             The delivery engines runs every 5 minutes (12 runs per hour). With that setting you'll have:
                                             <br>
                                             <?php echo $batch_max; ?> max emails every 5 minutes,
@@ -299,6 +303,21 @@ if (is_wp_error($license_data)) {
                                 <td>
                                     <?php $controls->text('max_per_second', 5); ?>
                                     <span class="description"><?php esc_html_e('0 for unlimited', 'newsletter') ?></span>
+                                </td>
+                            </tr>
+
+                            <tr valign="top">
+                                <th>Sending time window</th>
+                                <td>
+                                    <?php $controls->enabled('schedule'); ?>
+
+                                    <span data-tnpshow="schedule=1">
+                                    from <?php $controls->hours('schedule_start'); ?> to <?php $controls->hours('schedule_end'); ?>
+                                    </span>
+
+                                    <p class="description">
+                                        Out of this time window the newsletter sending is suspended. Does not apply to email series.
+                                    </p>
                                 </td>
                             </tr>
 

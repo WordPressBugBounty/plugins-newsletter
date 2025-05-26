@@ -29,7 +29,7 @@ $options['text'] = strip_tags($options['text'], '<br><span><b><strong><i><em>')
     .title {
         <?php $title_style->echo_css(); ?>
         padding: 0;
-        line-height: 150% !important;
+        line-height: 130% !important;
         letter-spacing: normal;
     }
 </style>

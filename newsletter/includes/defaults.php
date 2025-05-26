@@ -33,7 +33,8 @@ class NewsletterDefaults {
                 'page' => 0,
                 'disable_cron_notice' => 0,
                 'do_shortcodes' => 1,
-                'links' => 'ajax'
+                'links' => 'ajax',
+                'schedule' => 0
             ];
         }
 

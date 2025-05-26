@@ -70,7 +70,7 @@ if (!empty($controls->data['search_status'])) {
     }
 }
 
-$search_list = (int) $controls->data['search_list'];
+$search_list = (int) $controls->data['search_list'] ?? 0;
 if ($search_list) {
     if ($search_list === -1) {
         for ($i = 1; $i <= NEWSLETTER_LIST_MAX; $i++) {

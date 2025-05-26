@@ -17,12 +17,18 @@ $defaults = array(
     'button_border_color' => '',
     'align' => 'center',
     'block_background' => '',
-    'button_width' => '200',
+    'button_width' => '0',
     'button_align' => 'center',
     'block_padding_top' => 20,
     'block_padding_bottom' => 20,
     'block_style' => '',
 );
+
+if ($context['type'] === 'confirmation') {
+
+    $defaults['button_url'] = '{confirmation_url}';
+    $defaults['button_label'] = __('Confirm subscription', 'newsletter');
+}
 
 if (!empty($options['block_style'])) {
     if ($options['block_style'] === 'wire') {

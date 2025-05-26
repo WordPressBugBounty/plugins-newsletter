@@ -10,7 +10,7 @@
     });
 </script>
 
-<div id="subject-ideas-modal" aria-hidden="true" style="display: none">
+<div id="subject-ideas-modal" aria-hidden="true" class="modal">
 
     <div id="tnp-edit-subjects-list">
         <h3 class="tnp-subject-category">Promotions</h3>

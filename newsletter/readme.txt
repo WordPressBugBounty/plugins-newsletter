@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.8.1
-Stable tag: 8.8.5
+Stable tag: 8.8.6
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -129,9 +129,25 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 8.8.6 =
+
+* Fixed hero block image alt attribute
+* Fixed the minimal widget
+* Composer code refactoring
+* Fixed composer modals on welcome email
+* Removed the old presets
+* Updated the composer templates
+* Added warning if the confirmation email is missing the correct URL
+* Added sending time window (see main settings)
+* Improved the Help/Delivery page
+* Removed HTML filter for users with unfiltered html capability to avoid custom block breaking
+
 = 8.8.5 =
 
 * Added more content filters to prevent XSS (write us if you have issues on saving options or editing content)
+* Fixed PHP warnings
+* Optimized composer code
+* Limited access to delivery addon to administrators
 
 = 8.8.4 =
 
@@ -140,6 +156,7 @@ Thank you, The Newsletter Team
 = 8.8.3 =
 
 * Fixed the S. Valentine template
+* Changed the main CSS configuration validation
 * Fixed button padding lost when saving a newsletter
 
 = 8.8.2 =

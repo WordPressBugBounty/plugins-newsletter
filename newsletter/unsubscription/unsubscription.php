@@ -237,6 +237,7 @@ class NewsletterUnsubscription extends NewsletterModule {
             $text = $this->replace_url($text, 'unsubscription_url', $this->build_action_url('u', $user, $email));
             $text = $this->replace_url($text, 'unsubscribe_url', $this->build_action_url('u', $user, $email));
             $text = $this->replace_url($text, 'reactivate_url', $this->build_action_url('reactivate', $user, $email));
+            $text = $this->replace_url($text, 'reactivation_url', $this->build_action_url('reactivate', $user, $email));
         } else {
             $text = $this->replace_url($text, 'unsubscription_confirm_url', $this->build_action_url('nul'));
             $text = $this->replace_url($text, 'unsubscription_url', $this->build_action_url('nul'));

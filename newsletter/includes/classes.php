@@ -390,4 +390,10 @@ class TNP_Email {
     const EDITOR_TINYMCE = 0;
 
     var $options = [];
+    var $id;
+    var $message = '';
+    var $message_text = '';
+    var $track = '1';
+    var $send_on = 0;
+    var $token = '';
 }

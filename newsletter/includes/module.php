@@ -846,6 +846,7 @@ class NewsletterModule extends NewsletterModuleBase {
         $text = $this->replace_url($text, 'subscription_confirm_url', $this->build_action_url('c', $user, $email));
         $text = $this->replace_url($text, 'activation_url', $this->build_action_url('c', $user, $email));
         $text = $this->replace_url($text, 'confirmation_url', $this->build_action_url('c', $user, $email));
+        $text = $this->replace_url($text, 'confirm_url', $this->build_action_url('c', $user, $email));
 
         // To be moved to the "content lock" addon
         $text = $this->replace_url($text, 'unlock_url', $this->build_action_url('ul', $user));

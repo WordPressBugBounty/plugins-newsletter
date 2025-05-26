@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.8.5
+  Version: 8.8.6
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.8.5');
+define('NEWSLETTER_VERSION', '8.8.6');
 
 global $wpdb, $newsletter;
 
@@ -112,7 +112,6 @@ require_once NEWSLETTER_INCLUDES_DIR . '/module-base.php';
 require_once NEWSLETTER_INCLUDES_DIR . '/module.php';
 require_once NEWSLETTER_INCLUDES_DIR . '/TNP.php';
 require_once NEWSLETTER_INCLUDES_DIR . '/cron.php';
-require_once NEWSLETTER_INCLUDES_DIR . '/composer-class.php';
 
 class Newsletter extends NewsletterModule {
 
@@ -543,7 +542,23 @@ class Newsletter extends NewsletterModule {
     }
 
     function skip_this_run($email = null) {
-        return (boolean) apply_filters('newsletter_send_skip', false, $email);
+        $skip = false;
+
+        $schedule = $this->get_main_option('schedule');
+
+        $this->logger->debug('Schedule: ' . $schedule);
+
+        if ($schedule) {
+
+            $hour = gmdate('G') + get_option('gmt_offset');
+            $start = (int) $this->get_main_option('schedule_start');
+            $end = (int) $this->get_main_option('schedule_end');
+
+            $skip = $hour < $start || $hour > $end;
+            $this->logger->debug('Skip: ' . ($skip ? 'true' : 'false'));
+        }
+
+        return (bool) apply_filters('newsletter_send_skip', $skip, $email);
     }
 
     function get_runs_per_hour() {
@@ -620,6 +635,8 @@ class Newsletter extends NewsletterModule {
     function send($email, $users = null, $test = false) {
         global $wpdb;
 
+        $options = $this->get_main_options();
+
         if (is_array($email)) {
             $email = (object) $email;
         }
@@ -641,8 +658,10 @@ class Newsletter extends NewsletterModule {
 
         if (!$supplied_users) {
 
+
+
             if ($this->skip_this_run($email)) {
-                $this->logger->info(__METHOD__ . '> Asked to skip this run');
+                $this->logger->info(__METHOD__ . '> Out of the sending time window');
                 return true;
             }
 
@@ -1367,6 +1386,7 @@ class Newsletter extends NewsletterModule {
 $newsletter = Newsletter::instance();
 
 // Frontend modules
+require_once NEWSLETTER_DIR . '/composer/composer.php';
 require_once NEWSLETTER_DIR . '/users/users.php';
 require_once NEWSLETTER_DIR . '/subscription/subscription.php';
 require_once NEWSLETTER_DIR . '/emails/emails.php';

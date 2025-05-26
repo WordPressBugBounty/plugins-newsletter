@@ -128,7 +128,7 @@ if ($controls->is_action('html')) {
 if ($controls->is_action('test') || $controls->is_action('save') || $controls->is_action('send') || $controls->is_action('schedule')) {
 
     $controls->data = wp_kses_post_deep($controls->data);
-    
+
     if ($email['updated'] != $controls->data['updated']) {
         $controls->errors = 'This newsletter has been modified by someone else. Cannot save.';
     } else {
@@ -303,7 +303,8 @@ if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_a
         }
 
         // Immadiate first batch sending since people has no patience
-        if ($controls->is_action('send') && $email['total'] < 20) {
+
+        if ($controls->is_action('send') && $email['total'] < 20 && !Newsletter::instance()->skip_this_run()) {
             // Avoid the first batch if there are other newsletters delivering otherwise we can get over the per hour quota
             $sending_count = $wpdb->get_results("select count(*) from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time());
             if ($sending_count <= 1) { // This newsletter is counted as well

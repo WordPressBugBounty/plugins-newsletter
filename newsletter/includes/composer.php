@@ -1,13 +1,5 @@
 <?php
 
-function tnp_register_block($dir) {
-    return TNP_Composer::register_block($dir);
-}
-
-function tnp_register_template($dir) {
-    return TNP_Composer::register_template($dir);
-}
-
 /**
  * Generates and HTML button for email using the values found on $options and
  * prefixed by $prefix, with the standard syntax of NewsletterFields::button().
@@ -22,305 +14,36 @@ function tnpc_button($options, $prefix = 'button') {
 
 class TNP_Composer {
 
-    static $block_dirs = [];
-    static $template_dirs = [];
-
-    static function register_block($dir) {
-        // Checks
-        $dir = realpath($dir);
-        if (!$dir) {
-            $error = new WP_Error('1', 'Seems not a valid path: ' . $dir);
-            NewsletterEmails::instance()->logger->error($error);
-            return $error;
-        }
-
-        $dir = wp_normalize_path($dir);
-
-        if (!file_exists($dir . '/block.php')) {
-            $error = new WP_Error('1', 'block.php missing on folder ' . $dir);
-            NewsletterEmails::instance()->logger->error($error);
-            return $error;
-        }
-
-        self::$block_dirs[] = $dir;
-        return true;
-    }
-
-    static function register_template($dir) {
-        // Checks
-        $dir = realpath($dir);
-        if (!$dir) {
-            $error = new WP_Error('1', 'Seems not a valid path: ' . $dir);
-            NewsletterEmails::instance()->logger->error($error);
-            return $error;
-        }
-
-        $dir = wp_normalize_path($dir);
-        $dir = untrailingslashit($dir);
-
-        if (!file_exists($dir . '/template.json')) {
-            $error = new WP_Error('1', 'template.json missing on folder ' . $dir);
-            NewsletterEmails::instance()->logger->error($error);
-            return $error;
-        }
-
-        self::$template_dirs[] = $dir;
-        return true;
-    }
-
     /**
-     * @param string $open
-     * @param string $inner
-     * @param string $close
-     * @param string[] $markers
-     *
-     * @return string
-     */
-    static function wrap_html_element($open, $inner, $close, $markers = array('<!-- tnp -->', '<!-- /tnp -->')) {
-
-        return $open . $markers[0] . $inner . $markers[1] . $close;
-    }
-
-    /**
-     * @param string $block
-     * @param string[] $markers
-     *
-     * @return string
-     */
-    static function unwrap_html_element($block, $markers = array('<!-- tnp -->', '<!-- /tnp -->')) {
-        if (self::_has_markers($block, $markers)) {
-            self::_escape_markers($markers);
-            $pattern = sprintf('/%s(.*?)%s/s', $markers[0], $markers[1]);
-
-            $matches = array();
-            preg_match($pattern, $block, $matches);
-
-            return $matches[1];
-        }
-
-        return $block;
-    }
-
-    /**
-     * @param string $block
-     * @param string[] $markers
-     *
-     * @return bool
-     */
-    private static function _has_markers($block, $markers = array('<!-- tnp -->', '<!-- /tnp -->')) {
-
-        self::_escape_markers($markers);
-
-        $pattern = sprintf('/%s(.*?)%s/s', $markers[0], $markers[1]);
-
-        return preg_match($pattern, $block);
-    }
-
-    /**
-     * Sources:
-     * - https://webdesign.tutsplus.com/tutorials/creating-a-future-proof-responsive-email-without-media-queries--cms-23919
-     *
-     * @param type $email
+     * @deprecated since version 8.8.3
+     * @param string $dir
      * @return type
      */
-    static function get_html_open($email) {
-
-        $css_attrs = [
-            'body_padding_left' => ($email->options['composer_padding'] ?? '0') . 'px',
-            'body_padding_right' => ($email->options['composer_padding'] ?? '0') . 'px',
-            'body_padding_bottom' => ($email->options['composer_padding'] ?? '0') . 'px',
-            'body_padding_top' => ($email->options['composer_padding'] ?? '0') . 'px',
-        ];
-
-        $open = '<!DOCTYPE html>' . "\n";
-        $open .= '<html xmlns="https://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">' . "\n";
-        $open .= '<head>' . "\n";
-        $open .= '<title>{email_subject}</title>' . "\n";
-        $open .= '<meta charset="utf-8">' . "\n";
-        $open .= '<meta name="viewport" content="width=device-width, initial-scale=1">' . "\n";
-        $open .= '<meta http-equiv="X-UA-Compatible" content="IE=edge">' . "\n";
-        $open .= '<meta name="format-detection" content="address=no">' . "\n";
-        $open .= '<meta name="format-detection" content="telephone=no">' . "\n";
-        $open .= '<meta name="format-detection" content="email=no">' . "\n";
-        $open .= '<meta name="x-apple-disable-message-reformatting">' . "\n";
-        $open .= '<!--[if gte mso 9]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->' . "\n";
-        $open .= '<style type="text/css">' . "\n";
-        $open .= NewsletterEmails::instance()->get_composer_css($css_attrs);
-        $open .= "\n</style>\n";
-        $open .= "</head>\n";
-
-        $open .= '<body style="margin: 0; padding: 0; line-height: normal; word-spacing: normal;" dir="' . (is_rtl() ? 'rtl' : 'ltr') . '">';
-        $open .= "\n";
-
-        $open .= self::get_html_preheader($email);
-
-        return $open;
-    }
-
-    static private function get_html_preheader($email) {
-
-        if (empty($email->options['preheader'])) {
-            return "";
-        }
-
-        $preheader_text = esc_html($email->options['preheader']);
-        $html = "<div style=\"display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;\">$preheader_text</div>";
-        $html .= "\n";
-
-        return $html;
-    }
-
-    static function get_html_close($email) {
-        return "</body>\n</html>";
+    static function register_block($dir) {
+        return NewsletterComposer::instance()->register_block($dir);
     }
 
     /**
-     *
-     * @param TNP_Email $email
-     * @return string
+     * @deprecated since version 8.8.3
+     * @param string $dir
+     * @return Newsletter\Composer\Template
      */
-    static function get_main_wrapper_open($email) {
-        if (!isset($email->options['composer_background']) || $email->options['composer_background'] == 'inherit') {
-            $bgcolor = '';
-        } else {
-            $bgcolor = $email->options['composer_background'];
-        }
-
-        return "\n<table cellpadding='0' cellspacing='0' border='0' width='100%' role='presentation'>\n" .
-                "<tr>\n" .
-                "<td bgcolor='$bgcolor' valign='top' class='wrapper'><!-- tnp -->";
+    static function register_template($dir) {
+        return NewsletterComposer::instance()->register_template($dir);
     }
 
     /**
-     *
-     * @param TNP_Email $email
-     * @return string
-     */
-    static function get_main_wrapper_close($email) {
-        return "\n<!-- /tnp -->\n" .
-                "</td>\n" .
-                "</tr>\n" .
-                "</table>\n\n";
-    }
-
-    /**
-     * Remove <doctype>, <body> and unnecessary envelopes for editing with composer
-     *
-     * @param string $html_email
-     *
-     * @return string
-     */
-    static function unwrap_email($html_email) {
-
-        if (self::_has_markers($html_email)) {
-            $html_email = self::unwrap_html_element($html_email);
-        } else {
-            //KEEP FOR OLD EMAIL COMPATIBILITY
-            // Extracts only the body part
-            $x = strpos($html_email, '<body');
-            if ($x) {
-                $x = strpos($html_email, '>', $x);
-                $y = strpos($html_email, '</body>');
-                $html_email = substr($html_email, $x + 1, $y - $x - 1);
-            }
-
-            /* Cleans up uncorrectly stored newsletter bodies */
-            $html_email = preg_replace('/<style\s+.*?>.*?<\\/style>/is', '', $html_email);
-            $html_email = preg_replace('/<meta.*?>/', '', $html_email);
-            $html_email = preg_replace('/<title\s+.*?>.*?<\\/title>/i', '', $html_email);
-            $html_email = trim($html_email);
-        }
-
-        // Required since esc_html DOES NOT escape the HTML entities (apparently)
-        $html_email = str_replace('&', '&amp;', $html_email);
-        $html_email = str_replace('"', '&quot;', $html_email);
-        $html_email = str_replace('<', '&lt;', $html_email);
-        $html_email = str_replace('>', '&gt;', $html_email);
-
-        return $html_email;
-    }
-
-    private static function _escape_markers(&$markers) {
-        $markers[0] = str_replace('/', '\/', $markers[0]);
-        $markers[1] = str_replace('/', '\/', $markers[1]);
-    }
-
-    /**
-     * Using the data collected inside $controls (and submitted by a form containing the
-     * composer fields), updates the email. The message body is completed with doctype,
-     * head, style and the main wrapper.
-     *
-     * @param TNP_Email $email
-     * @param NewsletterControls $controls
+     * @deprecated since version 8.8.5
      */
     static function update_email($email, $controls) {
-        if (isset($controls->data['subject'])) {
-            $email->subject = wp_strip_all_tags($controls->data['subject']);
-        }
-
-        // They should be only composer options
-        foreach ($controls->data as $name => $value) {
-            if (strpos($name, 'options_') === 0) {
-                $email->options[substr($name, 8)] = wp_strip_all_tags($value);
-            }
-        }
-
-        $email->editor = NewsletterEmails::EDITOR_COMPOSER;
-
-        $message = str_replace([NewsletterComposer::OUTLOOK_START_IF, NewsletterComposer::OUTLOOK_END_IF], ['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], $controls->data['message']);
-
-        add_filter('safe_style_css', ['TNP_Composer', 'hook_safe_style_css'], 9999);
-        $message = wp_kses_post($message);
-        remove_filter('safe_style_css', ['TNP_Composer', 'hook_safe_style_css']);
-
-        $message = str_replace(['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], [NewsletterComposer::OUTLOOK_START_IF, NewsletterComposer::OUTLOOK_END_IF], $message);
-
-        $email->message = self::get_html_open($email) . self::get_main_wrapper_open($email) .
-                $message . self::get_main_wrapper_close($email) . self::get_html_close($email);
-    }
-
-    static function hook_safe_style_css($rules) {
-        $rules[] = 'display';
-        $rules[] = 'mso-padding-alt';
-        $rules[] = 'mso-line-height-rule';
-        return $rules;
+        return NewsletterComposer::instance()->update_email($email, $controls);
     }
 
     /**
-     * Prepares a NewsletterControls object injecting the relevant fields from an email
-     * which cannot be directly used by controls. If $email is null or missing,
-     * $controls is prepared with default values.
-     *
-     * @param NewsletterControls $controls
-     * @param TNP_Email $email
+     * @deprecated since version 8.8.5
      */
     static function prepare_controls($controls, $email = null) {
-
-        // Controls for a new email (which actually does not exist yet
-        if (!empty($email)) {
-
-            foreach ($email->options as $name => $value) {
-                $controls->data['options_' . $name] = $value;
-            }
-
-            $controls->data['message'] = TNP_Composer::unwrap_email($email->message);
-            $controls->data['subject'] = $email->subject;
-            $controls->data['updated'] = $email->updated;
-        }
-
-        if (!empty($email->options['sender_email'])) {
-            $controls->data['sender_email'] = $email->options['sender_email'];
-        } else {
-            $controls->data['sender_email'] = Newsletter::instance()->get_sender_email();
-        }
-
-        if (!empty($email->options['sender_name'])) {
-            $controls->data['sender_name'] = $email->options['sender_name'];
-        } else {
-            $controls->data['sender_name'] = Newsletter::instance()->get_sender_name();
-        }
-
-        $controls->data = array_merge(TNP_Composer::get_global_style_defaults(), $controls->data);
+        return NewsletterComposer::instance()->update_controls($controls, $email);
     }
 
     /**
@@ -485,7 +208,7 @@ class TNP_Composer {
             if ($media->height) {
                 $b .= ' height="' . esc_attr($media->height) . '"';
             }
-            $b .= ' alt="' . esc_attr($media->alt) . '" '
+            $b .= ' alt="' . esc_attr(wp_strip_all_tags($media->alt)) . '" '
                     . ' border="0"'
                     . $styling
                     . ' class="' . esc_attr($attr['class']) . '" '

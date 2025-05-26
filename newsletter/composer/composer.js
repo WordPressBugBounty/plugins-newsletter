@@ -265,6 +265,7 @@ function init_builder_area() {
                         {"name": 'id', "value": ui.item.data("id")},
                         {"name": 'b', "value": ui.item.data("id")},
                         {"name": 'full', "value": 1},
+                        {"name": "context_type", "value": tnp_context_type},
                         {"name": '_wpnonce', "value": tnp_nonce}
                 );
 
@@ -479,13 +480,6 @@ function tnpb_open_tab(evt, tabName) {
     evt.currentTarget.className += " active";
 }
 
-function tnpc_scratch() {
-
-    jQuery('#tnpb-content').html(" ");
-    init_builder_area();
-
-}
-
 function tnpc_reload_options(e) {
     e.preventDefault();
     let options = jQuery("#tnpc-block-options-form :input").serializeArray();
@@ -511,78 +505,6 @@ function tnpc_add_global_options(data) {
     }
 }
 
-// ==================================================== //
-// =================    PRESET    ===================== //
-// ==================================================== //
-
-//TODO - spostare gestione dei preset in contesto privato ma aggiungendo comunque a window le funzioni triggerate da html (load_preset, delete_preset,...) per mantenere compatibilità?
-const presetListModal = new TNPModal({
-    closeWhenClickOutside: true,
-    showClose: true,
-    style: {
-        backgroundColor: '#ECF0F1',
-        height: '500px',
-        width: '900px',
-    },
-    onClose: function () {
-        start_composer();
-        //Enable buttons
-        jQuery('.tnpc-controls input[type=button]').attr('disabled', false);
-    }
-});
-
-function tnpc_show_presets_modal() {
-
-    jQuery('.tnpc-controls input[type=button]').attr('disabled', true);
-
-    const elModalContent = presetListModal.open();
-
-    jQuery.ajax({
-        type: "POST",
-        url: ajaxurl,
-        data: {
-            action: "tnpc_get_all_presets",
-            context_type: tnp_context_type,
-        },
-        success: function (res) {
-            jQuery(elModalContent).html(res.data);
-        },
-    });
-
-}
-
-function tnpc_load_preset(id, subject, isEditMode) {
-
-    presetListModal.close();
-
-    jQuery.ajax({
-        type: "POST",
-        url: ajaxurl,
-        data: {
-            action: "tnpc_get_preset",
-            id: id
-        },
-        success: function (res) {
-            jQuery('#tnpb-content').html(res.data.content);
-            _restore_global_options(res.data.globalOptions);
-
-            start_composer();
-
-            if (!isEditMode) {
-                //Enable buttons
-                jQuery('.tnpc-controls input[type=button]').attr('disabled', false);
-            }
-
-            if (subject && subject.length > 0) {
-                jQuery('#options-subject').val(tnpc_remove_double_quotes_escape_from(subject));
-            }
-        },
-    });
-
-
-
-}
-
 function _restore_global_options(options) {
     jQuery.each(options, function (name, value) {
         var el = jQuery(`#tnpb-settings-form #options-options_composer_${name}`);
@@ -603,11 +525,6 @@ function tnpc_remove_double_quotes_escape_from(str) {
 function tnpc_remove_double_quotes_from(str) {
     return str.replace(/['"]+/g, '');
 }
-
-
-// ========================================================= //
-// =================    PRESET FINE    ===================== //
-// ========================================================= //
 
 jQuery(document).ready(function () {
     'use strict'
@@ -729,6 +646,7 @@ jQuery(document).ready(function () {
                     'b': container.data('id'),
                     'full': 1,
                     '_wpnonce': tnp_nonce,
+                    'context_type': tnp_context_type,
                     'options': {
                         'inline_edits': [{
                                 'type': type,

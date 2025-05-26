@@ -354,7 +354,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
             }
         });
 
-        if (is_admin() && !empty($this->menu_title) && !empty($this->dir) && current_user_can('administrator')) {
+        if (is_admin()) {
             $this->index_page = 'newsletter_' . $this->menu_slug . '_index';
             $this->logs_page = 'newsletter_' . $this->menu_slug . '_logs';
         }
@@ -373,6 +373,10 @@ class NewsletterMailerAddon extends NewsletterAddon {
     }
 
     function admin_menu() {
+
+        if (!current_user_can('administrator')) {
+            return;
+        }
 
         add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . esc_html($this->menu_title) . '</span>', 'manage_options', $this->index_page,
                 function () {
@@ -400,6 +404,9 @@ class NewsletterMailerAddon extends NewsletterAddon {
     }
 
     function newsletter_menu() {
+        if (!current_user_can('administrator')) {
+            return;
+        }
         $this->add_settings_menu_page($this->menu_title, '?page=' . $this->index_page);
     }
 

@@ -8,31 +8,6 @@ defined('ABSPATH') || exit;
 if ($controls->is_action()) {
 
     if ($controls->is_action('save')) {
-        // Processing IPs
-        $list = wp_parse_list($controls->data['ip_blacklist']);
-        $controls->data['ip_blacklist'] = [];
-        foreach ($list as $item) {
-            $item = trim($item);
-            if (substr($item, 0, 1) === '#') {
-                $controls->data['ip_blacklist'][] = $item;
-                continue;
-            }
-            $item = preg_replace('|[^0-9a-fA-F:./]|', '', $item);
-            if (empty($item)) {
-                continue;
-            }
-            if (strpos($item, '/', 2)) {
-                list($ip, $bits) = explode('/', $item);
-                $bits = (int) $bits;
-                if (!$bits)
-                    continue;
-                $item = $ip . '/' . $bits;
-            } else {
-
-            }
-            $controls->data['ip_blacklist'][] = $item;
-        }
-
         $controls->data['address_blacklist'] = wp_parse_list($controls->data['address_blacklist']);
 
         $controls->data = wp_kses_post_deep($controls->data);

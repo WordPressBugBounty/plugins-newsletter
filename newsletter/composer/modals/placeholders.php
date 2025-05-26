@@ -1,4 +1,4 @@
-<div id="tnpc-placeholders-modal" aria-hidden="true" style="display: none">
+<div id="tnpc-placeholders-modal" aria-hidden="true" class="modal">
     <h3><?php esc_html_e('Placeholders', 'newsletter') ?></h3>
     <ul>
         <li>{name} - <?php esc_html_e('First name', 'newsletter') ?></li>

@@ -209,7 +209,7 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
     tnp_nonce = '<?php echo esc_js(wp_create_nonce('save')) ?>';
 </script>
 <?php
-wp_enqueue_script('tnp-composer', plugins_url('newsletter') . '/composer/composer.js', [], NEWSLETTER_VERSION);
+wp_enqueue_script('tnp-composer', plugins_url('newsletter') . '/composer/composer.js', ['jquery'], NEWSLETTER_VERSION);
 ?>
 
 <?php include __DIR__ . '/modals/test.php' ?>

@@ -233,7 +233,7 @@ class NewsletterDefaultMailer extends NewsletterMailer {
 
     function get_description() {
         // TODO: check if overloaded
-        return 'wp_mail() WordPress function (could be extended by a SMTP plugin)';
+        return ' WordPress wp_mail() function';
     }
 
     function get_speed() {

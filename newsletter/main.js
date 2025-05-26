@@ -1,10 +1,10 @@
 // For compatibility with optimizers
 if (document.readyState !== 'loading') {
-    console.log('Newsletter loaded (late)');
+    //console.log('Newsletter loaded (late)');
     tnp_ajax_init();
 } else {
     document.addEventListener("DOMContentLoaded", function () {
-        console.log('Newsletter loaded');
+        //console.log('Newsletter loaded');
         tnp_ajax_init();
     });
 }

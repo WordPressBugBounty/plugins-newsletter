@@ -100,21 +100,35 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
                                 </tr>
                             </thead>
 
-                            <?php
-                            $condition = $stats->good ? 1 : 0;
-                            ?>
-                            <tr>
-                                <td>Scheduler</td>
-                                <td class="status">
-                                    <?php $this->condition_flag($condition) ?>
-                                </td>
-                                <td>
-                                    <?php if ($condition == 0) { ?>
-                                    The cron system is NOT triggered enough often.<br>
-                                    <?php $controls->btn_link('https://www.thenewsletterplugin.com/documentation/delivery-and-spam/newsletter-delivery-engine/', 'How to solve'); ?>
-                                    <?php } ?>
-                                </td>
-                            </tr>
+                            <?php if (!$stats) { ?>
+                                <tr>
+                                    <td>Scheduler</td>
+                                    <td class="status">
+                                        <?php $this->condition_flag(1) ?>
+                                    </td>
+                                    <td>
+                                        Collecting data...
+                                    </td>
+                                </tr>
+                            <?php } else { ?>
+                                <?php
+                                $condition = $stats->good ? 1 : 0;
+                                ?>
+                                <tr>
+                                    <td>Scheduler</td>
+                                    <td class="status">
+                                        <?php $this->condition_flag($condition) ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($condition == 0) { ?>
+                                            The cron system is NOT triggered enough often.<br>
+                                            <?php $controls->btn_link('https://www.thenewsletterplugin.com/documentation/delivery-and-spam/newsletter-delivery-engine/', 'How to solve'); ?>
+                                        <?php } ?>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+
+
                             <?php
                             $status = $this->get_job_status();
                             $condition = $status == NewsletterSystemAdmin::JOB_OK ? 1 : 0;

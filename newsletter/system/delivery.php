@@ -51,9 +51,8 @@ if ($controls->is_action('test')) {
             }
 
             $controls->errors .= '<a href="https://www.thenewsletterplugin.com/documentation/?p=15170" target="_blank"><strong>' . __('Read more', 'newsletter') . '</strong></a>.<br>';
-            $controls->errors .= 'PLEASE REPORT ALL THE DATA ON THIS PAGE WHEN ASKING FOR SUPPORT, THANK YOU'.
-
-            $parts = explode('@', $newsletter->get_sender_email());
+            $controls->errors .= 'PLEASE REPORT ALL THE DATA ON THIS PAGE WHEN ASKING FOR SUPPORT, THANK YOU' .
+                    $parts = explode('@', $newsletter->get_sender_email());
             $sitename = strtolower($_SERVER['SERVER_NAME']);
             if (substr($sitename, 0, 4) == 'www.') {
                 $sitename = substr($sitename, 4);
@@ -144,6 +143,18 @@ if ($mailer instanceof NewsletterDefaultMailer) {
 }
 
 $speed = Newsletter::instance()->get_send_speed();
+$schedule = (bool) Newsletter::instance()->get_main_option('schedule');
+$schedule_start = Newsletter::instance()->get_main_option('schedule_start');
+$schedule_end = Newsletter::instance()->get_main_option('schedule_end');
+
+$tz = new DateTimeZone('gmt'); //::UTC;
+
+$mailer_name = $mailer->get_description();
+if ($mailer->get_name() === 'default') {
+    $mailer_description = 'Could be enhanced by an SMTP plugin.';
+} else {
+    $mailer_description = '';
+}
 ?>
 
 <style>
@@ -198,14 +209,47 @@ $speed = Newsletter::instance()->get_send_speed();
 
                     <div class="tnp-card">
                         <div class="tnp-card-header">
-                            <div class="tnp-card-title"><?php esc_html_e('In error', 'newsletter') ?></div>
+                            <div class="tnp-card-title"><?php esc_html_e('Stopped by errors', 'newsletter') ?></div>
                         </div>
                         <div class="tnp-card-value"><?php echo (int) count($error_emails); ?></div>
                         <div class="tnp-card-description">Newsletters</div>
                     </div>
 
+                </div>
 
+                <div class="tnp-cards-container">
+                    <div class="tnp-card">
+                        <div class="tnp-card-header">
+                            <div class="tnp-card-title"><?php esc_html_e('Speed', 'newsletter') ?></div>
+                            <div class="tnp-card-upper-buttons"><a href="?page=newsletter_main_main"><i class="fas fa-cog"></i></a></div>
+                        </div>
+                        <div class="tnp-card-value"><?php echo (int) $speed ?></div>
+                        <div class="tnp-card-description">Emails per hour</div>
+                    </div>
 
+                    <div class="tnp-card">
+                        <div class="tnp-card-header">
+                            <div class="tnp-card-title"><?php esc_html_e('Mailer', 'newsletter') ?></div>
+                        </div>
+                        <div class="tnp-card-value"><?php echo esc_html($mailer_name); ?></div>
+                        <div class="tnp-card-description"><?php echo esc_html($mailer_description); ?></div>
+                    </div>
+
+                    <div class="tnp-card">
+                        <div class="tnp-card-header">
+                            <div class="tnp-card-title"><?php esc_html_e('Sending time window', 'newsletter') ?></div>
+                            <div class="tnp-card-upper-buttons"><a href="?page=newsletter_main_main"><i class="fas fa-cog"></i></a></div>
+                        </div>
+                        <div class="tnp-card-value">
+                            <?php if ($schedule) { ?>
+                                <?php echo wp_date(get_option('time_format'), $schedule_start * HOUR_IN_SECONDS, $tz); ?> -
+                                <?php echo wp_date(get_option('time_format'), $schedule_end * HOUR_IN_SECONDS, $tz); ?>
+                            <?php } else { ?>
+                                Always
+                            <?php } ?>
+                        </div>
+                        <div class="tnp-card-description"></div>
+                    </div>
                 </div>
 
                 <div class="tnp-cards-container">
@@ -265,13 +309,13 @@ $speed = Newsletter::instance()->get_send_speed();
 
                                 </tr>
                                 <tr>
-                                    <td>Delivering</td>
+                                    <td>Sending</td>
                                     <td class="status">
                                         &nbsp;
                                     </td>
                                     <td>
                                         <?php if (count($emails)) { ?>
-                                            Delivering <?php echo count($emails) ?> newsletters to about <?php echo (int) $queued ?> recipients.
+                                            Sending <?php echo count($emails) ?> newsletters to about <?php echo (int) $queued ?> recipients.
                                             At speed of <?php echo (int) $speed ?> emails per hour it will take <?php esc_html(printf('%.1f', $queued / $speed)) ?> hours to finish.
 
                                         <?php } else { ?>
@@ -286,7 +330,7 @@ $speed = Newsletter::instance()->get_send_speed();
                                         &nbsp;
                                     </td>
                                     <td>
-                                        <?php echo esc_html($mailer->get_description()) ?>
+                                        <?php echo esc_html($mailer_name) ?>
                                     </td>
                                 </tr>
 

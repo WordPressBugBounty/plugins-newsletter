@@ -27,6 +27,7 @@ class NewsletterProfile extends NewsletterModule {
 
         if (!is_admin() || defined('DOING_AJAX') && DOING_AJAX) {
             add_shortcode('newsletter_export_button', [$this, 'shortcode_newsletter_export_button']);
+            add_shortcode('newsletter_profile_button', [$this, 'shortcode_newsletter_profile_button']);
         }
     }
 
@@ -43,6 +44,22 @@ class NewsletterProfile extends NewsletterModule {
         $label = empty($attrs['label']) ? __('Export your data', 'newsletter') : $attrs['label'];
 
         $b = '<form action="' . esc_attr($this->build_action_url('px')) . '" method="post" class="tnp-button-form tnp-export" target="_blank">';
+        $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
+        $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
+        $b .= '</form>';
+        return $b;
+    }
+
+
+    function shortcode_newsletter_profile_button($attrs, $content = '') {
+        $user = $this->get_current_user();
+
+        if (!$user || !$user->_trusted) {
+            return '';
+        }
+
+        $label = empty($attrs['label']) ? __('Profile edit', 'newsletter') : $attrs['label'];
+        $b = '<form action="' . esc_attr($this->build_action_url('profile')) . '" method="post" class="tnp-button-form tnp-profile">';
         $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
         $b .= '</form>';

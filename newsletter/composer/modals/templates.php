@@ -3,7 +3,7 @@ $emails_module = NewsletterEmails::instance();
 $user_preset_list = $emails_module->get_emails(NewsletterEmails::PRESET_EMAIL_TYPE);
 $templates = NewsletterComposer::instance()->get_templates();
 ?>
-<div id="templates-modal" aria-hidden="true" style="display: none; max-width: 80%;">
+<div id="templates-modal" aria-hidden="true" class="modal" style="min-width: 750px">
     <div class='tnpc-preset-container'>
 
         <?php if ($user_preset_list) { ?>
@@ -15,7 +15,7 @@ $templates = NewsletterComposer::instance()->get_templates();
                 <?php
                 foreach ($user_preset_list as $user_preset) {
 
-                    $default_icon_url = plugins_url('newsletter') . "/emails/presets/default-icon.png?ver=2";
+                    $default_icon_url = plugins_url('newsletter') . "/admin/images/template-icon.png?ver=" . NEWSLETTER_VERSION;
                     $preset_name = $user_preset->subject;
 
                     // esc_js() assumes the string will be in single quote (arghhh!!!)

@@ -13,6 +13,7 @@ require_once __DIR__ . '/emails/emails-admin.php';
 require_once __DIR__ . '/system/system-admin.php';
 require_once __DIR__ . '/statistics/statistics-admin.php';
 require_once __DIR__ . '/profile/profile-admin.php';
+require_once __DIR__ . '/composer/composer-admin.php';
 
 class NewsletterAdmin extends NewsletterModuleAdmin {
 
@@ -75,7 +76,8 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
         }
 
         NewsletterMainAdmin::instance()->wp_loaded();
-        NewsletterEmailsAdmin::instance()->wp_loaded();
+        //NewsletterEmailsAdmin::instance()->wp_loaded();
+        NewsletterComposerAdmin::instance()->wp_loaded();
 
         if (self::$is_admin_page) {
 
