@@ -336,7 +336,7 @@ class NewsletterComposerAdmin extends NewsletterModuleAdmin {
         $content = "<div class='tnpc-preset-container'>";
 
         if ($this->is_normal_context_request()) {
-            $content .= "<div class='tnpc-preset-legacy-themes'><a href='" . $this->get_admin_page_url('theme') . "'>" . __('Looking for legacy themes?', 'newsletter') . "</a></div>";
+            $content .= "<div class='tnpc-preset-legacy-themes'><a href='?page=newsletter_emails_theme'>" . __('Looking for legacy themes?', 'newsletter') . "</a></div>";
         }
 
         // LOAD USER PRESETS
