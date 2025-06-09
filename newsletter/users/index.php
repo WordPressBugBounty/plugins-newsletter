@@ -5,19 +5,16 @@
 
 defined('ABSPATH') || exit;
 
+$controls->data['search_page'] = (int) ($controls->data['search_page'] ?? 1);
+
 // Move to base zero
 if ($controls->is_action()) {
     if ($controls->is_action('reset')) {
-        $controls->data = array();
-    } else {
-        $controls->data['search_page'] = (int) $controls->data['search_page'] - 1;
+        $controls->data = ['search_page' => 1];
     }
     $this->save_options($controls->data, 'users_search');
 } else {
-    $controls->data = $this->get_options('users_search');
-    if (empty($controls->data['search_page'])) {
-        $controls->data['search_page'] = 0;
-    }
+    $controls->data = $this->get_main_options('users_search');
 }
 
 if ($controls->is_action('resend')) {
@@ -51,7 +48,7 @@ if ($controls->is_action('delete_selected')) {
 
 // We build the query condition
 $where = 'where 1=1';
-$query_args = array();
+$query_args = [];
 $text = trim($controls->get_value('search_text', ''));
 if ($text) {
     $query_args[] = '%' . $text . '%';
@@ -61,23 +58,24 @@ if ($text) {
     $where .= " and (id like %s or email like %s or name like %s or surname like %s)";
 }
 
-if (!empty($controls->data['search_status'])) {
-    if ('T' === $controls->data['search_status']) {
+$search_status = $controls->data['search_status'] ?? '';
+if ($search_status) {
+    if ('T' === $search_status) {
         $where .= " and test=1";
     } else {
-        $query_args[] = $controls->data['search_status'];
+        $query_args[] = $search_status;
         $where .= " and status=%s";
     }
 }
 
-$search_list = (int) $controls->data['search_list'] ?? 0;
+$search_list = (int) ($controls->data['search_list'] ?? 0);
 if ($search_list) {
     if ($search_list === -1) {
         for ($i = 1; $i <= NEWSLETTER_LIST_MAX; $i++) {
             $where .= ' and list_' . $i . '=0';
         }
     } else {
-        $where .= " and list_" . ((int) $controls->data['search_list']) . "=1";
+        $where .= " and list_" . $search_list . "=1";
     }
 }
 
@@ -89,10 +87,8 @@ if (!empty($query_args)) {
     $where = $wpdb->prepare($where, $query_args);
 }
 $count = Newsletter::instance()->store->get_count(NEWSLETTER_USERS_TABLE, $where);
-$last_page = floor($count / $items_per_page) - ($count % $items_per_page == 0 ? 1 : 0);
-if ($last_page < 0) {
-    $last_page = 0;
-}
+$last_page = ceil($count / $items_per_page);
+
 
 if ($controls->is_action('last')) {
     $controls->data['search_page'] = $last_page;
@@ -111,17 +107,16 @@ if ($controls->is_action('search')) {
 }
 
 // Eventually fix the page
-if (!isset($controls->data['search_page']) || $controls->data['search_page'] < 0)
-    $controls->data['search_page'] = 0;
+if ($controls->data['search_page'] < 1)
+    $controls->data['search_page'] = 1;
 if ($controls->data['search_page'] > $last_page)
     $controls->data['search_page'] = $last_page;
 
-$query = "select *, unix_timestamp(created) created_at from " . NEWSLETTER_USERS_TABLE . ' ' . $where . " order by id desc";
-$query .= " limit " . ($controls->data['search_page'] * $items_per_page) . "," . $items_per_page;
-$list = $wpdb->get_results($query);
+$offset = ($controls->data['search_page']-1)*$items_per_page;
 
-// Move to base 1
-$controls->data['search_page']++;
+$query = "select *, unix_timestamp(created) created_at from " . NEWSLETTER_USERS_TABLE . ' ' . $where . " order by id desc";
+$query .= " limit " . $offset . "," . $items_per_page;
+$list = $wpdb->get_results($query);
 
 $lists = $this->get_lists();
 
@@ -173,7 +168,7 @@ $lists_options['-1'] = __('Without list', 'newsletter');
 
                 <?php $controls->btn('first', '«', ['tertiary' => true]); ?>
                 <?php $controls->btn('prev', '‹', ['tertiary' => true]); ?>
-                <?php $controls->text('search_page', 3); ?> of <?php echo (int) ($last_page + 1) ?> <?php $controls->btn('go', __('Go', 'newsletter'), ['secondary' => true]); ?>
+                <?php $controls->text('search_page', 3); ?> of <?php echo $last_page; ?> <?php $controls->btn('go', __('Go', 'newsletter'), ['secondary' => true]); ?>
                 <?php $controls->btn('next', '›', ['tertiary' => true]); ?>
                 <?php $controls->btn('last', '»', ['tertiary' => true]); ?>
 

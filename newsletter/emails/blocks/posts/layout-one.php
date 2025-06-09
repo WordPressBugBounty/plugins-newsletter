@@ -34,7 +34,7 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
         padding: 15px 0;
     }
     .main-title {
-        <?php $main_title_style->echo_css(1.1)?>
+        <?php $main_title_style->echo_css(1.1) ?>
         padding: 0 0 20px 0;
         line-height: normal !important;
         letter-spacing: normal;
@@ -42,13 +42,13 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
 </style>
 
 <?php if (!empty($main_title)) { ?>
-<table border="0" cellspacing="0" cellpadding="0" width="100%">
-    <tr>
-        <td align="<?php echo esc_attr($options['main_title_align']) ?>" valign="middle" inline-class="main-title" dir="<?php echo esc_attr($dir) ?>">
-            <?php echo $main_title; ?>
-        </td>
-    </tr>
-</table>
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+        <tr>
+            <td align="<?php echo esc_attr($options['main_title_align']) ?>" valign="middle" inline-class="main-title" dir="<?php echo esc_attr($dir) ?>">
+                <?php echo $main_title; ?>
+            </td>
+        </tr>
+    </table>
 <?php } ?>
 
 <?php
@@ -57,7 +57,6 @@ global $authordata, $post;
 
 <?php foreach ($posts as $p) { ?>
     <?php
-
     // Setup the global variables like in a template loop (hope so...)
     $post = $p;
     $authordata = get_user_by('id', $post->post_author);
@@ -75,11 +74,10 @@ global $authordata, $post;
     $button_options['button_align'] = 'left';
     $items = [];
     ?>
-
     <?php if ($media) { ?>
         <?php ob_start(); ?>
 
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
             <tr>
                 <td style="padding-bottom: 20px;" width="100%">
                     <?php echo TNP_Composer::image($media, ['class' => 'fluid']) ?>
@@ -91,7 +89,7 @@ global $authordata, $post;
 
 
     <?php ob_start() ?>
-    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+    <table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">
         <?php if ($post->meta) { ?>
             <tr>
                 <td inline-class="meta" dir="<?php echo $dir ?>" align="<?php echo $align_left ?>">
@@ -102,14 +100,14 @@ global $authordata, $post;
 
         <tr>
             <td align="<?php echo $align_left ?>" inline-class="title-td">
-                <?php echo $post->title_linked ?>
+                <?php echo $post->title_linked; ?>
             </td>
         </tr>
 
         <?php if ($excerpt_length) { ?>
             <tr>
                 <td align="<?php echo $align_left ?>" inline-class="excerpt-td">
-                    <?php echo $post->excerpt_linked ?>
+                    <?php echo $post->excerpt_linked; ?>
                 </td>
             </tr>
         <?php } ?>

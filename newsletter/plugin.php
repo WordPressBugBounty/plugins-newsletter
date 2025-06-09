@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.8.7
+  Version: 8.8.9
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.8.7');
+define('NEWSLETTER_VERSION', '8.8.9');
 
 global $wpdb, $newsletter;
 
@@ -91,18 +91,18 @@ if (!defined('NEWSLETTER_FORMS_MAX'))
     define('NEWSLETTER_FORMS_MAX', 10);
 
 spl_autoload_register(function ($class) {
-    static $prefix = 'Newsletter\\';
     static $dir = __DIR__ . '/classes/';
 
-    $len = strlen($prefix);
-    if (strncmp($prefix, $class, $len) !== 0) {
-        return;
-    }
+    if (strncmp('Newsletter', $class, 10) === 0) {
+        $file = $dir . str_replace('\\', '/', $class) . '.php';
 
-    $file = $dir . str_replace('\\', '/', $class) . '.php';
-
-    if (file_exists($file)) {
-        require $file;
+        if (file_exists($file)) {
+//            if (NEWSLETTER_DEBUG) {
+//                $memory = size_format(memory_get_usage(), 1);
+//                error_log($memory . ' - Loading ' . $class);
+//            }
+            require $file;
+        }
     }
 });
 

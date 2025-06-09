@@ -66,13 +66,13 @@ if (empty($emails)) {
 <div class="wrap tnp-statistics tnp-statistics-index" id="tnp-wrap">
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
     <div id="tnp-heading">
-        <h2><?php esc_html_e('Overall basic statistics (last 20 newsletters)', 'newsletter') ?></h2>
+        <?php include __DIR__ . '/index-nav.php' ?>
     </div>
 
     <div id="tnp-body" class="tnp-statistics">
 
         <?php $controls->show() ?>
-
+        <p><?php esc_html_e('Overall basic statistics (last 20 newsletters)', 'newsletter') ?></p>
         <p>
             Full details, including Automated and Autoresponder newsletter statistics are available with the
             <a href="https://www.thenewsletterplugin.com/reports?utm_source=statistics&utm_campaign=plugin" target="_blank">Reports Addon</a>.

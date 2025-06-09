@@ -31,7 +31,7 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
         font-style: italic;
     }
     .main-title {
-        <?php $main_title_style->echo_css(1.1)?>
+        <?php $main_title_style->echo_css(1.1) ?>
         padding: 0 0 20px 0;
         line-height: normal !important;
         letter-spacing: normal;
@@ -39,13 +39,13 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
 </style>
 
 <?php if (!empty($main_title)) { ?>
-<table border="0" cellspacing="0" cellpadding="0" width="100%">
-    <tr>
-        <td align="<?php echo esc_attr($options['main_title_align']) ?>" valign="middle" inline-class="main-title" dir="<?php echo esc_attr($dir) ?>">
-            <?php echo $main_title; ?>
-        </td>
-    </tr>
-</table>
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+        <tr>
+            <td align="<?php echo esc_attr($options['main_title_align']) ?>" valign="middle" inline-class="main-title" dir="<?php echo esc_attr($dir) ?>">
+                <?php echo $main_title; ?>
+            </td>
+        </tr>
+    </table>
 <?php } ?>
 
 
@@ -63,13 +63,9 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
             $media->link = $post->url;
         }
     }
-
-
-
     ?>
-
     <?php if ($media) { ?>
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 20px" role="presentation">
             <tr>
                 <td align="center">
                     <?php echo TNP_Composer::image($media) ?>
@@ -78,16 +74,15 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
         </table>
     <?php } ?>
 
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" class="responsive" style="margin: 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" class="responsive" style="margin: 0;" role="presentation">
         <tr>
-            <td style="padding-left: <?php echo (int)$options['text_padding_left'] ?>px; padding-right: <?php echo (int)$options['text_padding_right'] ?>px">
+            <td style="padding-left: <?php echo (int) $options['text_padding_left'] ?>px; padding-right: <?php echo (int) $options['text_padding_right'] ?>px">
 
                 <table border="0" cellspacing="0" cellpadding="0" width="100%">
 
-
                     <tr>
                         <td align="<?php echo $align_left ?>" inline-class="title-td">
-                                <?php echo $post->title_linked ?>
+                            <?php echo $post->title_linked ?>
                         </td>
                     </tr>
 
@@ -122,7 +117,6 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
             </td>
         </tr>
     </table>
-
 <?php } ?>
 
 

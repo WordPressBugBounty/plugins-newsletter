@@ -20,7 +20,6 @@ array_walk($items, function ($item) {
     <?php include NEWSLETTER_ADMIN_HEADER ?>
 
     <div id="tnp-heading">
-        <h2><?php _e('Subscription', 'newsletter') ?></h2>
         <?php include __DIR__ . '/nav.php' ?>
     </div>
 

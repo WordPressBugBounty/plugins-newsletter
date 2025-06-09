@@ -37,7 +37,7 @@ $options['text'] = strip_tags($options['text'], '<br><span><b><strong><i><em>')
 <table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">
     <tr>
         <td align="<?php echo esc_attr($options['align']) ?>" valign="middle"  dir="<?php echo $dir ?>">
-            <div inline-class="title"><?php echo wp_kses_post($options['text']); ?></div>
+            <div inline-class="title" role="heading" aria-level="1"><?php echo wp_kses_post($options['text']); ?></div>
         </td>
     </tr>
 </table>

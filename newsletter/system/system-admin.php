@@ -326,7 +326,6 @@ class TNP_Cron_Stats {
     var $deltas_ts = [];
     /* If the cron is triggered enough often */
     var $good = true;
-
 }
 
 class TNP_Send_Stats {

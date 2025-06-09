@@ -27,7 +27,7 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
     }
 
     .meta {
-        <?php $text_style->echo_css(0.9) ?>
+        <?php $text_style->echo_css(0.9); ?>
         padding: 0 0 5px 0;
         line-height: normal !important;
         font-style: italic;
@@ -36,7 +36,7 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
         padding: 15px 0;
     }
     .main-title {
-        <?php $main_title_style->echo_css(1.1)?>
+        <?php $main_title_style->echo_css(1.1); ?>
         padding: 0 0 20px 0;
         line-height: normal !important;
         letter-spacing: normal;
@@ -81,7 +81,7 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
             <td valign="top" style="padding: 20px 0 25px 0;">
 
                 <?php if ($media) { ?>
-                    <table width="<?php echo $column_width ?>" cellpadding="0" cellspacing="0" border="0" align="left" style="margin: 0;" class="responsive">
+                    <table width="<?php echo $column_width ?>" cellpadding="0" cellspacing="0" border="0" align="left" style="margin: 0;" class="responsive" role="presentation">
                         <tr>
                             <td class="pb-1">
                                 <?php echo TNP_Composer::image($media, ['class' => 'fluid']) ?>

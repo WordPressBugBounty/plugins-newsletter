@@ -90,9 +90,9 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                     <a href="?page=newsletter_subscription_options"><?php esc_html_e('Settings', 'newsletter') ?></a>
                 </li>
 
-<!--                <li>
-                    <a href="?page=newsletter_subscription_sources"><?php esc_html_e('Forms', 'newsletter') ?></a>
-                </li>-->
+                <!--                <li>
+                                    <a href="?page=newsletter_subscription_sources"><?php esc_html_e('Forms', 'newsletter') ?></a>
+                                </li>-->
 
                 <li>
                     <a href="?page=newsletter_subscription_lists"><?php esc_html_e('Lists', 'newsletter') ?></a>
@@ -128,9 +128,17 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                     <a href="?page=newsletter_emails_presets"><?php esc_html_e('Templates', 'newsletter') ?></a>
                 </li>
 
-                <li>
-                    <a href="<?php echo NewsletterStatisticsAdmin::instance()->get_index_url() ?>"><?php _e('Statistics', 'newsletter') ?></a>
-                </li>
+
+                <?php if (class_exists('NewsletterReports')) { ?>
+                    <li><a href="?page=newsletter_reports_index"><?php esc_html_e('Statistics', 'newsletter') ?></a></li>
+                    <?php if (NEWSLETTER_DEBUG) { ?>
+                        <li><a href="?page=newsletter_statistics_index">Statistics (base)</a></li>
+                    <?php } ?>
+                <?php } else { ?>
+                    <li><a href="?page=newsletter_statistics_index"><?php esc_html_e('Statistics', 'newsletter') ?></a></li>
+                <?php } ?>
+
+
 
                 <?php newsletter_print_entries('newsletters') ?>
             </ul>
@@ -181,7 +189,7 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
 
                     <li><a href="?page=newsletter_system_scheduler"><?php esc_html_e('Scheduler', 'newsletter') ?></a></li>
 
-                    <li><a href="?page=newsletter_system_delivery"><?php esc_html_e('Delivery', 'newsletter') ?></a></li>
+                    <li><a href="?page=newsletter_system_delivery"><?php esc_html_e('Sending', 'newsletter') ?></a></li>
 
                     <?php if (class_exists('NewsletterExtensions')) { ?>
                         <li>

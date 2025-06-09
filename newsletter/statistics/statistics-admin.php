@@ -26,6 +26,7 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
 
     function admin_menu() {
         $this->add_admin_page('index', 'Statistics');
+        $this->add_admin_page('newsletters', 'Statistics');
         $this->add_admin_page('view', 'Statistics');
         $this->add_admin_page('users', 'Statistics');
         $this->add_admin_page('urls', 'Statistics');

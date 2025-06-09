@@ -35,7 +35,7 @@ $title_style = TNP_Composer::get_text_style($options, '', $composer);
 </style>
 <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
-        <td valign="top" align="center" inline-class="html-td" class="html-td-global">
+        <td valign="top" inline-class="html-td" class="html-td-global">
             <?php echo $options['html'] ?>
         </td>
     </tr>

@@ -382,13 +382,14 @@ if (is_wp_error($license_data)) {
                             <tr>
                                 <th><?php esc_html_e('Custom styles', 'newsletter') ?></th>
                                 <td>
+                                    <p class="description">
+                                        Styles added to the site for the subscription and profile editing forms.
+                                    </p>
                                     <?php if (apply_filters('newsletter_enqueue_style', true) === false) { ?>
                                         <p><strong>Warning: Newsletter styles and custom styles are disable by your theme or a plugin.</strong></p>
                                     <?php } ?>
                                     <?php $controls->textarea('css'); ?>
-                                    <p class="description">
-                                        Styles added to the site for the subscription and profile editing forms.
-                                    </p>
+
                                 </td>
                             </tr>
 

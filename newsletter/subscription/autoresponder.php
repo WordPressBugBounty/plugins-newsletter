@@ -12,7 +12,6 @@ defined('ABSPATH') || exit;
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription') ?>
-        <h2><?php esc_html_e('Subscription', 'newsletter') ?></h2>
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>

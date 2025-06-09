@@ -1349,7 +1349,7 @@ span.tnp-user-status {
     The head section of each administration page with title and introduction
 */
 #tnp-heading {
-    padding: 1rem 0px;
+    padding: .5rem 0px;
     margin-bottom: 1.2rem;
     margin-left: -20px;
     margin-right: -20px;
@@ -1497,9 +1497,9 @@ span.tnp-user-status {
 
 
 /* For pages that need a sub menu */
-#tnp-heading .tnp-nav {
+#tnp-heading ul.tnp-nav {
     /*background-color: var(--tnp-gray);*/
-    padding: 5px 0 0 0;
+    padding: 0;
     width: fit-content;
     font-size: 0; /* To rmeove the element spacing */
     line-height: normal;
@@ -1523,7 +1523,7 @@ span.tnp-user-status {
 #tnp-heading .tnp-nav li a:visited,
 #tnp-heading .tnp-nav li a:active,
 #tnp-heading .tnp-nav li.tnp-nav-title {
-    font-size: 1rem;
+    font-size: .9rem;
     color: var(--tnp-text) !important;
     /*color: #ddd !important;*/
     /*display: inline-block;*/
@@ -1537,13 +1537,13 @@ span.tnp-user-status {
 }
 
 #tnp-heading .tnp-nav li.tnp-nav-title {
-    color: var(--tnp-title);
     font-size: .8rem;
     /*line-height: normal;*/
     /*vertical-align: middle;*/
     font-weight: normal;
     padding: 0;
     margin: 0px;
+    margin-left: -20px;
     /*margin-bottom: .5rem;*/
     text-transform: uppercase;
     background-color: var(--tnp-green);
@@ -1556,6 +1556,18 @@ span.tnp-user-status {
     padding-left: .5rem;
 }
 
+#tnp-heading ul.tnp-nav li.tnp-nav-title a {
+    color: #fff !important;
+    font-size: .9rem;
+    text-decoration: none;
+}
+
+/* The "back" entry */
+#tnp-heading ul.tnp-nav li.tnp-nav-title a i {
+    display: inline-block;
+    margin: 0 .5em;
+}
+
 #tnp-heading .tnp-nav li.active {
     /*background-color: #fff !important;*/
     /*border-left: 1px solid transparent;*/
@@ -1563,10 +1575,10 @@ span.tnp-user-status {
 
 #tnp-heading .tnp-nav li.active a {
     /*color: var(--tnp-text) !important;*/
-    color: #000 !important;
-    font-weight: normal !important;
+    /*color: #000 !important;*/
+    font-weight: bolder !important;
     display: inline-block;
-    border-bottom: 3px solid var(--tnp-title);
+    /*border-bottom: 3px solid var(--tnp-title);*/
 }
 
 /*#tnp-heading .tnp-nav-title {
@@ -1588,7 +1600,55 @@ span.tnp-user-status {
     border-radius: 5px;
     position: relative;
     top: -5px;
-}#tnp-footer {
+}
+
+
+#tnp-heading .tnp-nav li.tnp-nav-badge {
+    background-color: transparent;
+    /*border: 1px solid #999;*/
+    font-weight: normal !important;
+    display: inline-block;
+    padding: .3rem 1rem;
+    font-size: .75rem;
+    border-radius: 7px;
+    /*vertical-align: middle;*/
+    color: #444 !important;
+    /*margin-left: 2em;*/
+    box-shadow: 0 0 3px #ccc;
+}
+
+#tnp-heading .tnp-nav li.tnp-nav-badge.green
+{
+    /*background-color: green;*/
+    border: 1px solid green;
+    font-weight: normal;
+    /*color: #fff !important;*/
+}
+
+#tnp-heading .tnp-nav li.tnp-nav-badge.red
+{
+    /*background-color: red;*/
+    border: 1px solid red;
+    font-weight: normal;
+    /*color: #fff !important;*/
+}
+
+#tnp-heading .tnp-nav li.tnp-nav-badge.orange
+{
+    /*background-color: var(--tnp-orange);*/
+    border: 1px solid var(--tnp-orange);
+    font-weight: normal;
+    color: #444 !important;
+}
+
+#tnp-heading .tnp-nav li.tnp-nav-badge.blue
+#tnp-heading h2 span.tnp-badge-blue a {
+    /*background-color: var(--tnp-blue);*/
+    border: 1px solid var(--tnp-blue);
+    font-weight: normal;
+    /*color: #fff !important;*/
+}
+#tnp-footer {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;

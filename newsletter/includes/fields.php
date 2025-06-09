@@ -576,7 +576,7 @@ class NewsletterFields {
             }
         }
 
-        $args = array_merge(array('filters' => array(
+        $args = array_merge_recursive(array('filters' => array(
                 'posts_per_page' => 5,
                 'offset' => 0,
                 'category' => '',
