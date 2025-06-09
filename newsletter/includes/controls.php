@@ -1071,15 +1071,12 @@ class NewsletterControls {
 
         $confirm = $attrs['confirm'] ?? false;
 
-        // Patch
-        if (is_string($confirm) && empty($confirm)) {
-            $confirm = true;
+        if ($confirm === true || is_string($confirm) && empty($confirm)) {
+            $confirm = __('Proceed?', 'newsletter');
         }
 
-        if (is_string($attrs['confirm'])) {
-            $onclick .= "if (!confirm('" . esc_attr(esc_js($attrs['confirm'])) . "')) return false;";
-        } elseif ($confirm) {
-            $onclick .= "if (!confirm('" . esc_attr(esc_js(__('Proceed?', 'newsletter'))) . "')) return false;";
+        if ($confirm) {
+            $onclick .= "if (!confirm('" . esc_attr(esc_js($confirm)) . "')) return false;";
         }
 
         echo ' onclick="', esc_attr($onclick), '"';
@@ -1266,12 +1263,12 @@ class NewsletterControls {
         }
     }
 
-    function button_confirm($action, $label, $message = true, $data = '') {
-        $this->btn($action, $label, ['data' => $data, 'confirm' => $message]);
+    function button_confirm($action, $label, $confirm = true, $data = '') {
+        $this->btn($action, $label, ['data' => $data, 'confirm' => $confirm]);
     }
 
-    function button_confirm_secondary($action, $label, $message = true, $data = '') {
-        $this->btn($action, $label, ['data' => $data, 'confirm' => $message, 'secondary' => true]);
+    function button_confirm_secondary($action, $label, $confirm = true, $data = '') {
+        $this->btn($action, $label, ['data' => $data, 'confirm' => $confirm, 'secondary' => true]);
     }
 
     /**
