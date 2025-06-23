@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.9.0
+  Version: 8.9.1
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.9.0');
+define('NEWSLETTER_VERSION', '8.9.1');
 
 global $wpdb, $newsletter;
 
@@ -335,6 +335,10 @@ class Newsletter extends NewsletterModule {
      */
     function setup_language() {
 
+        if (defined('NEWSLETTER_MULTILANGUAGE') && !NEWSLETTER_MULTILANGUAGE) {
+            return;
+        }
+
         self::$is_multilanguage = apply_filters('newsletter_is_multilanguage', class_exists('SitePress') || function_exists('pll_default_language') || class_exists('TRP_Translate_Press'));
 
         if (self::$is_multilanguage) {
@@ -344,6 +348,10 @@ class Newsletter extends NewsletterModule {
     }
 
     static function _get_current_language() {
+
+        if (defined('NEWSLETTER_MULTILANGUAGE') && !NEWSLETTER_MULTILANGUAGE) {
+            return '';
+        }
 
         // WPML
         if (class_exists('SitePress')) {

@@ -39,7 +39,7 @@ if (!$controls->is_action()) {
                 $controls->data['scheduler_max'] = 12;
             }
 
-            $controls->data['max_per_second'] = (int) $controls->data['max_per_second'];
+            $controls->data['max_per_second'] = (float) $controls->data['max_per_second'];
             if ($controls->data['max_per_second'] <= 0) {
                 $controls->data['max_per_second'] = 0;
             }
@@ -301,8 +301,12 @@ if (is_wp_error($license_data)) {
                                     <?php $controls->field_help('/installation/newsletter-configuration/#speed') ?>
                                 </th>
                                 <td>
-                                    <?php $controls->text('max_per_second', 5); ?>
-                                    <span class="description"><?php esc_html_e('0 for unlimited', 'newsletter') ?></span>
+                                    <?php if (defined('NEWSLETTER_SEND_DELAY')) { ?>
+                                        Delay set to <?php echo esc_html(NEWSLETTER_SEND_DELAY); ?> in <code>wp-config.php</code>
+                                    <?php } else { ?>
+                                        <?php $controls->text('max_per_second', 5); ?>
+                                        <span class="description"><?php esc_html_e('0 for unlimited', 'newsletter') ?></span>
+                                    <?php } ?>
                                 </td>
                             </tr>
 
@@ -312,7 +316,7 @@ if (is_wp_error($license_data)) {
                                     <?php $controls->enabled('schedule'); ?>
 
                                     <span data-tnpshow="schedule=1">
-                                    from <?php $controls->hours('schedule_start'); ?> to <?php $controls->hours('schedule_end'); ?>
+                                        from <?php $controls->hours('schedule_start'); ?> to <?php $controls->hours('schedule_end'); ?>
                                     </span>
 
                                     <p class="description">

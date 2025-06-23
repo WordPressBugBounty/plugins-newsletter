@@ -239,6 +239,11 @@ class NewsletterModuleBase {
      * An empty array is returned if no language is available.
      */
     static function get_languages() {
+
+        if (defined('NEWSLETTER_MULTILANGUAGE') && !NEWSLETTER_MULTILANGUAGE) {
+            return [];
+        }
+
         $language_options = [];
 
         // WPML

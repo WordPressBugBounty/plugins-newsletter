@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.8.1
-Stable tag: 8.9.0
+Stable tag: 8.9.1
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -128,6 +128,14 @@ Thank you, The Newsletter Team
 3. The Reports extension
 
 == Changelog ==
+
+= 8.9.1 =
+
+* Fixed max emails per second to be a decimal number less than 1
+* Fixed subscribers pagination when the database is empty
+* Improved "controls" for post selection
+* Added the NEWSLETTER_MULTILANGUAGE constant: when set to false the multilanguage features are disabled
+* Added the NEWSLETTER_SEND_DELAY constant (see our documentation)
 
 = 8.9.0 =
 

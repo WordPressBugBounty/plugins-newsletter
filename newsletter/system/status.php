@@ -1326,7 +1326,7 @@ function tnp_describe_table($table) {
                             <tr>
                                 <td>NEWSLETTER_SEND_DELAY</td>
                                 <td>
-                                    <?php echo esc_html(NEWSLETTER_SEND_DELAY) ?> (seconds)
+                                    <?php echo esc_html(NEWSLETTER_SEND_DELAY) ?> (milliseconds)
                                 </td>
                             </tr>
                             <tr>
@@ -1373,6 +1373,13 @@ function tnp_describe_table($table) {
                                 <td>NEWSLETTER_USE_POST_GALLERY</td>
                                 <td>
                                     <?php echo NEWSLETTER_USE_POST_GALLERY ? 'true' : 'false' ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>NEWSLETTER_MULTILANGUAGE</td>
+                                <td>
+                                    <?php echo defined('NEWSLETTER_MULTILANGUAGE') ? (NEWSLETTER_MULTILANGUAGE ? 'true' : 'false') : 'false'; ?>
                                 </td>
                             </tr>
 

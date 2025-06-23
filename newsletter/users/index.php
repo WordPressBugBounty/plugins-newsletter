@@ -87,23 +87,23 @@ if (!empty($query_args)) {
     $where = $wpdb->prepare($where, $query_args);
 }
 $count = Newsletter::instance()->store->get_count(NEWSLETTER_USERS_TABLE, $where);
-$last_page = ceil($count / $items_per_page);
 
+$last_page = max(1, ceil($count / $items_per_page));
 
 if ($controls->is_action('last')) {
     $controls->data['search_page'] = $last_page;
 }
 if ($controls->is_action('first')) {
-    $controls->data['search_page'] = 0;
+    $controls->data['search_page'] = 1;
 }
 if ($controls->is_action('next')) {
-    $controls->data['search_page'] = (int) $controls->data['search_page'] + 1;
+    $controls->data['search_page'] = $controls->data['search_page'] + 1;
 }
 if ($controls->is_action('prev')) {
-    $controls->data['search_page'] = (int) $controls->data['search_page'] - 1;
+    $controls->data['search_page'] = $controls->data['search_page'] - 1;
 }
 if ($controls->is_action('search')) {
-    $controls->data['search_page'] = 0;
+    $controls->data['search_page'] = 1;
 }
 
 // Eventually fix the page
@@ -112,7 +112,7 @@ if ($controls->data['search_page'] < 1)
 if ($controls->data['search_page'] > $last_page)
     $controls->data['search_page'] = $last_page;
 
-$offset = ($controls->data['search_page']-1)*$items_per_page;
+$offset = ($controls->data['search_page'] - 1) * $items_per_page;
 
 $query = "select *, unix_timestamp(created) created_at from " . NEWSLETTER_USERS_TABLE . ' ' . $where . " order by id desc";
 $query .= " limit " . $offset . "," . $items_per_page;
@@ -220,13 +220,13 @@ $lists_options['-1'] = __('Without list', 'newsletter');
                         <td>
                             <?php if (!empty($controls->data['show_lists'])) { ?>
                                 <small><?php
-                                foreach ($lists as $item) {
-                                    $l = 'list_' . $item->id;
-                                    if ($s->$l == 1)
-                                        echo esc_html($item->name) . '<br>';
-                                }
-                                ?></small>
-                                <?php } ?>
+                                    foreach ($lists as $item) {
+                                        $l = 'list_' . $item->id;
+                                        if ($s->$l == 1)
+                                            echo esc_html($item->name) . '<br>';
+                                    }
+                                    ?></small>
+                            <?php } ?>
                         </td>
 
                         <td>
