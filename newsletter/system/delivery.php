@@ -366,7 +366,11 @@ if ($mailer->get_name() === 'default') {
                                         &nbsp;
                                     </td>
                                     <td>
-                                        <?php echo esc_html(NEWSLETTER_SEND_DELAY) ?> milliseconds
+                                        <?php if (defined('NEWSLETTER_SEND_DELAY')) { ?>
+                                            <?php echo esc_html(NEWSLETTER_SEND_DELAY) ?> milliseconds
+                                        <?php } else { ?>
+                                            Not set
+                                        <?php } ?>
                                     </td>
                                 </tr>
                             </tbody>

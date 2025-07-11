@@ -14,9 +14,11 @@ if (!$controls->is_action()) {
 
         if (!$language) {
 
-            $css = $controls->data['css'];
-            $controls->data = wp_kses_post_deep($controls->data);
-            $controls->data['css'] = $css;
+            if (!$this->is_html_allowed()) {
+                $css = $controls->data['css'];
+                $controls->data = wp_kses_post_deep($controls->data);
+                $controls->data['css'] = $css;
+            }
 
             if (preg_match('#</?\w+#', $css)) {
                 $controls->errors .= __('Invalid CSS', 'newsletter') . '<br>';
@@ -39,9 +41,13 @@ if (!$controls->is_action()) {
                 $controls->data['scheduler_max'] = 12;
             }
 
-            $controls->data['max_per_second'] = (float) $controls->data['max_per_second'];
-            if ($controls->data['max_per_second'] <= 0) {
-                $controls->data['max_per_second'] = 0;
+            if (defined('NEWSLETTER_SEND_DELAY')) {
+                $controls->data['max_per_second'] = (float) $controls->data['max_per_second'];
+            } else {
+                $controls->data['max_per_second'] = (float) $controls->data['max_per_second'];
+                if ($controls->data['max_per_second'] <= 0) {
+                    $controls->data['max_per_second'] = 0;
+                }
             }
 
             if (!$this->is_email($controls->data['reply_to'], true)) {

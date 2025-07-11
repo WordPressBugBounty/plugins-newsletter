@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.9.1
+  Version: 8.9.2
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.9.1');
+define('NEWSLETTER_VERSION', '8.9.2');
 
 global $wpdb, $newsletter;
 
@@ -59,8 +59,8 @@ if (!defined('NEWSLETTER_SENT_TABLE'))
 if (!defined('NEWSLETTER_LOGS_TABLE'))
     define('NEWSLETTER_LOGS_TABLE', $wpdb->prefix . 'newsletter_logs');
 
-if (!defined('NEWSLETTER_SEND_DELAY'))
-    define('NEWSLETTER_SEND_DELAY', 0);
+//if (!defined('NEWSLETTER_SEND_DELAY'))
+//    define('NEWSLETTER_SEND_DELAY', 0);
 
 if (!defined('NEWSLETTER_USE_POST_GALLERY'))
     define('NEWSLETTER_USE_POST_GALLERY', false);
@@ -539,8 +539,8 @@ class Newsletter extends NewsletterModule {
      * @return int Milliseconds
      */
     function get_send_delay() {
-        if (NEWSLETTER_SEND_DELAY) {
-            return NEWSLETTER_SEND_DELAY;
+        if (defined('NEWSLETTER_SEND_DELAY')) {
+            return (int)NEWSLETTER_SEND_DELAY;
         }
         $max = (float) $this->get_main_option('max_per_second');
         if ($max > 0) {
@@ -561,6 +561,10 @@ class Newsletter extends NewsletterModule {
             $hour = gmdate('G') + get_option('gmt_offset');
             $start = (int) $this->get_main_option('schedule_start');
             $end = (int) $this->get_main_option('schedule_end');
+            $end--; // Stop at the starting of the hour
+
+            $this->logger->debug('Start: ' . $start);
+            $this->logger->debug('End: ' . $end);
 
             $skip = $hour < $start || $hour > $end;
             $this->logger->debug('Skip: ' . ($skip ? 'true' : 'false'));

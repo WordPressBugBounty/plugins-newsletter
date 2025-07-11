@@ -1326,7 +1326,11 @@ function tnp_describe_table($table) {
                             <tr>
                                 <td>NEWSLETTER_SEND_DELAY</td>
                                 <td>
-                                    <?php echo esc_html(NEWSLETTER_SEND_DELAY) ?> (milliseconds)
+                                    <?php if (defined('NEWSLETTER_SEND_DELAY')) { ?>
+                                        <?php echo esc_html(NEWSLETTER_SEND_DELAY) ?> milliseconds
+                                    <?php } else { ?>
+                                        Not set
+                                    <?php } ?>
                                 </td>
                             </tr>
                             <tr>

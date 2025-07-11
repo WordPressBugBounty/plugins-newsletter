@@ -429,9 +429,10 @@ table.clicks {
 }
 
 .tnp-tab-notice {
-    padding: 15px;
+    padding: 1rem;
     border: 1px dashed #999;
     background-color: var(--tnp-blue-lighter);
+    margin-bottom: 1rem;
 }
 
 .tnp-tab-warning {
