@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
-Tested up to: 6.8.1
-Stable tag: 8.9.2
+Tested up to: 6.8.2
+Stable tag: 8.9.3
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -129,12 +129,17 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 8.9.3 =
+
+* Fixed deprecated PHP function
+* Fixed excerpt with non breakable spaces
+
 = 8.9.2 =
 
 * Fixed wrong escape on sender name
 * Fixed notice when NEWSLETTER_SEND_DELAY is set
 * Fixed max emails per seconds option
-* Changed the sending window 
+* Changed the sending window
 
 = 8.9.1 =
 

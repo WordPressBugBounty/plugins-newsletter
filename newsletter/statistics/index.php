@@ -36,7 +36,7 @@ foreach ($emails as $email) {
     $report->open_count += $data->open_count;
     $report->click_count += $data->click_count;
 
-    $overview_labels[] = strftime('%a, %e %b %y', $email->send_on);
+    $overview_labels[] = wp_date(get_option('date_format'), $email->send_on);
     //$overview_labels[] = mb_substr($email->subject, 0, 10) . '...';
 
     $overview_open_rate[] = $data->open_rate;

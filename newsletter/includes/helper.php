@@ -47,7 +47,7 @@ function tnp_post_thumbnail_src($post, $size = 'thumbnail', $alternative = '') {
 $tnp_excerpt_length = 0;
 
 function tnp_excerpt_length($length) {
-    
+
     global $tnp_excerpt_length;
     return $tnp_excerpt_length;
 }
@@ -74,7 +74,7 @@ function tnp_post_excerpt($post, $length = 30, $characters = false) {
 
     $excerpt = tnp_delete_all_shordcodes_tags($excerpt);
     $excerpt = trim($excerpt);
-    $excerpt = str_replace('&nbsp;', '', $excerpt);
+    $excerpt = str_replace('&nbsp;', ' ', $excerpt);
 
     if ($characters) {
         if (mb_strlen($excerpt) > $length) {
@@ -458,8 +458,8 @@ function tnp_composer_block_posts_get_media($post, $size, $default_image_url = n
         Newsletter::instance()->logger->error('Thumbnail id not found');
         $media = new TNP_Media();
         $media->url = $default_image_url;
-        $media->width = $size['width'];
-        $media->height = $size['height'];
+        $media->width = $size['width'] ?? 600;
+        $media->height = $size['height'] ?? 0;
     }
     return $media;
 }
