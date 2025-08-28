@@ -9,7 +9,7 @@ if (!$controls->is_action()) {
 
     $controls->data = $this->get_options('', $language);
 
-    $email = Newsletter::instance()->get_email($controls->data['welcome_email_id'] ?? 0);
+    $email = $this->get_email($controls->data['welcome_email_id'] ?? 0);
 
     if (!$email) {
         $email = NewsletterComposer::instance()->build_email_from_template('welcome-1');
@@ -17,7 +17,7 @@ if (!$controls->is_action()) {
 
         $email->subject = $this->get_default_text('confirmed_subject');
 
-        $email = NewsletterEmails::instance()->save_email($email);
+        $email = $this->save_email($email);
         $controls->data['welcome_email_id'] = $email->id;
         $controls->data['welcome_email'] = '';
         $this->save_options($controls->data, '', $language);

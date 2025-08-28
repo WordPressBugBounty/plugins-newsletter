@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.9.3
+  Version: 8.9.4
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.9.3');
+define('NEWSLETTER_VERSION', '8.9.4');
 
 global $wpdb, $newsletter;
 
@@ -774,6 +774,7 @@ class Newsletter extends NewsletterModule {
                     // For fatal error, the newsletter status i changed to error (and the delivery stopped)
                     if (!$test && $r->get_error_code() == NewsletterMailer::ERROR_FATAL) {
                         $this->set_error_state_of_email($email, $r->get_error_message());
+                        $this->notify_fatal_error($email, $r->get_error_message());
                         return $r;
                     }
                 }
@@ -826,6 +827,7 @@ class Newsletter extends NewsletterModule {
 
                     if (!$test && $r->get_error_code() == NewsletterMailer::ERROR_FATAL) {
                         $this->set_error_state_of_email($email, $r->get_error_message());
+                        $this->notify_fatal_error($email, $r->get_error_message());
                         return $r;
                     }
                 }
@@ -868,6 +870,22 @@ class Newsletter extends NewsletterModule {
     }
 
     /**
+     * Attempts to notify a sending fatal error usding wp_mail().
+     *
+     * The function does not usethe current mailer, since the connected service is probably
+     * not working.
+     *
+     * @param TNP_Email $email
+     * @param type $error
+     */
+    function notify_fatal_error($email, $error) {
+        $to = get_option('admin_email');
+        $title = get_option('blogname');
+        wp_mail($to, '[' . $title . '] Fatal error while sending a newsletter',
+                'Please check the Newsletter plugin Help/Sending for more details. The error description is: ' . $error);
+    }
+
+    /**
      * @param TNP_Email $email
      */
     private function set_error_state_of_email($email, $message = '') {
@@ -878,7 +896,7 @@ class Newsletter extends NewsletterModule {
 
         do_action('newsletter_error_on_sending', $email, $message);
 
-        $edited_email = new TNP_Email();
+        $edited_email = new stdClass();
         $edited_email->id = $email->id;
         $edited_email->status = TNP_Email::STATUS_ERROR;
         $edited_email->options = $email->options;

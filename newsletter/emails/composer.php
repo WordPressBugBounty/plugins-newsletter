@@ -38,7 +38,7 @@ if ($controls->is_action()) {
 
         TNP_Composer::update_email($email, $controls);
 
-        $email = $this->save_email($email, OBJECT, true);
+        $email = $this->save_email($email);
         if ($controls->is_action('preview')) {
             $redirect = '?page=newsletter_emails_edit';
         } else {
@@ -49,19 +49,11 @@ if ($controls->is_action()) {
     } else {
         $logger->info('Saving newsletter ' . $_GET['id'] . ' from composer');
         $email = $this->get_email($_GET['id']);
-        if ($email->updated != $controls->data['updated']) {
-            $controls->errors = 'This newsletter has been modified by someone else. Cannot save.';
-            if (!empty($email->options['sender_email'])) {
-                $controls->data['sender_email'] = $email->options['sender_email'];
-            } else {
-                $controls->data['sender_email'] = Newsletter::instance()->get_sender_email();
-            }
 
-            if (!empty($email->options['sender_name'])) {
-                $controls->data['sender_name'] = $email->options['sender_name'];
-            } else {
-                $controls->data['sender_name'] = Newsletter::instance()->get_sender_name();
-            }
+        if ($email->status == TNP_Email::STATUS_SENDING) {
+            $controls->errors = 'The newsletter is "sending" cannot be modified.';
+        } elseif ($email->updated != $controls->data['updated']) {
+            $controls->errors = 'This newsletter has been modified by someone else, cannot save. Do you have another tab editing this newsletter?';
         } else {
             TNP_Composer::update_email($email, $controls);
 
@@ -74,7 +66,7 @@ if ($controls->is_action()) {
 
             $email->updated = time();
 
-            $email = $this->save_email($email, OBJECT, true);
+            $email = $this->save_email($email);
 
             if (is_wp_error($email)) {
                 $controls->errors = $email->get_error_message();
@@ -84,6 +76,18 @@ if ($controls->is_action()) {
                     $controls->add_toast_saved();
                 }
             }
+        }
+
+        if (!empty($email->options['sender_email'])) {
+            $controls->data['sender_email'] = $email->options['sender_email'];
+        } else {
+            $controls->data['sender_email'] = Newsletter::instance()->get_sender_email();
+        }
+
+        if (!empty($email->options['sender_name'])) {
+            $controls->data['sender_name'] = $email->options['sender_name'];
+        } else {
+            $controls->data['sender_name'] = Newsletter::instance()->get_sender_name();
         }
     }
 
@@ -112,6 +116,9 @@ if ($controls->is_action()) {
 
     if (!empty($_GET['id'])) {
         $email = NewsletterAdmin::instance()->get_email((int) $_GET['id']);
+        if ($email && $email->status == TNP_Email::STATUS_SENDING) {
+            die('That newsletter is already sending, cannot be edited');
+        }
     }
     TNP_Composer::prepare_controls($controls, $email);
 }
@@ -151,7 +158,7 @@ if ($controls->is_action()) {
 
             <?php $controls->composer_fields_v2(); ?>
 
-            <?php //$controls->button('update_preset', __('Update preset', 'newsletter'), 'tnpc_update_preset(this.form)', 'update-preset-button'); ?>
+            <?php //$controls->button('update_preset', __('Update preset', 'newsletter'), 'tnpc_update_preset(this.form)', 'update-preset-button');  ?>
             <?php //$controls->button('save_preset', __('Save as preset', 'newsletter'), 'tnpc_save_preset(this.form)', 'save-preset-button'); ?>
             <?php $controls->button_confirm_secondary('reset', __('Back to last save', 'newsletter'), 'Are you sure?'); ?>
             <?php $controls->button('save', __('Save', 'newsletter'), 'tnpc_save(this.form); this.form.submit();'); ?>

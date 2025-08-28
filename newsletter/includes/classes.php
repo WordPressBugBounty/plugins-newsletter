@@ -396,4 +396,5 @@ class TNP_Email {
     var $track = '1';
     var $send_on = 0;
     var $token = '';
+    var $status = self::STATUS_DRAFT;
 }
