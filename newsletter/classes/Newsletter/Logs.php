@@ -22,6 +22,11 @@ class Logs {
         if (!is_scalar($data)) {
             $data = wp_json_encode($data, JSON_PRETTY_PRINT);
         }
+
+        if (is_wp_error($description)) {
+            $description = $description->get_error_message() . ' (' . $description->get_error_code() . ')';
+        }
+        
         $wpdb->insert($wpdb->prefix . 'newsletter_logs', ['source' => $source, 'description' => $description, 'status' => $status, 'data' => $data, 'created' => time()]);
     }
 

@@ -14,9 +14,11 @@ if (!$controls->is_action()) {
 
         if (!$language) {
 
+            $css = $controls->data['css'] ?? '';
+
             if (!$this->is_html_allowed()) {
-                $css = $controls->data['css'];
                 $controls->data = wp_kses_post_deep($controls->data);
+                // CSS must not be filtered!
                 $controls->data['css'] = $css;
             }
 
@@ -124,6 +126,21 @@ $license_data = License::get_data();
 
 if (is_wp_error($license_data)) {
     $controls->errors .= esc_html($license_data->get_error_message());
+}
+
+$mailer = Newsletter::instance()->get_mailer();
+$mailer_speed = $mailer->get_speed();
+
+// Public page type check
+$front_page_id = (int) get_option('page_on_front');
+$blog_page_id = (int) get_option('page_for_posts');
+
+if (!empty($controls->data['page'])) {
+    if ($controls->data['page'] == $front_page_id) {
+        $controls->warnings[] = 'The blog front page has been set as the Newsletter public page, that is not recommended. Please create a dedicated page.';
+    } elseif ($controls->data['page'] == $blog_page_id) {
+        $controls->warnings[] = 'The blog post list page has been set as the Newsletter public page, that is not recommended. Please create a dedicated page.';
+    }
 }
 ?>
 
@@ -259,6 +276,8 @@ if (is_wp_error($license_data)) {
 
                                 <p class="description">
                                     <?php esc_html_e('The page content must be only the shortcode [newsletter]', 'newsletter') ?>.
+                                    <br>
+                                    <?php esc_html_e('Do not choose the "front page" or "post list page"', 'newsletter') ?>.
                                 </p>
 
                                 <?php if ($this->is_multilanguage()) { ?>
@@ -297,7 +316,13 @@ if (is_wp_error($license_data)) {
                                             <?php echo $batch_max * 12 * 24; ?> max emails per day
                                         <?php } ?>
 
+                                        <?php if ($mailer_speed && $mailer_speed != $controls->data['scheduler_max']) { ?>
+                                            <br><br>
+                                            <strong>The maximum speed is overridden by the delivery addon "<?php echo esc_html($mailer->get_description()); ?>"</strong>
+                                        <?php } ?>
                                     </p>
+
+
                                 </td>
                             </tr>
 

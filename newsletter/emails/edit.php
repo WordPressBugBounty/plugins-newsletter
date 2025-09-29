@@ -1,5 +1,5 @@
 <?php
-/* @var $this NewsletterEmails */
+/** @var NewsletterEmailsAdmin $this */
 /* @var $controls NewsletterControls */
 defined('ABSPATH') || exit;
 
@@ -13,35 +13,38 @@ function tnp_prepare_controls($email, $controls) {
     }
 }
 
+$email_id = (int)$_GET['id'];
+
 // Always required
-$email = $this->get_email($_GET['id'], ARRAY_A);
+$email = $this->get_email($email_id, ARRAY_A);
 
 if (empty($email)) {
     echo 'Newsletter not found';
     return;
 }
 
-$email_id = $email['id'];
-
 /* Satus changes which require a reload */
 if ($controls->is_action('pause')) {
+    $this->log($email_id, 'Paused');
     $this->logger->info('Newsletter ' . $email_id . ' paused');
     $wpdb->update(NEWSLETTER_EMAILS_TABLE, array('status' => 'paused'), array('id' => $email_id));
-    $email = $this->get_email($_GET['id'], ARRAY_A);
+    $email = $this->get_email($email_id, ARRAY_A);
     tnp_prepare_controls($email, $controls);
 }
 
 if ($controls->is_action('continue')) {
+    $this->log($email_id, 'Restarted');
     $this->logger->info('Newsletter ' . $email_id . ' restarted');
     $wpdb->update(NEWSLETTER_EMAILS_TABLE, array('status' => 'sending'), array('id' => $email_id));
-    $email = $this->get_email($_GET['id'], ARRAY_A);
+    $email = $this->get_email($email_id, ARRAY_A);
     tnp_prepare_controls($email, $controls);
 }
 
 if ($controls->is_action('abort')) {
+    $this->log($email_id, 'Stopped');
     $this->logger->info('Newsletter ' . $email_id . ' aborted');
     $wpdb->query("update " . NEWSLETTER_EMAILS_TABLE . " set last_id=0, sent=0, status='new' where id=" . $email_id);
-    $email = $this->get_email($_GET['id'], ARRAY_A);
+    $email = $this->get_email($email_id, ARRAY_A);
     tnp_prepare_controls($email, $controls);
     $controls->messages = __('Delivery definitively cancelled', 'newsletter');
 }
@@ -49,7 +52,7 @@ if ($controls->is_action('abort')) {
 if ($controls->is_action('change-private')) {
     $data = [];
     $data['private'] = $controls->data['private'];
-    $data['id'] = $email['id'];
+    $data['id'] = $email_id;
     $email = $this->save_email($data, ARRAY_A);
     $controls->add_toast_saved();
 
@@ -298,8 +301,10 @@ if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_a
         if ($controls->is_action('send')) {
             $controls->messages = __('Now sending.', 'newsletter');
             $controls->messages .= '<br>' . __('The first batch of emails will be delivered in 5 minutes.', 'newsletter');
+            $this->log($email_id, 'Started');
         } else {
             $controls->messages = __('Scheduled.', 'newsletter');
+            $this->log($email_id, 'Scheduled');
         }
 
         // Immadiate first batch sending since people has no patience

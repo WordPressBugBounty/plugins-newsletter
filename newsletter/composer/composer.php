@@ -616,13 +616,6 @@ class NewsletterComposer extends NewsletterModule {
         include $block['dir'] . '/block.php';
         $content = trim(ob_get_clean());
 
-        if (empty($content)) {
-            return $out;
-        }
-
-        // Obsolete
-        $content = str_replace('{width}', $composer['width'], $content);
-
         $content = NewsletterEmails::instance()->inline_css($content, true);
 
         // CSS driven by the block
@@ -740,7 +733,7 @@ class NewsletterComposer extends NewsletterModule {
         if (Newsletter::instance()->is_html_allowed()) {
             return $html;
         }
-        
+
         $html = str_replace([self::OUTLOOK_START_IF, self::OUTLOOK_END_IF], ['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], $html);
 
         add_filter('safe_style_css', ['NewsletterComposer', 'hook_safe_style_css'], 9999);
@@ -792,7 +785,7 @@ class NewsletterComposer extends NewsletterModule {
      * $context contains a type and, for automated, the last_run.
      *
      * @param TNP_Email $email
-     * @return string
+     * @return WP_Error
      */
     function regenerate($email, $context = [], $wp_error = false) {
 

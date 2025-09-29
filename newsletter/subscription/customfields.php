@@ -99,12 +99,12 @@ $main_options = $this->get_main_options('customfields');
                             <tr>
                                 <td><?php echo $i; ?></td>
                                 <td>
-                                    <?php $placeholder = !$language ? '' : $main_options['profile_' . $i] ?>
+                                    <?php $placeholder = !$language ? '' : $main_options['profile_' . $i] ?? '' ?>
                                     <?php $controls->text('profile_' . $i, ['placeholder' => $placeholder]); ?>
 
                                 </td>
                                 <td>
-                                    <?php $placeholder = !$language ? '' : $main_options['profile_' . $i . '_placeholder'] ?>
+                                    <?php $placeholder = !$language ? '' : $main_options['profile_' . $i . '_placeholder'] ?? '' ?>
                                     <?php $controls->text('profile_' . $i . '_placeholder', ['placeholder' => $placeholder]); ?>
                                 </td>
                                 <?php if (!$language) { ?>
@@ -113,7 +113,7 @@ $main_options = $this->get_main_options('customfields');
                                     <td><?php $controls->select('profile_' . $i . '_rules', $rules); ?></td>
                                 <?php } ?>
                                 <td>
-                                    <?php $placeholder = !$language ? '' : $main_options['profile_' . $i . '_options'] ?>
+                                    <?php $placeholder = !$language ? '' : $main_options['profile_' . $i . '_options'] ?? '' ?>
                                     <?php $controls->textarea('profile_' . $i . '_options', ['width' => '200px', 'height' => '50px', 'placeholder' => $placeholder]); ?>
                                 </td>
                             </tr>

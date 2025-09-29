@@ -48,7 +48,7 @@ class NewsletterLogger {
 
         $this->file = NEWSLETTER_LOG_DIR . '/' . $module . '-' . gmdate('Y-m', time() + $this->offset) . '-' . $secret . '.txt';
 
-        $this->offset = (int) (get_option('gmt_offset') * 3600);
+        $this->offset = 3600 * (int)get_option('gmt_offset', 0);
     }
 
     /**

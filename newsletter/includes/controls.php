@@ -719,12 +719,16 @@ class NewsletterControls {
      * @param bool $show_id Show the page ID near the page title
      */
     function page($name = 'page', $first = null, $language = '', $show_id = false) {
+
+        $front_page_id = (int)get_option('page_on_front');
+        $blog_page_id = (int)get_option('page_for_posts');
         $args = array(
             'post_type' => 'page',
             // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page
             'posts_per_page' => 1500,
             'offset' => 0,
             'orderby' => 'post_title',
+            'order' => 'ASC',
             'post_status' => 'any',
             'suppress_filters' => true
         );
@@ -740,6 +744,13 @@ class NewsletterControls {
             if ($show_id) {
                 $label .= ' [#' . $page->ID . ']';
             }
+
+            if ($page->ID == $front_page_id) {
+                $label .= ' (front page)';
+            } elseif ($page->ID == $blog_page_id) {
+                $label .= ' (post list page)';
+            }
+
             $options[$page->ID] = $label;
         }
         $this->select($name, $options, $first);
@@ -2539,6 +2550,6 @@ class NewsletterControls {
     }
 
     function logs($source, $attrs = []) {
-        include __DIR__ . '/controls-logs.php';
+        include NEWSLETTER_INCLUDES_DIR . '/controls-logs.php';
     }
 }

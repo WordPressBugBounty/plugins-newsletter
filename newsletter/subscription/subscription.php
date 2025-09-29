@@ -419,7 +419,6 @@ class NewsletterSubscription extends NewsletterModule {
             $subscription->data->ip = $this->get_remote_ip();
         }
 
-
         // Spam check before sanitization: we could remove relevant information to evaluate spam
 
         if ($subscription->spamcheck) {
@@ -473,8 +472,6 @@ class NewsletterSubscription extends NewsletterModule {
             if ($user->status == TNP_User::STATUS_COMPLAINED) {
                 return new WP_Error('complained', 'Subscriber blocked since complained. Contact the site administrator.');
             }
-
-
 
             if ($subscription->if_exists === TNP_Subscription::EXISTING_ERROR) {
                 return new WP_Error('exists', 'Email address already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.');
@@ -610,6 +607,12 @@ class NewsletterSubscription extends NewsletterModule {
             delete_transient('newsletter_subscription_' . $user->id);
             $subscription->data->merge_in($user);
             $user = $this->save_user($user);
+        } else {
+            // No confirmation for new data and already confirmed, it's a double call, and we don't send the welcome email
+            // once again. Should be managed at the top.
+            if ($user->status == TNP_User::STATUS_CONFIRMED) {
+                $emails = false;
+            }
         }
 
         $user = $this->set_user_status($user, TNP_User::STATUS_CONFIRMED);

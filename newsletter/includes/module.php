@@ -5,8 +5,6 @@ defined('ABSPATH') || exit;
 require_once __DIR__ . '/logger.php';
 require_once __DIR__ . '/store.php';
 require_once __DIR__ . '/composer.php';
-require_once __DIR__ . '/addon.php';
-require_once __DIR__ . '/mailer.php';
 require_once __DIR__ . '/themes.php';
 
 /**

@@ -2,8 +2,8 @@
 /**
  * This file is included by NewsletterControls to create the composer.
  */
-/* @var $this NewsletterControls */
 /* @var $context_type string */
+/** @var NewsletterControls $this */
 
 defined('ABSPATH') || exit;
 

@@ -29,10 +29,11 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
 
     function admin_menu() {
         //$this->add_menu_page('index', 'Newsletters');
-        $this->add_admin_page('list', 'Email List');
-        $this->add_admin_page('new', 'Email New');
-        $this->add_admin_page('edit', 'Email Edit');
-        $this->add_admin_page('theme', 'Email Themes');
+        $this->add_admin_page('list', 'Newsletter List');
+        $this->add_admin_page('new', 'Newsletter New');
+        $this->add_admin_page('edit', 'Newsletter Edit');
+        $this->add_admin_page('logs', 'Newsletter Logs');
+        $this->add_admin_page('theme', 'Newsletter Themes');
         $this->add_admin_page('composer', 'The Composer');
         $this->add_admin_page('editorhtml', 'HTML Editor');
         $this->add_admin_page('editortinymce', 'TinyMCE Editor');
@@ -193,5 +194,18 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         $messages .= '<a href="https://www.thenewsletterplugin.com/documentation/email-sending-issues" target="_blank">' . __('Read more about delivery issues', 'newsletter') . '</a>.';
 
         return $messages;
+    }
+
+    function log($email_id, $description) {
+        global $current_user;
+
+        if (defined('DOING_CRON') && DOING_CRON) {
+            $user = '[cron]';
+        } elseif ($current_user) {
+            $user = $current_user->user_login;
+        } else {
+            $user = '[no user]';
+        }
+        Newsletter\Logs::add('newsletter-' . $email_id, '[' . $user . '] ' . $description);
     }
 }

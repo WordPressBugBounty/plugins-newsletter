@@ -1,24 +1,18 @@
 // add delete buttons
 jQuery.fn.add_delete = function () {
-    this.append('<div class="tnpc-row-delete" title="Delete"><img src="' + TNP_PLUGIN_URL + '/emails/tnp-composer/_assets/delete.png" width="32"></div>');
-    this.find('.tnpc-row-delete').perform_delete();
-};
-
-// delete row
-jQuery.fn.perform_delete = function () {
-    this.click(function (e) {
-        e.preventDefault();
-        e.stopPropagation();
+    this.append('<div class="tnpc-row-action tnpc-row-delete" title="Delete"><img src="' + TNP_PLUGIN_URL + '/composer/assets/delete.png" width="32"></div>');
+    this.find('.tnpc-row-delete').on('click', function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
         tnpc_hide_block_options();
-        // remove block
         jQuery(this).parent().remove();
     });
-}
+};
 
 // add edit button
 jQuery.fn.add_block_edit = function () {
-    this.append('<div class="tnpc-row-edit-block" title="Edit"><img src="' + TNP_PLUGIN_URL + '/emails/tnp-composer/_assets/edit.png" width="32"></div>');
-    this.find('.tnpc-row-edit-block').perform_block_edit();
+    this.append('<div class="tnpc-row-action tnpc-row-edit" title="Edit"><img src="' + TNP_PLUGIN_URL + '/composer/assets/edit.png" width="32"></div>');
+    this.find('.tnpc-row-edit').perform_block_edit();
 }
 
 // edit block
@@ -74,39 +68,26 @@ jQuery.fn.perform_block_edit = function () {
 
 // add clone button
 jQuery.fn.add_block_clone = function () {
-    this.append('<div class="tnpc-row-clone" title="Clone"><img src="' + TNP_PLUGIN_URL + '/emails/tnp-composer/_assets/copy.png" width="32"></div>');
-    this.find('.tnpc-row-clone').perform_clone();
-}
-
-// clone block
-jQuery.fn.perform_clone = function () {
-
-    this.click(function (e) {
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        // hide block edit form
+    this.append('<div class="tnpc-row-action tnpc-row-clone" title="Clone"><img src="' + TNP_PLUGIN_URL + '/composer/assets/copy.png" width="32"></div>');
+    this.find('.tnpc-row-clone').on('click', function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
         tnpc_hide_block_options();
-
-        // find the row
+         // find the row
         let row = jQuery(this).closest('.tnpc-row');
 
         // clone the block
         let new_row = row.clone();
-        new_row.find(".tnpc-row-delete").remove();
-        new_row.find(".tnpc-row-edit-block").remove();
-        new_row.find(".tnpc-row-clone").remove();
+        new_row.find(".tnpc-row-action").remove();
 
         new_row.add_delete();
         new_row.add_block_edit();
         new_row.add_block_clone();
-        // if (new_row.hasClass('tnpc-row-block')) {
-        //     new_row.find(".tnpc-row-edit-block i").click();
-        // }
+
         new_row.insertAfter(row);
     });
-};
+}
+
 
 let start_options = null;
 let tnp_container = null;
@@ -121,8 +102,8 @@ jQuery(function () {
     // preload content from a body named input
     var preloadedContent = jQuery('#options-message').val();
 
-    if (!preloadedContent && tnp_preset_show) {
-        tnpc_show_presets_modal();
+    if (!preloadedContent) {
+        jQuery('#templates-modal').modal();
     } else {
         jQuery('#tnpb-content').html(preloadedContent);
         start_composer();
@@ -176,9 +157,7 @@ const NewsletterComposer = {
     get_content: function () {
         var el = jQuery('#tnpb-content').clone();
 
-        el.find('.tnpc-row-delete').remove();
-        el.find('.tnpc-row-edit-block').remove();
-        el.find('.tnpc-row-clone').remove();
+        el.find('.tnpc-row-action').remove();
         el.find('.tnpc-row').removeClass('ui-draggable');
         el.find('#tnpb-sortable-helper').remove();
 
@@ -282,7 +261,7 @@ function init_builder_area() {
                     new_row.add_block_clone();
                     // new_row.find(".tnpc-row-edit").hover_edit();
                     if (new_row.hasClass('tnpc-row-block')) {
-                        new_row.find(".tnpc-row-edit-block").click();
+                        new_row.find(".tnpc-row-edit").click();
                     }
                 }).fail(function () {
                     alert("Block rendering failed.");
@@ -381,7 +360,7 @@ function start_composer() {
         jQuery.post(ajaxurl, data, function (response) {
             _target.html(response);
             if (event.target.dataset.afterRendering === 'reload') {
-                _container.find(".tnpc-row-edit-block").click();
+                _container.find(".tnpc-row-edit").click();
             }
         }).fail(function () {
             alert("Block rendering failed");
@@ -416,9 +395,7 @@ function tnpc_get_email_content_from_builder_area() {
 
     var $elMessage = jQuery("#tnpb-content").clone();
 
-    $elMessage.find('.tnpc-row-delete').remove();
-    $elMessage.find('.tnpc-row-edit-block').remove();
-    $elMessage.find('.tnpc-row-clone').remove();
+    $elMessage.find('.tnpc-row-action').remove();
     $elMessage.find('.tnpc-row').removeClass('ui-draggable');
     $elMessage.find('#tnpb-sortable-helper').remove();
 
@@ -671,7 +648,7 @@ jQuery(document).ready(function () {
 
                     //Force reload options
                     if (new_row.hasClass('tnpc-row-block')) {
-                        new_row.find(".tnpc-row-edit-block").click();
+                        new_row.find(".tnpc-row-edit").click();
                     }
 
                 }).fail(function () {

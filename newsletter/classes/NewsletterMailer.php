@@ -47,6 +47,16 @@ class NewsletterMailer {
         return $this->speed;
     }
 
+    /**
+     * Logs special events directly into the database (do not confuse with the logger, which logs on
+     * files).
+     *
+     * @since 8.9.1
+     */
+    function log($description, $data = null) {
+        Newsletter\Logs::add($this->name, $description, 0, $data);
+    }
+
     function send_with_stats($message) {
         $this->delta = microtime(true);
         $r = $this->send($message);
@@ -55,6 +65,7 @@ class NewsletterMailer {
     }
 
     /**
+     * Sends a message (should be abstract).
      *
      * @param TNP_Mailer_Message $message
      * @return bool|WP_Error
@@ -64,6 +75,12 @@ class NewsletterMailer {
         return new WP_Error(self::ERROR_FATAL, 'No mailing system available');
     }
 
+    /**
+     * Sends a batch of messages and collects statistics (use only by the admin side).
+     *
+     * @param TNP_Mailer_Message[] $messages
+     * @return bool|WP_Error
+     */
     public function send_batch_with_stats($messages) {
         $this->delta = microtime(true);
         $r = $this->send_batch($messages);
@@ -71,11 +88,17 @@ class NewsletterMailer {
         return $r;
     }
 
+    /**
+     * Returns the number of emails per hour capacity (wrong name).
+     *
+     * @return int
+     */
     function get_capability() {
         return (int) (3600 * $this->batch_size / $this->delta);
     }
 
     /**
+     * Sends a batch of messages.
      *
      * @param TNP_Mailer_Message[] $messages
      * @return bool|WP_Error
@@ -113,8 +136,7 @@ class NewsletterMailer {
     }
 
     /**
-     * This one should be implemented by specilized classes.
-     *
+     * This one should be implemented by specilized classes usually providing paraller sending.
      * @param TNP_Mailer_Message[] $messages
      * @return bool|WP_Error
      */
@@ -130,13 +152,17 @@ class NewsletterMailer {
     }
 
     /**
+     * Returns the logger for this mailer which writes logs on a file postfixed with
+     * "-mailer".
+     *
+     * The logger is created once then cached.
+     *
      * @return NewsletterLogger
      */
     function get_logger() {
-        if ($this->logger) {
-            return $this->logger;
+        if (!$this->logger) {
+            $this->logger = new NewsletterLogger($this->name . '-mailer');
         }
-        $this->logger = new NewsletterLogger($this->name . '-mailer');
         return $this->logger;
     }
 

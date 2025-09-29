@@ -18,12 +18,12 @@ class News {
             $url = "http://www.thenewsletterplugin.com/wp-content/news.json?ver=" . NEWSLETTER_VERSION;
         }
         $response = wp_remote_get($url);
-        if (is_wp_error($response)) {
-            return [];
+
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+            update_option('newsletter_news', [], false);
+            return;
         }
-        if (wp_remote_retrieve_response_code($response) !== 200) {
-            return [];
-        }
+
         $news = json_decode(wp_remote_retrieve_body($response), true);
 
         // Firewall returns an invalid response

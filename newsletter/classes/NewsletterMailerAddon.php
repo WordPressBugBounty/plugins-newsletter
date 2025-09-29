@@ -265,7 +265,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
      * @since 8.5.2
      */
     function webhook_callback() {
-        $logger = $this->get_webhook_logger();
+        //$logger = $this->get_webhook_logger();
         // ...
     }
 

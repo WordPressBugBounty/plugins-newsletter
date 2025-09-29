@@ -4,13 +4,13 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.9.4
+  Version: 8.9.6
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
   Text Domain: newsletter
   License: GPLv2 or later
-  Requires at least: 5.6
+  Requires at least: 6.1
   Requires PHP: 7.0
 
   Copyright 2009-2025 The Newsletter Team (email: info@thenewsletterplugin.com, web: https://www.thenewsletterplugin.com)
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.9.4');
+define('NEWSLETTER_VERSION', '8.9.6');
 
 global $wpdb, $newsletter;
 
@@ -903,6 +903,8 @@ class Newsletter extends NewsletterModule {
         $edited_email->options['error_message'] = $message;
 
         $this->save_email($edited_email);
+
+        Newsletter\Logs::add('newsletter-' . $email->id, 'Error: ' . $message);
     }
 
     /**

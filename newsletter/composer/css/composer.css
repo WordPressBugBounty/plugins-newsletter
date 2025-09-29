@@ -231,95 +231,36 @@
 .tnpc-row.ui-sortable-helper {
     max-width: 700px!important;
 }
-.tnpc-row-delete, .tnpc-row-edit-block, .tnpc-row-clone {
+
+/*.tnpc-row-delete, .tnpc-row-edit, .tnpc-row-clone {*/
+
+.tnpc-row-action {
     height: 30px;
     width: 30px;
     top: 0px;
     background-color: rgba(255,255,255,0.5);
-    z-index: 5;
+    z-index: 10;
     position: absolute;
     color: rgba(102,102,102,1);
-    -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-    -o-transition: all 0.5s;
     transition: all 0.5s;
     opacity: 0;
     text-align: center;
     font-size: 18px;
-}
-.tnpc-row-delete i, .tnpc-row-edit-block i, .tnpc-row-clone i {
-    line-height: 30px;
-}
-.tnpc-row-delete:hover {
-    background-color: #E74C3C;
     cursor: pointer;
-    color: rgba(255,255,255,1);
 }
-.tnpc-row:hover .tnpc-row-delete, .tnpc-row:hover .tnpc-row-edit-block, .tnpc-row:hover .tnpc-row-clone {
+
+.tnpc-row:hover .tnpc-row-delete, .tnpc-row:hover .tnpc-row-edit, .tnpc-row:hover .tnpc-row-clone {
     opacity: 1;
 }
 .tnpc-row-delete {
     right: 0px;
-    z-index: 5;
 }
-.tnpc-row-edit-block {
+.tnpc-row-edit {
     right: 60px;
-}
-.tnpc-row-edit-block:hover {
-    background-color: #e0e0e0;
-    cursor: pointer;
-    color: rgba(0, 0, 0, 1);
 }
 
 .tnpc-row-clone {
     right: 30px;
-}
-.tnpc-row-clone:hover {
-    background-color: #e0e0e0;
-    ;
-    cursor: pointer;
-    color: rgba(0,0,0,1);
-}
-
-.tnpc-row-edit {
-    position: relative;
-}
-.tnpc-row-edit-hover {
-    height: 100%;
-    width: 100%;
-    background-color: rgba(63,141,191,0.8);
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    cursor: default;
-    -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-    -o-transition: all 0.5s;
-    transition: all 0.5s;
-}
-.tnpc-row-edit-hover i {
-    position: absolute;
-    height: 30px;
-    width: 30px;
-    line-height: 30px;
-    left: 50%;
-    top: 50%;
-    text-align: center;
-    margin-top: -15px;
-    margin-left: -15px;
-    color: rgba(255,255,255,1);
-    -webkit-transition: all 0.5s;
-    -moz-transition: all 0.5s;
-    -o-transition: all 0.5s;
-    transition: all 0.5s;
-    -webkit-border-radius: 50%;
-    -moz-border-radius: 50%;
-    border-radius: 50%;
-    font-size: 16px;
-}
-.tnpc-row-edit-hover i:hover {
-    background-color: rgba(0,0,0,0.5);
-    cursor: pointer;
 }
 
 .tnpc-drop-here {
@@ -771,10 +712,10 @@
 }
 
 .tnpc-preset-label {
-/*    position: absolute;
-    top: 150px;
-    left: 50%;
-    transform: translate(-50%, -50%);*/
+    /*    position: absolute;
+        top: 150px;
+        left: 50%;
+        transform: translate(-50%, -50%);*/
     font-size: 14px;
     /*width: 80%;*/
     /*font-family: soleil, sans-serif;*/
