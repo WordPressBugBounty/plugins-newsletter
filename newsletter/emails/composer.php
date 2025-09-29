@@ -37,10 +37,10 @@ if ($controls->is_action()) {
         $email->send_on = time();
         $email->query = "select * from " . NEWSLETTER_USERS_TABLE . " where status='C'";
 
-        NewsletterComposer::instance->update_email($email, $controls);
+        NewsletterComposer::instance()->update_email($email, $controls);
 
         $email = $this->save_email($email);
-        
+
         if ($controls->is_action('preview')) {
             $controls->js_redirect('?page=newsletter_emails_edit&id=' . $email->id);
         } else {
