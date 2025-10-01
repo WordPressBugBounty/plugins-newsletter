@@ -5,6 +5,7 @@
             e.preventDefault();
             jQuery("#options-subject-subject").val(this.innerText);
             jQuery("#options-title").val(this.innerText);
+            jQuery("#options-subject").val(this.innerText);
             $.modal.close();
         });
 

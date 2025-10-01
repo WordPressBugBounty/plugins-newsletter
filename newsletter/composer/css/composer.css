@@ -685,6 +685,7 @@
     margin: 1rem;
     cursor: pointer;
     min-width: 10rem;
+    max-width: 10rem;
     /*height: 13rem;*/
     background: white;
     border-radius: 8px;

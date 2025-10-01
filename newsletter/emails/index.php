@@ -53,6 +53,8 @@ if ($controls->is_action('delete_selected')) {
 
 $pagination_controller = new TNP_Pagination_Controller(NEWSLETTER_EMAILS_TABLE, 'id', ['type' => 'message']);
 $emails = $pagination_controller->get_items();
+
+
 ?>
 
 <div class="wrap tnp-emails tnp-emails-index" id="tnp-wrap">
@@ -77,6 +79,10 @@ $emails = $pagination_controller->get_items();
             <?php $controls->btn_link($this->get_admin_page_url('composer'), __('Add new', 'newsletter')); ?>
 
             <?php $controls->btn('delete_selected', __('Delete selected', 'newsletter'), ['tertiary' => true, 'confirm' => true]); ?>
+
+            <?php $controls->btn_link(wp_nonce_url('admin.php?page=newsletter_emails_editorhtml', 'newsletter-new'), __('Add new (raw HTML)', 'newsletter'), ['secondary' => true]); ?>
+            <?php $controls->btn_link(wp_nonce_url('admin.php?page=newsletter_emails_theme', 'newsletter-new'), __('Add new (legacy themes)', 'newsletter'), ['secondary' => true]); ?>
+
 
             <?php $pagination_controller->display_paginator(); ?>
 

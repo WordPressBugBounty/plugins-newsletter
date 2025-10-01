@@ -667,10 +667,10 @@ class NewsletterSubscription extends NewsletterModule {
         $subscription = $this->get_default_subscription($language);
         $data = $subscription->data;
 
-        $data->email = $posted['ne'];
+        $data->email = $posted['ne'] ?? '';
 
         if (isset($posted['nn'])) {
-            $data->name = $posted['nn'];
+            $data->name = $posted['nn'] ?? '';
         }
 
         if (isset($posted['ns'])) {

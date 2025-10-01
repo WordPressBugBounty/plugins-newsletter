@@ -40,11 +40,11 @@ abstract class NewsletterMembershipAddon extends NewsletterAddon {
     abstract function hook_newsletter_lists_notes($notes, $list_id);
 
     function hook_set_user_role($wp_user_id) {
-        $this->_process_wp_user($wp_user_id, $subscriber);
+        $this->_process_wp_user($wp_user_id);
     }
 
     function hook_profile_update($wp_user_id, $old_user_data = null, $userdata = null) {
-        $this->_process_wp_user($wp_user_id, $subscriber);
+        $this->_process_wp_user($wp_user_id);
     }
 
     function _process_wp_user($wp_user_id) {
@@ -73,43 +73,40 @@ abstract class NewsletterMembershipAddon extends NewsletterAddon {
         $newsletter = Newsletter::instance();
 
         $subscriber = $newsletter->get_user_by_wp_user_id($wp_user->ID);
-        if (!$subscriber) {
-            $logger->debug('Linked subscriber not found, tying by email');
-            $subscriber = $newsletter->get_user_by_email($wp_user->user_email);
-            if ($subscriber) {
-                $newsletter->set_user_wp_user_id($subscriber->id, $wp_user->ID);
-            } else {
-                $logger->debug('Linked subscriber not found, tying by email');
-                return;
-            }
+        if ($subscriber) {
+            // TODO: Fix email?
+            return $subscriber;
         }
 
-        if (!$subscriber) {
-
-            if (is_null($autocreate)) {
-                $autocreate = !empty($this->options['autocreate']);
-            } else {
-
-            }
-
-            if ($autocreate) {
-                $subscriber = [];
-                $subscriber['email'] = $wp_user->user_email;
-                $subscriber['wp_user_id'] = $wp_user->ID;
-                $subscriber['status'] = TNP_User::STATUS_CONFIRMED;
-                $subscriber['token'] = Newsletter::instance()->get_token();
-                $subscriber['name'] = get_user_meta($wp_user->ID, 'first_name', true);
-                $subscriber['surname'] = get_user_meta($wp_user->ID, 'last_name', true);
-                $subscriber['referrer'] = $this->name;
-
-                $subscriber = $newsletter->save_user($subscriber);
-            }
+        $logger->debug('Linked subscriber not found, tying by email');
+        $subscriber = $newsletter->get_user_by_email($wp_user->user_email);
+        if ($subscriber) {
+            $newsletter->set_user_wp_user_id($subscriber->id, $wp_user->ID);
+            return $subscriber;
         }
 
-        return $subscriber;
+        if (is_null($autocreate)) {
+            $autocreate = !empty($this->options['autocreate']);
+        }
+
+        if ($autocreate) {
+            $subscriber = [];
+            $subscriber['email'] = $wp_user->user_email;
+            $subscriber['wp_user_id'] = $wp_user->ID;
+            $subscriber['status'] = TNP_User::STATUS_CONFIRMED;
+            $subscriber['token'] = Newsletter::instance()->get_token();
+            $subscriber['name'] = get_user_meta($wp_user->ID, 'first_name', true);
+            $subscriber['surname'] = get_user_meta($wp_user->ID, 'last_name', true);
+            $subscriber['referrer'] = $this->name;
+
+            $subscriber = $newsletter->save_user($subscriber);
+            return $subscriber;
+        }
+
+        return null;
     }
 
-    abstract function update_subscriber($wp_user, $subscriber);
+    abstract function update_subscriber($subscriber, $wp_user);
 
     function newsletter_menu() {
         $this->add_subscription_menu_page($this->menu_title, '?page=' . $this->index_page);
@@ -156,7 +153,7 @@ abstract class NewsletterMembershipAddon extends NewsletterAddon {
         if (is_scalar($wp_user)) {
             $tmp = get_user_by('id', $wp_user);
 
-            if (!$wp_user) {
+            if (!$tmp) {
                 $error = new WP_Error(101, 'WP user not found with ID ' . $wp_user);
                 $this->log($error);
                 return $error;

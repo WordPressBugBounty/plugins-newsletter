@@ -5,9 +5,31 @@
 
 defined('ABSPATH') || exit;
 
-$email_id = (int) $_GET['id'];
+$email_id = (int) $_GET['id'] ?? 0;
+
+if (!$email_id) {
+    check_admin_referer('newsletter-new');
+    $email = [];
+    $email['status'] = 'new';
+    $email['subject'] = __('Here the email subject', 'newsletter');
+    $email['track'] = Newsletter::instance()->get_option('track');
+    $email['token'] = $this->get_token();
+    $email['type'] = 'message';
+    $email['send_on'] = time();
+    $email['editor'] = NewsletterEmails::EDITOR_HTML;
+    $email['message'] = "<!DOCTYPE html>\n<html>\n<head>\n<title>Your email title</title>\n</head>\n<body>\n</body>\n</html>";
+    $email = $this->save_email($email);
+
+    $controls->js_redirect($this->get_editor_url($email->id, $email->editor));
+} else {
+    $e = $this->get_email($email_id);
+    if (!$e) {
+        die('Invalid email ID');
+    }
+}
 
 if ($controls->is_action('save') || $controls->is_action('next') || $controls->is_action('test')) {
+    $email = [];
     $email['id'] = $email_id;
 
     if ($this->is_html_allowed()) {
@@ -28,7 +50,7 @@ if ($controls->is_action('test')) {
     $this->send_test_email($this->get_email($email_id), $controls);
 }
 
-$controls->data = Newsletter::instance()->get_email($email_id, ARRAY_A);
+$controls->data = $this->get_email($email_id, ARRAY_A);
 
 if (!$this->is_html_allowed()) {
     $controls->warnings[] = 'Your user cannot manage full HTML content, when saving the content will be filtered and get broken.';
@@ -96,13 +118,13 @@ if (!$this->is_html_allowed()) {
             <?php $controls->init() ?>
 
             <?php $controls->text('subject', 60, 'Newsletter subject') ?>
-            <a href="#" class="button-primary" onclick="tnp_suggest_subject(); return false;"><?php _e('Get ideas', 'newsletter') ?></a>
+            <!--
+            <a href="#subject-ideas-modal" rel="modal:open" class="button-primary" onclick="tnp_suggest_subject(); return false;"><?php esc_html_e('Get ideas', 'newsletter') ?></a>
+            -->
             <a href="#" class="button-primary" onclick="newsletter_textarea_preview('options-message'); return false;"><i class="fa fa-eye"></i></a>
 
             <input type="button" class="button-primary" value="Add media" onclick="tnp_media()">
             <?php $controls->textarea_preview('message', '100%', 700, '', '', false); ?>
-
-
 
             <div style="text-align: right ">
                 <?php $controls->button_confirm('reset', __('Back to last save', 'newsletter'), 'Are you sure?'); ?>

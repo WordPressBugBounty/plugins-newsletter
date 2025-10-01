@@ -7,10 +7,6 @@ $is_standard_newsletter = $_GET['page'] === 'newsletter_emails_composer';
 <div id="templates-modal" aria-hidden="true" class="modal" style="min-width: 750px; max-width: 90%;">
     <div class='tnpc-preset-container'>
 
-        <?php if ($is_standard_newsletter) { ?>
-            <div class='tnpc-preset-legacy-themes'><a href='?page=newsletter_emails_theme'><?php esc_html_e('Looking for legacy themes?', 'newsletter'); ?></a></div>
-        <?php } ?>
-
         <?php if ($user_preset_list) { ?>
 
             <h3>Custom templates</h3>
@@ -18,9 +14,10 @@ $is_standard_newsletter = $_GET['page'] === 'newsletter_emails_composer';
             <div class="tnpc-preset-block">
 
                 <?php
+                $default_icon_url = plugins_url('newsletter') . "/admin/images/template-icon.png?ver=" . NEWSLETTER_VERSION;
                 foreach ($user_preset_list as $user_preset) {
 
-                    $default_icon_url = plugins_url('newsletter') . "/admin/images/template-icon.png?ver=" . NEWSLETTER_VERSION;
+
                     $preset_name = $user_preset->subject;
 
                     // esc_js() assumes the string will be in single quote (arghhh!!!)
