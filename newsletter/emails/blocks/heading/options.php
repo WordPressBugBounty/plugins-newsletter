@@ -1,12 +1,14 @@
 <?php
-/* @var $fields NewsletterFields */
+/** @var array $options */
+/** @var NewsletterControls $controls  */
+/** @var NewsletterFields $fields */
 ?>
 
 <?php
 $fields->select('editor', __('Editor', 'newsletter'), [
     'default' => __('Default', 'newsletter'),
     'full' => __('Full', 'newsletter'),
-], ['reload' => true]);
+], ['after-rendering' => 'reload']);
 
 $background = $options['block_background'] ?? '#aaa';
 $color = $options['font_color'] ?? '#fff';

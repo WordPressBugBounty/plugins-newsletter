@@ -2,7 +2,8 @@
 /**
  * This file is included by NewsletterControls to create the composer.
  */
-/* @var $context_type string */
+
+/** @var string $context_type */
 /** @var NewsletterControls $this */
 
 defined('ABSPATH') || exit;
@@ -55,9 +56,12 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 
 <div id="tnp-builder" dir="ltr">
 
-    <?php $this->hidden('message'); ?>
+    <?php $this->hidden_encoded('message'); ?>
     <?php $this->hidden('updated'); ?>
-    <input type="hidden" name="tnp_fields[message]" value="encoded">
+
+    <?php $this->hidden('sender_email'); ?>
+    <?php $this->hidden('sender_name'); ?>
+    <?php $this->hidden('track'); ?>
 
     <div id="tnpb-main">
 
@@ -208,18 +212,16 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
     tnp_context_type = "<?php echo esc_js($context_type) ?>";
     tnp_nonce = '<?php echo esc_js(wp_create_nonce('save')) ?>';
 </script>
+
 <?php
 wp_enqueue_script('tnp-composer', plugins_url('newsletter') . '/composer/composer.js', ['jquery'], NEWSLETTER_VERSION);
-?>
+include __DIR__ . '/modals/test.php';
+include __DIR__ . '/modals/attachment.php';
+include __DIR__ . '/modals/subjects.php';
+include __DIR__ . '/modals/placeholders.php';
+include __DIR__ . '/modals/templates.php';
 
-<?php include __DIR__ . '/modals/test.php' ?>
-<?php include __DIR__ . '/modals/attachment.php' ?>
-<?php include __DIR__ . '/modals/subjects.php'; ?>
-<?php include __DIR__ . '/modals/placeholders.php'; ?>
-<?php include __DIR__ . '/modals/templates.php'; ?>
+wp_enqueue_editor();
 
-
-<?php if (function_exists('wp_enqueue_editor')) wp_enqueue_editor(); ?>
-
-<?php do_action('newsletter_composer_footer') ?>
+do_action('newsletter_composer_footer');
 

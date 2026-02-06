@@ -1,5 +1,7 @@
 <?php
-/* @var $fields NewsletterFields */
+/** @var array $options */
+/** @var NewsletterControls $controls  */
+/** @var NewsletterFields $fields */
 ?>
 
 <?php

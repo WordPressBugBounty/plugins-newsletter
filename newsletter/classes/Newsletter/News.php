@@ -50,7 +50,7 @@ class News {
      * Updates made only when used, if no one is accessing the admin pages
      * there is no need to update the news.
      *
-     * @return type
+     * @return array
      */
     static function get_news() {
         $updated = (int) get_option('newsletter_news_updated');

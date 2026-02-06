@@ -136,7 +136,7 @@ class TNP_Profile {
     }
 
     function show_on_profile() {
-        return $this->status == self::STATUS_PROFILE_ONLY || $this->status == self::STATUS_PUBLIC;
+        return $this->status == self::STATUS_PUBLIC;
     }
 }
 

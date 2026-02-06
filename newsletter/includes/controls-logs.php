@@ -1,4 +1,6 @@
 <?php
+/** @var NewsletterControls $this */
+/** @var string $source */
 
 use Newsletter\Logs;
 
@@ -54,6 +56,5 @@ $show_data = $attrs['show_data'] ?? true;
             <?php } ?>
         </tbody>
     </table>
-<?php } ?>
-
+<?php }
 

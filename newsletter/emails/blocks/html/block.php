@@ -6,8 +6,8 @@
  *
  */
 
-/* @var $options array */
-/* @var $wpdb wpdb */
+/** @var array $options */
+/** @var array $composer */
 
 $defaults = array(
     'html'=>'This is a piece of nice html code. You can use any tag, but be aware that email readers do not render everything.',

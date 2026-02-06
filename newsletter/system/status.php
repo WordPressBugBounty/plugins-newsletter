@@ -1,8 +1,7 @@
 <?php
-/* @var $wpdb wpdb */
-/* @var $this NewsletterSystemAdmin */
-/* @var $controls NewsletterControls */
-
+/** @var NewsletterSystemAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var wpfb $wpdb */
 
 defined('ABSPATH') || exit;
 
@@ -13,6 +12,8 @@ $mailer = $newsletter->get_mailer();
 
 if ($controls->is_action('conversion')) {
     $this->logger->info('Maybe convert to utf8mb4');
+
+    // @phpstan-ignore-next-line
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     if (function_exists('maybe_convert_table_to_utf8mb4')) {
         $r = maybe_convert_table_to_utf8mb4(NEWSLETTER_EMAILS_TABLE);
@@ -277,9 +278,7 @@ function tnp_describe_table($table) {
                                 list($return_path_local, $return_path_domain) = explode('@', $return_path);
                             }
                             $sender = $newsletter->get_sender_email();
-                            if (!empty($sender)) {
                                 list($sender_local, $sender_domain) = explode('@', $sender);
-                            }
                             ?>
                             <tr>
                                 <td>Return path</td>
@@ -333,6 +332,7 @@ function tnp_describe_table($table) {
                                 $res = true;
                                 $response = wp_remote_get('http://www.thenewsletterplugin.com/wp-content/extensions.json');
                                 $condition = 1;
+                                $message = '';
                                 if (is_wp_error($response)) {
                                     $res = false;
                                     $condition = 0;

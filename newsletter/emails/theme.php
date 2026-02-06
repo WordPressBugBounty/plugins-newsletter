@@ -1,7 +1,8 @@
 <?php
-/* @var $this NewsletterEmailsAdmin */
-/* @var $controls NewsletterControls */
-/* @var $logger NewsletterLogger */
+/** @var NewsletterEmailsAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
+/** @var string $module */
 
 defined('ABSPATH') || exit;
 
@@ -62,7 +63,7 @@ $themes = $this->themes->get_all_with_data();
     <?php include NEWSLETTER_ADMIN_HEADER ?>
 
     <div id="tnp-heading">
-        
+
         <?php echo $controls->title_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-themes') ?>
 
         <h2><?php _e('Legacy themes', 'newsletter') ?></h2>

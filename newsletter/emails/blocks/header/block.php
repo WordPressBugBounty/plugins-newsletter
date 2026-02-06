@@ -6,6 +6,10 @@
  * Description: Default header with company info
  */
 
+/** @var array $options */
+/** @var array $composer */
+/** @var array $info */
+
 $defaults = array(
     'font_family' => '',
     'font_size' => '',

@@ -1,6 +1,8 @@
 <?php
-/* @var $fields NewsletterFields */
-
+/** @var array $options */
+/** @var array $context */
+/** @var NewsletterControls $controls  */
+/** @var NewsletterFields $fields */
 ?>
 
 <?php $fields->block_style('', ['default' => 'Default', 'wire' => 'Wire', 'inverted' => 'Inverted']) ?>

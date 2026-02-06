@@ -6,8 +6,8 @@
  * Description: Image, title, text and call to action all in one
  */
 
-/* @var $options array */
-/* @var $wpdb wpdb */
+/** @var array $options */
+/** @var array $composer */
 
 $defaults = array(
     'order' => '',

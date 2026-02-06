@@ -48,6 +48,7 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
      *
      * @param string $key
      * @param string $sub
+     * @param string|null $language
      * @return mixed Returns null if the option is not found
      */
     function get_option($key, $sub = '', $language = '') {
@@ -200,16 +201,6 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
 
     function get_last_run($sub = '') {
         return get_option($this->get_prefix($sub) . '_last_run', 0);
-    }
-
-    /**
-     * Sums $delta seconds to the last run time.
-     * @param int $delta Seconds
-     * @param string $sub Sub module name (default empty)
-     */
-    function add_to_last_run($delta, $sub = '') {
-        $time = $this->get_last_run($sub);
-        $this->save_last_run($time + $delta, $sub);
     }
 
     function delete_transient($name = '') {
@@ -609,16 +600,7 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
         return md5($text . $key) === $signature;
     }
 
-    static function get_home_url() {
-        static $url = false;
-        if (!$url) {
-            $url = home_url('/');
-        }
-        return $url;
-    }
-
     function set_current_language($language) {
-        self::$current_language = $language;
     }
 
     function get_default_language() {

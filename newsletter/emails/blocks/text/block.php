@@ -6,7 +6,8 @@
  *
  */
 
-/* @var $options array */
+/** @var array $options */
+/** @var array $composer */
 
 $default_options = array(
     'html'=>'<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam vitae sodales nulla, nec blandit velit.</p>',

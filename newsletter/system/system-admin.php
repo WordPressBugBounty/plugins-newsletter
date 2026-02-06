@@ -10,6 +10,8 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
     const JOB_MISSING = 2;
     const JOB_LATE = 1;
     const JOB_SKIPPED = 3;
+    const JOB_FAR_FUTURE = 4;
+
 
     /**
      * @return NewsletterSystemAdmin
@@ -22,7 +24,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
     }
 
     function __construct() {
-        parent::__construct('system', '1.1.0');
+        parent::__construct('system');
     }
 
     function admin_menu() {
@@ -110,11 +112,22 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
     function get_job_status() {
 
         $x = wp_next_scheduled('newsletter');
+
+        // If the job is missing
+        // Should never happen since there is a check and a fix on NewsletterAdmin
         if ($x === false) {
             return self::JOB_MISSING;
         }
 
+        // If the job is scheduled in the future but too far (yes, we saw even that one...)
+        // Should never happen since there is a check and a fix on NewsletterAdmin
+        if ($x > time() + NEWSLETTER_CRON_INTERVAL*2) {
+            return self::JOB_FAR_FUTURE;
+        }
+
         // Special case: the scheduler has been triggered but the job not executed
+        // It happens when another job has a fatal error or with bad working object caches
+        // that make the scheduler loop to end prematurely.
         $calls = $this->get_option_array('newsletter_diagnostic_cron_calls');
         if (!empty($calls)) {
             $last = end($calls);
@@ -123,7 +136,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
             }
         }
 
-        if (time() - $x > 900) {
+        if (time() - $x > NEWSLETTER_CRON_INTERVAL*3) {
             return self::JOB_LATE;
         }
         return self::JOB_OK;
@@ -148,7 +161,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
         $send_total_time = 0;
         $send_total_emails = 0;
         $send_completed = 0;
-        $stats = new TNP_Send_stats();
+        $stats = new TNP_Send_Stats();
 
         // Batches
         for ($i = 0; $i < count($send_calls); $i++) {

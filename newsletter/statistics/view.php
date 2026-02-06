@@ -1,8 +1,9 @@
 <?php
 // phpcs:disable WordPress.Security.NonceVerification.Recommended
 
-/* @var $this NewsletterStatisticsAdmin */
-/* @var $controls NewsletterControls */
+/** @var NewsletterStatisticsAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var wpdb $wpdb */
 
 defined('ABSPATH') || exit;
 
@@ -10,7 +11,7 @@ wp_enqueue_script('tnp-chart');
 
 $email = $this->get_email((int) $_GET['id'] ?? 0);
 
-if (empty($email)) {
+if (!$email) {
     echo 'Newsletter not found';
     return;
 }

@@ -183,6 +183,7 @@ class NewsletterThemes {
         if (is_file($file)) {
             @include $file;
         }
+        // @phpstan-ignore-next-line
         if (isset($theme_defaults) && is_array($theme_defaults)) {
             $options = array_merge($theme_defaults, $options);
         }

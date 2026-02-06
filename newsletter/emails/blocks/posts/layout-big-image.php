@@ -1,4 +1,5 @@
 <?php
+
 $size = [1200, 0, false];
 $content_width = $composer['content_width'];
 $title_style = TNP_Composer::get_title_style($options, 'title', $composer);
@@ -117,6 +118,8 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
             </td>
         </tr>
     </table>
-<?php } ?>
+<?php }
+
+
 
 

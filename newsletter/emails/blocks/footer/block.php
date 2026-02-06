@@ -6,6 +6,9 @@
  * Description: View online ad profile links
  */
 
+/** @var array $options */
+/** @var array $composer */
+
 $defaults = array(
     'show_company' => 1,
     'show_logo' => 1,

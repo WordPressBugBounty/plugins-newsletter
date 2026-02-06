@@ -126,6 +126,7 @@ class NewsletterSubscription extends NewsletterModule {
 
             // Per message custom URL from configuration (language variants could not be supported)
             $page_id = $this->get_option('confirmation_id');
+            $url = '';
             if (!empty($page_id)) {
                 if ($page_id === 'url') {
                     $url = sanitize_url($this->get_option('confirmation_url'));
@@ -146,6 +147,7 @@ class NewsletterSubscription extends NewsletterModule {
 
             // Per message custom URL from configuration (language variants could not be supported)
             $page_id = $this->get_option('confirmed_id');
+            $url = '';
             if (!empty($page_id)) {
                 if ($page_id === 'url') {
                     $url = sanitize_url($this->get_option('confirmed_url'));
@@ -171,7 +173,7 @@ class NewsletterSubscription extends NewsletterModule {
             case 'profile-change':
                 if ($this->antibot_form_check()) {
 
-                    if (!$user || $user->status != TNP_user::STATUS_CONFIRMED || !$user->_trusted) {
+                    if (!$user || $user->status != TNP_User::STATUS_CONFIRMED || !$user->_trusted) {
                         $this->dienow('Subscriber not found or not confirmed.', 'Even the wrong subscriber token can lead to this error.', 404);
                     }
 
@@ -340,6 +342,8 @@ class NewsletterSubscription extends NewsletterModule {
             $id = $user->id;
         } else if (is_array($user)) {
             $id = $user['id'];
+        } else {
+            $id = 0;
         }
 
         $id = (int) $id;
@@ -1283,6 +1287,7 @@ class NewsletterSubscription extends NewsletterModule {
         if (isset($attrs['autoresponders']) && method_exists('NewsletterAutoresponder', 'get_autoresponder_key')) {
             $ids = wp_parse_id_list($attrs['autoresponders']);
             foreach ($ids as $id) {
+                // @phpstan-ignore-next-line
                 $key = NewsletterAutoresponder::instance()->get_autoresponder_key($id);
                 if ($key) {
                     $b .= '<input type="hidden" name="nar[]" value="' . esc_attr($key) . '">' . "\n";

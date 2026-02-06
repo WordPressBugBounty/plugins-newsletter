@@ -17,7 +17,7 @@ class NewsletterUsersAdmin extends NewsletterModuleAdmin {
     }
 
     function __construct() {
-        parent::__construct('users', '1.0.7');
+        parent::__construct('users');
     }
 
     function admin_menu() {

@@ -1,5 +1,7 @@
 <?php
-/* @var $fields NewsletterFields */
+/** @var array $options */
+/** @var NewsletterControls $controls  */
+/** @var NewsletterFields $fields */
 ?>
 
 <div class="tnp-accordion">
@@ -13,9 +15,9 @@
             </div>
 
             <div class="tnp-field-col-2">
-                <?php $fields->select('height', __('Height', 'newsletter'), array('0' => 0, '1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9)) ?>
+                <?php $fields->select('height', __('Height', 'newsletter'), array('0' => 0, '1' => 1, '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9)) ?>
             </div>
-            
+
         </div>
     </div>
 

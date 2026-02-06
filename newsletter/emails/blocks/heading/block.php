@@ -5,6 +5,10 @@
  * Description: Section title
  */
 
+/** @var array $options */
+/** @var array $composer */
+/** @var string $dir */
+
 $defaults = array(
     'text' => 'An Awesome Title',
     'align' => 'center',
@@ -32,11 +36,14 @@ $options['text'] = strip_tags($options['text'], '<br><span><b><strong><i><em>')
         line-height: 130% !important;
         letter-spacing: normal;
     }
+    .title-td {
+        text-align: <?php echo esc_html($options['align']); ?>;
+    }
 </style>
 
 <table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">
     <tr>
-        <td align="<?php echo esc_attr($options['align']) ?>" valign="middle"  dir="<?php echo $dir ?>">
+        <td align="<?php echo esc_attr($options['align']) ?>" valign="middle" dir="<?php echo $dir; ?>" inline-class="title-td">
             <div inline-class="title" role="heading" aria-level="1"><?php echo wp_kses_post($options['text']); ?></div>
         </td>
     </tr>

@@ -1,7 +1,7 @@
 <?php
-/* @var $options array contains all the options the current block we're ediging contains */
-/* @var $controls NewsletterControls */
-/* @var $fields NewsletterFields */
+/** @var array $options */
+/** @var NewsletterControls $controls  */
+/** @var NewsletterFields $fields */
 ?>
 <p>
     We suggest <a href="https://wordpress.org/plugins/instant-images/" target="_blank">Instant Images</a> to get all images

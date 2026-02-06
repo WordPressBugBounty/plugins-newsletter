@@ -900,10 +900,12 @@
 /* jQuery Model patch */
 
 .blocker {
-    z-index: 10000;
+    z-index: 100000;
 }
 
 .modal {
-    z-index: 10001;
+    z-index: 100001;
     top: 50px;
+    visibility: visible !important; /* Patch for buy me a coffee plugin... */
 }
+

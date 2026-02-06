@@ -1,6 +1,7 @@
 <?php
-/* @var $this NewsletterProfileAdmin */
-/* @var $controls NewsletterControls */
+/** @var NewsletterProfileAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var string $language */
 
 defined('ABSPATH') || exit;
 

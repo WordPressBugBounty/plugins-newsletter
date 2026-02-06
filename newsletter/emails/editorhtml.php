@@ -1,11 +1,11 @@
 <?php
-/* @var $this NewsletterEmailsAdmin */
-/* @var $controls NewsletterControls */
-/* @var $logger NewsletterLogger */
+/** @var NewsletterEmailsAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
 
 defined('ABSPATH') || exit;
 
-$email_id = (int) $_GET['id'] ?? 0;
+$email_id = (int) ($_GET['id'] ?? 0);
 
 if (!$email_id) {
     check_admin_referer('newsletter-new');
@@ -39,7 +39,8 @@ if ($controls->is_action('save') || $controls->is_action('next') || $controls->i
     }
 
     $email['subject'] = wp_strip_all_tags($controls->data['subject']);
-    $this->save_email($email);
+    $email_object = $this->save_email($email);
+    Newsletter\Logs::add('newsletter-version-' . $email_object->id, date('Y-m-d H:i:s'), 0, $email_object->message);
     if ($controls->is_action('next')) {
         $controls->js_redirect($this->get_admin_page_url('edit') . '&id=' . $email_id);
         return;
@@ -64,6 +65,17 @@ if (!$this->is_html_allowed()) {
         height: 600px;
         margin-top: 15px;
         margin-bottom: 15px;
+    }
+
+    /* jQuery modal */
+    .blocker {
+        z-index: 100000;
+    }
+
+    .modal {
+        z-index: 100001;
+        top: 50px;
+        visibility: visible !important; /* Patch for buy me a coffee plugin... */
     }
 </style>
 <script>
@@ -114,8 +126,18 @@ if (!$this->is_html_allowed()) {
 
         <?php $controls->show(); ?>
 
-        <form action="" method="post" style="margin-top: 2rem">
+        <form action="" method="post" style="margin-top: 2rem" id="tnp-raw-html-editor">
             <?php $controls->init() ?>
+
+            <?php $controls->hidden('id'); // Used during tests ?>
+
+            <div style="margin-bottom: 1.5rem">
+                <?php $controls->button_confirm('reset', __('Back to last save', 'newsletter'), 'Are you sure?'); ?>
+                <a class="button-primary tnpc-button" href="#tnp-test-modal" rel="modal:open"><?php esc_html_e('Test', 'newsletter'); ?></a>
+                <?php $controls->button('save', __('Save', 'newsletter')); ?>
+                <?php $controls->button('next', __('Next', 'newsletter') . ' &raquo;'); ?>
+            </div>
+
 
             <?php $controls->text('subject', 60, 'Newsletter subject') ?>
             <!--
@@ -126,13 +148,10 @@ if (!$this->is_html_allowed()) {
             <input type="button" class="button-primary" value="Add media" onclick="tnp_media()">
             <?php $controls->textarea_preview('message', '100%', 700, '', '', false); ?>
 
-            <div style="text-align: right ">
-                <?php $controls->button_confirm('reset', __('Back to last save', 'newsletter'), 'Are you sure?'); ?>
-                <?php $controls->button('test', __('Test', 'newsletter')); ?>
-                <?php $controls->button('save', __('Save', 'newsletter')); ?>
-                <?php $controls->button('next', __('Next', 'newsletter') . ' &raquo;'); ?>
-            </div>
+
         </form>
         <?php include NEWSLETTER_DIR . '/emails/subjects.php'; ?>
     </div>
 </div>
+
+<?php include __DIR__ . '/modals/test.php' ?>

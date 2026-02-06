@@ -11,13 +11,13 @@ class NewsletterAddonAdmin {
     var $version;
     var $labels;
     var $menu_priority = 100;
+    var $dir = '';
 
     public function __construct($name, $version = '0.0.0', $dir = '') {
         $this->name = $name;
         $this->version = $version;
         add_action('newsletter_init', array($this, 'init'));
-        //Load translations from specific addon /languages/ directory
-
+        $this->dir = $dir;
     }
 
 
@@ -87,7 +87,7 @@ class NewsletterAddonAdmin {
         if ($this->options) {
             return;
         }
-        $this->options = $this->get_option_array('newsletter_' . $this->name, []);
+        $this->options = $this->get_option_array('newsletter_' . $this->name);
         if (!is_array($this->options)) {
             $this->options = [];
         }

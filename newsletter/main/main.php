@@ -1,6 +1,9 @@
 <?php
-/* @var $this NewsletterMainAdmin */
-/* @var $controls NewsletterControls */
+/** @var NewsletterMainAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
+/** @var wpdb $wpdb */
+/** @var string $language */
 
 use Newsletter\License;
 

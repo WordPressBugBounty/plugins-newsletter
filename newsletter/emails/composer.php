@@ -1,6 +1,7 @@
 <?php
-/* @var $this NewsletterEmailsAdmin */
-/* @var $controls NewsletterControls */
+/** @var NewsletterEmailsAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
 
 defined('ABSPATH') || exit;
 
@@ -68,6 +69,8 @@ if ($controls->is_action()) {
 
             $email = $this->save_email($email);
 
+            Newsletter\Logs::add('newsletter-version-' . $email->id, date('Y-m-d H:i:s'), 0, $email->message);
+
             if (is_wp_error($email)) {
                 $controls->errors = $email->get_error_message();
             } else {
@@ -128,8 +131,8 @@ if ($controls->is_action()) {
             <?php $controls->init(); ?>
 
             <?php $controls->button_confirm_secondary('reset', __('Back to last save', 'newsletter'), 'Are you sure?'); ?>
-            <?php $controls->button('save', __('Save', 'newsletter'), 'tnpc_save(this.form); this.form.submit();'); ?>
-            <?php $controls->button('preview', __('Next', 'newsletter') . ' &raquo;', 'tnpc_save(this.form); this.form.submit();'); ?>
+            <?php $controls->button('save', __('Save', 'newsletter')); ?>
+            <?php $controls->button('preview', __('Next', 'newsletter') . ' &raquo;'); ?>
 
 
             <div>

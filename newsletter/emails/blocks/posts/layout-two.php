@@ -118,10 +118,8 @@ $items = [];
     <?php
     $items[] = ob_get_clean();
 }
-?>
 
-
-<?php echo TNP_Composer::grid($items, ['width' => $total_width, 'responsive' => true, 'padding' => 5]) ?>
+echo TNP_Composer::grid($items, ['width' => $total_width, 'responsive' => true, 'padding' => 5]);
 
 
 

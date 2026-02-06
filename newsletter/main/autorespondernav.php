@@ -1,11 +1,13 @@
 <?php
+/** @var object $autoresponder */
+/** @var NewsletterControls $controls */
 
 $autoresponder->name = 'Welcome email series (DEMO)';
 
 if ($autoresponder->status) {
-    $status_badge = '<span class="tnp-badge-green">' . esc_html('Enabled', 'newsletter') . '</span>';
+    $status_badge = '<span class="tnp-badge-green">' . esc_html__('Enabled', 'newsletter') . '</span>';
 } else {
-    $status_badge = '<span class="tnp-badge-orange">' . esc_html('Disabled', 'newsletter') . '</span>';
+    $status_badge = '<span class="tnp-badge-orange">' . esc_html__('Disabled', 'newsletter') . '</span>';
 }
 ?>
 <?php $controls->title_help('/addons/extended-features/autoresponder-extension/'); ?>

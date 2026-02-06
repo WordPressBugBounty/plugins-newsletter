@@ -1,8 +1,7 @@
 <?php
-/*
- * @var $options array contains all the options the current block we're ediging contains
- * @var $controls NewsletterControls
- */
+/** @var array $options */
+/** @var NewsletterControls $controls  */
+/** @var NewsletterFields $fields */
 ?>
 
 <div class="tnp-accordion">

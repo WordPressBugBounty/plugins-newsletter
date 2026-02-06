@@ -1,4 +1,5 @@
 <?php
+/** @var TNP_User $user */
 ?>
 <ul class="tnp-nav">
     <li><a href="?page=newsletter_users_index"><i class="fas fa-chevron-left"></i></a></li>

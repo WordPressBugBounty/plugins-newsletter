@@ -1,5 +1,5 @@
 <?php
-/* @var $this NewsletterAutomated */
+/** @var NewsletterControls $controls */
 
 defined('ABSPATH') || exit;
 

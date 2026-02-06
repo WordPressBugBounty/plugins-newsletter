@@ -25,6 +25,8 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
             global $wp_actions;
             $wp_actions['wp_enqueue_editor'] = 1;
         }
+
+        add_action('wp_ajax_tnpc_test_raw_html', array($this, 'ajax_tnpc_test_raw_html'));
     }
 
     function admin_menu() {
@@ -33,6 +35,7 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         $this->add_admin_page('new', 'Newsletter New');
         $this->add_admin_page('edit', 'Newsletter Edit');
         $this->add_admin_page('logs', 'Newsletter Logs');
+        $this->add_admin_page('versions', 'Newsletter Versions');
         $this->add_admin_page('theme', 'Newsletter Themes');
         $this->add_admin_page('composer', 'The Composer');
         $this->add_admin_page('editorhtml', 'HTML Editor');
@@ -100,6 +103,50 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
             define('NEWSLETTER_TEST_SUBJECT_POSTFIX', ' [PREVIEW]');
         }
         $email->subject = $email->subject . NEWSLETTER_TEST_SUBJECT_POSTFIX;
+    }
+
+    function ajax_tnpc_test_raw_html() {
+        check_admin_referer('save');
+        if (!$this->is_allowed()) {
+            wp_send_json_error('Not allowed', 403);
+        }
+
+            require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+
+        $controls = new NewsletterControls();
+
+        $email = $this->get_email($controls->data['id']);
+        $email->id = 0; // To unlink from the database object
+
+        if ($this->is_html_allowed()) {
+            $email->message = $controls->data['message'];
+        } else {
+            $email->message = wp_kses_post($controls->data['message']);
+        }
+
+        $email->subject = wp_strip_all_tags($controls->data['subject']);
+
+        $email->track = $controls->data['track'] ?? (int) Newsletter::instance()->get_option('track');
+        if (!empty($controls->data['sender_email'])) {
+            $email->options['sender_email'] = $controls->data['sender_email'];
+        }
+        if (!empty($controls->data['sender_name'])) {
+            $email->options['sender_name'] = $controls->data['sender_name'];
+        }
+
+        if (isset($_POST['to_email'])) {
+            $message = NewsletterEmailsAdmin::instance()->send_test_newsletter_to_email_address($email, $controls->data['test_email']);
+            echo $message;
+        } else {
+            NewsletterEmailsAdmin::instance()->send_test_email($email, $controls);
+            if ($controls->messages) {
+                echo $controls->messages;
+            } else {
+                echo $controls->errors;
+            }
+        }
+
+        die();
     }
 
     /**

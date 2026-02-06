@@ -1,7 +1,7 @@
 <?php
-/* @var $this NewsletterEmailsAdmin */
-/* @var $controls NewsletterControls */
-/* @var $logger NewsletterLogger */
+/** @var NewsletterEmailsAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
 
 $theme_id = $_GET['id'];
 
@@ -31,7 +31,7 @@ if (!file_exists($theme['dir'] . '/theme-options.php') && check_admin_referer('n
     include $theme['dir'] . '/theme.php';
     $email['message'] = ob_get_clean();
 
-    if (!empty($theme_subject)) {
+    if ($theme_subject) {
         $email['subject'] = $theme_subject;
     }
 
@@ -74,7 +74,7 @@ if ($controls->is_action('create')) {
     include $theme['dir'] . '/theme.php';
     $email['message'] = ob_get_clean();
 
-    if (!empty($theme_subject)) {
+    if ($theme_subject) {
         $email['subject'] = $theme_subject;
     }
 

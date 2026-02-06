@@ -44,6 +44,7 @@ class NewsletterUpgrade {
         $this->logger->info('Start upgrade from ' . $this->old_version);
 
         require_once NEWSLETTER_DIR . '/admin.php';
+        // @phpstan-ignore-next-line
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
         wp_cache_flush();

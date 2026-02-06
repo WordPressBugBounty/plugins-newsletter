@@ -1,4 +1,5 @@
 <?php
+/** @var object $email */
 $p = $_GET['page'];
 ?>
 <ul class="tnp-nav">

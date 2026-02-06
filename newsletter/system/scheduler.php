@@ -1,8 +1,8 @@
 <?php
-/* @var $wpdb wpdb */
-/* @var $this NewsletterSystemAdmin */
-/* @var $controls NewsletterControls */
+/** @var NewsletterSystemAdmin $this */
+/** @var NewsletterControls $controls */
 
+/** @var wpfb $wpdb */
 use Newsletter\License;
 
 defined('ABSPATH') || exit;
@@ -150,6 +150,9 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
                                         case NewsletterSystemAdmin::JOB_SKIPPED:
                                             echo 'The job has been skipped! The scheduler is overloaded or a job has fatal error and blocks the scheduler: <a target="blank" href="https://www.thenewsletterplugin.com/documentation/troubleshooting/newsletter-delivery-engine/#job-skipped">external scheduler trigger</a>.';
                                             break;
+                                        case NewsletterSystemAdmin::JOB_FAR_FUTURE:
+                                            echo 'The job is planned too far into the future. Someone/something changed it! <a target="blank" href="https://www.thenewsletterplugin.com/documentation/troubleshooting/newsletter-delivery-engine/#job-far-future">Read here to fix</a>.';
+                                            break;
                                         case NewsletterSystemAdmin::JOB_OK:
                                             echo 'Everything seems fine!';
                                             break;
@@ -280,7 +283,11 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
                                                 if ($key == 'newsletter') {
                                                     echo '<li style="padding: 0; margin: 0; font-weight: bold">', esc_html($key . ' - ' . $data['interval']), ' seconds</li>';
                                                 } else {
-                                                    echo '<li style="padding: 0; margin: 0;">', esc_html($key . ' - ' . $data['interval']), ' seconds</li>';
+                                                    if (!is_numeric($data['interval'])) {
+                                                        echo '<li style="padding: 0; margin: 0; font-weight: bold; color: red;">', esc_html($key . ' - ' . $data['interval']), ' seconds (the interval is not a number!)</li>';
+                                                    } else {
+                                                        echo '<li style="padding: 0; margin: 0;">', esc_html($key . ' - ' . $data['interval']), ' seconds</li>';
+                                                    }
                                                 }
                                             }
                                         }
@@ -308,7 +315,7 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
                                     WordPress scheduler auto trigger
                                 </td>
                                 <td class="status">
-                                    <?php //$this->condition_flag($condition)     ?>
+                                    <?php //$this->condition_flag($condition)      ?>
                                 </td>
                                 <td>
                                     <?php $controls->button_test() ?>
@@ -430,7 +437,7 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
                             <tr>
                                 <td>Transient <code>doing_cron</code></td>
                                 <td class="status">
-                                    <?php //$this->condition_flag($condition)    ?>
+                                    <?php //$this->condition_flag($condition)     ?>
                                 </td>
                                 <td>
                                     <?php if ($transient) { ?>

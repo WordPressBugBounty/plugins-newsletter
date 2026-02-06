@@ -106,7 +106,7 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 
                     <?php if ($show_test) { ?>
                         <span class="button-primary" data-tnp-modal-target="#test-newsletter-modal" title="<?php esc_attr_e('Test', 'newsletter') ?>">
-                            <i class="fas fa-paper-plane"></i> <?php //_e('Test', 'newsletter')          ?>
+                            <i class="fas fa-paper-plane"></i> <?php //_e('Test', 'newsletter')            ?>
                         </span>
                     <?php } ?>
 
@@ -174,7 +174,7 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 
                     </div>
                     <div class="tnp-field-col-2">
-                        <?php $fields->text('options_composer_padding', __('Mobile padding', 'newsletter'), ['size'=> '40', 'description' => 'For boxed layouts']); ?>
+                        <?php $fields->text('options_composer_padding', __('Mobile padding', 'newsletter'), ['size' => '40', 'description' => 'For boxed layouts']); ?>
                     </div>
                 </div>
 
@@ -236,7 +236,8 @@ wp_enqueue_script('tnp-composer', plugins_url('newsletter') . '/emails/tnp-compo
     </p>
 </div>
 
-<?php if (function_exists('wp_enqueue_editor')) wp_enqueue_editor(); ?>
-
-<?php do_action('newsletter_composer_footer') ?>
+<?php
+if (function_exists('wp_enqueue_editor'))
+    wp_enqueue_editor();
+do_action('newsletter_composer_footer');
 

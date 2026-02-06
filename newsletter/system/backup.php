@@ -1,6 +1,7 @@
 <?php
-/* @var $this NewsletterSystemAdmin */
-/* @var $controls NewsletterControls */
+/** @var NewsletterSystemAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var wpfb $wpdb */
 
 defined('ABSPATH') || exit;
 

@@ -1,3 +1,9 @@
+<?php
+/** @var array $options */
+/** @var array $composer */
+/** @var TNP_Media $media */
+?>
+
 <style>
     /* Styles which will be removed and injected in the replacing the matching "inline-class" attribute */
     .title {

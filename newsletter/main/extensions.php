@@ -1,9 +1,12 @@
 <?php
-/* @var $this NewsletterMainAdmin */
-/* @var $controls NewsletterControls */
+/** @var NewsletterMainAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
+/** @var wpdb $wpdb  */
 
 defined('ABSPATH') || exit;
-$extensions = Newsletter::instance()->getTnpExtensions();
+
+$extensions = Newsletter\Addons::get_addons();
 
 if ($controls->is_action('activate')) {
     $result = activate_plugin('newsletter-extensions/extensions.php');

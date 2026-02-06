@@ -1,4 +1,10 @@
 <?php
+/** @var array $options */
+/** @var array $composer */
+/** @var string $dir */
+/** @var array $info */
+/** @var TNP_Media $media */
+
 $text_style = TNP_Composer::get_text_style($options, '', $composer);
 $title_style = TNP_Composer::get_title_style($options, 'title', $composer);
 if ($media) {

@@ -18,7 +18,6 @@ require_once __DIR__ . '/composer/composer-admin.php';
 class NewsletterAdmin extends NewsletterModuleAdmin {
 
     static $instance = null;
-
     static $menu = ['settings' => [], 'subscription' => [], 'newsletters' => [], 'forms' => [], 'subscribers' => []];
 
     /**
@@ -40,12 +39,18 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
         add_action('in_admin_header', [$this, 'hook_in_admin_header'], 1000);
         add_action('admin_menu', [$this, 'hook_admin_menu']);
 
-        // Protection against strange schedule removal on some installations
-        if (!wp_next_scheduled('newsletter') && (!defined('WP_INSTALLING') || !WP_INSTALLING)) {
-            wp_schedule_event(time() + 30, 'newsletter', 'newsletter');
+        // Protection against strange schedule removal on some installations and
+        // against far in the future scheduled events
+        if (!defined('WP_INSTALLING') || !WP_INSTALLING) {
+            $time = wp_next_scheduled('newsletter');
+            if (!$time) {
+                wp_schedule_event(time() + 30, 'newsletter', 'newsletter');
+            } elseif ($time > time() + NEWSLETTER_CRON_INTERVAL * 2) {
+                // Someone played with the cron scheduling the event in the far future...
+                wp_clear_scheduled_hook('newsletter');
+                wp_schedule_event(time() + 30, 'newsletter', 'newsletter');
+            }
         }
-
-        //add_action('admin_menu', [$this, 'add_extensions_menu'], 90);
 
         add_action('admin_enqueue_scripts', [$this, 'hook_admin_enqueue_scripts'], 999);
     }
@@ -58,18 +63,16 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
 
             add_filter('plugin_row_meta', function ($plugin_meta, $plugin_file) {
 
-                static $slugs = array();
+                static $slugs = [];
                 if (empty($slugs)) {
-                    $addons = Newsletter::instance()->getTnpExtensions();
-                    if ($addons) {
-                        foreach ($addons as $addon) {
-                            $slugs[] = $addon->wp_slug;
-                        }
+                    $addons = Newsletter\Addons::get_addons();
+
+                    foreach ($addons as $addon) {
+                        $slugs[$addon->wp_slug] = 1;
                     }
                 }
-                if (array_search($plugin_file, $slugs) !== false) {
-
-                    $plugin_meta[] = '<a href="admin.php?page=newsletter_main_extensions" style="font-weight: bold">Newsletter Addons Manager required</a>';
+                if (isset($slugs[$plugin_file])) {
+                    $plugin_meta[] = '<a href="admin.php?page=newsletter_main_extensions" style="font-weight: bold">The Newsletter Addons Manager is required to update</a>';
                 }
                 return $plugin_meta;
             }, 10, 2);
@@ -81,7 +84,7 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
 
         if (self::$is_admin_page) {
 
-            // Specpal header for HTML coded forms
+            // Special header for HTML coded forms
             if (isset($_GET['page']) && $_GET['page'] === 'newsletter_subscription_forms') {
                 header('X-XSS-Protection: 0');
             }
@@ -94,7 +97,6 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
      *
      * @global wpdb $wpdb
      * @param WP_Admin_Bar $admin_bar
-     * @return type
      *
      * https://developer.wordpress.org/reference/hooks/admin_bar_menu/
      */

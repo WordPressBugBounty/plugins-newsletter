@@ -1,9 +1,12 @@
 <?php
-/* @var $this NewsletterStatistics */
-/* @var $controls NewsletterControls */
-/* @var $wpdb wpdb */
+
+defined('ABSPATH') || exit;
 
 global $wpdb;
+
+/** @var NewsletterStatisticsAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
 
 $emails = $wpdb->get_results("select send_on, id, subject, total, sent, type, status, stats_time, open_count, click_count, error_count, unsub_count from " . NEWSLETTER_EMAILS_TABLE . " where status='sent' and type='message' order by send_on desc limit 20");
 

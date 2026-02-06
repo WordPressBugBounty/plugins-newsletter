@@ -5,6 +5,10 @@
  * Description: Company Info for Can-Spam act requirements
  */
 
+/** @var array $options */
+/** @var array $composer */
+/** @var array $info */
+
 $default_options = array(
     'font_family' => '',
     'font_size' => '',

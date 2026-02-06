@@ -1,4 +1,6 @@
 <?php
+global $wpdb;
+
 defined('ABSPATH') || exit;
 ?>
 

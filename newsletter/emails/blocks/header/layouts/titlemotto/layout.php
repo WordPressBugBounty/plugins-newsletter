@@ -1,4 +1,9 @@
 <?php
+/** @var array $options */
+/** @var array $composer */
+/** @var array $info */
+/** @var string $dir */
+
 $title_style = TNP_Composer::get_title_style($options, 'title', $composer);
 $text_style = TNP_Composer::get_text_style($options, '', $composer);
 ?>

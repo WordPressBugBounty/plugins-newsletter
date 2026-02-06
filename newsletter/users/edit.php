@@ -1,8 +1,9 @@
 <?php
 // phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
-/* @var $this NewsletterUsersAdmin */
-/* @var $controls NewsletterControls */
+/** @var NewsletterUsersAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
 
 defined('ABSPATH') || exit;
 
@@ -301,6 +302,13 @@ function percentValue($value, $total) {
                                     <?php $profile_page_url = NewsletterProfile::instance()->get_profile_page_url($user) ?>
                                     <a href='<?php echo esc_attr($profile_page_url) ?>' target="_blank"><?php echo esc_html($profile_page_url) ?></a>
                                 <?php } ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><?php esc_html_e('Unsubscribe URL', 'newsletter'); ?></th>
+                            <td>
+                                <?php $unsubscribe_url = NewsletterUnsubscription::instance()->get_unsubscribe_url($user) ?>
+                                <a href='<?php echo esc_attr($unsubscribe_url) ?>' target="_blank"><?php echo esc_html($unsubscribe_url) ?></a>
                             </td>
                         </tr>
 

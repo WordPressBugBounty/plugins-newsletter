@@ -41,6 +41,7 @@ if (isset($_REQUEST['alert'])) $alert = stripslashes($_REQUEST['alert']);
 header('Content-Type: text/html;charset=UTF-8');
 
 if (is_file(WP_CONTENT_DIR . '/extensions/newsletter/subscription/page.php')) {
+    // @phpstan-ignore-next-line
     include WP_CONTENT_DIR . '/extensions/newsletter/subscription/page.php';
     die();
 }

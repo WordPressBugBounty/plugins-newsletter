@@ -19,7 +19,7 @@ class NewsletterUnsubscription extends NewsletterModule {
     function __construct() {
         parent::__construct('unsubscription');
 
-        add_filter('newsletter_replace', [$this, 'hook_newsletter_replace'], 10, 4);
+        add_filter('newsletter_replace', [$this, 'hook_newsletter_replace'], 10, 5);
         add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
         add_filter('newsletter_message', [$this, 'hook_newsletter_message'], 9, 3);
 
@@ -48,6 +48,7 @@ class NewsletterUnsubscription extends NewsletterModule {
         $label = empty($attrs['label']) ? __('Unsubscribe', 'newsletter') : $attrs['label'];
 
         $b = '<form action="' . esc_attr($this->build_action_url('uc')) . '" method="post" class="tnp-button-form tnp-unsubscribe">';
+        $b .= wp_nonce_field('newsletter-unsubscribe', '_wpnonce', true, false);
         $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
         $b .= '</form>';
@@ -63,6 +64,7 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         $label = empty($attrs['label']) ? __('Resubscribe', 'newsletter') : $attrs['label'];
         $b = '<form action="' . esc_attr($this->build_action_url('reactivate')) . '" method="post" class="tnp-button-form tnp-reactivate">';
+        $b .= wp_nonce_field('newsletter-reactivate', '_wpnonce', true, false);
         $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
         $b .= '</form>';
@@ -137,7 +139,10 @@ class NewsletterUnsubscription extends NewsletterModule {
                 break;
 
             case 'uc':
-
+                $verified = wp_verify_nonce($_REQUEST['_wpnonce'], 'newsletter-unsubscribe');
+                if (!$verified) {
+                    $this->redirect($this->build_action_url('u', $user, $email));
+                }
                 $this->unsubscribe($user, $email);
                 $url = $this->build_message_url(null, 'unsubscribed', $user, $email);
                 setcookie('newsletter', '', 0, '/');
@@ -153,6 +158,10 @@ class NewsletterUnsubscription extends NewsletterModule {
                 break;
 
             case 'reactivate':
+                $verified = wp_verify_nonce($_REQUEST['_wpnonce'], 'newsletter-reactivate');
+                if (!$verified) {
+                    die('Unverified request');
+                }
                 $this->reactivate($user);
                 setcookie('newsletter', $user->id . '-' . $user->token, time() + 60 * 60 * 24 * 365, '/');
                 $url = $this->build_message_url(null, 'reactivated', $user);
@@ -221,8 +230,6 @@ class NewsletterUnsubscription extends NewsletterModule {
     /**
      * Reactivate the subscriber extracted from the request setting his status
      * to confirmed and logging. No email are sent. Dies on subscriber extraction failure.
-     *
-     * @return TNP_User
      */
     function reactivate($user = null) {
         $this->set_user_status($user, TNP_User::STATUS_CONFIRMED);
@@ -230,14 +237,28 @@ class NewsletterUnsubscription extends NewsletterModule {
         do_action('newsletter_user_reactivated', $user);
     }
 
-    function hook_newsletter_replace($text, $user, $email, $html = true) {
+    function get_unsubscribe_url($user, $email = null) {
+        return $this->build_action_url('u', $user, $email);
+    }
+
+    function hook_newsletter_replace($text, $user, $email, $html = true, $context = null) {
 
         if ($user) {
-            $text = $this->replace_url($text, 'unsubscription_confirm_url', $this->build_action_url('uc', $user, $email));
+            $url = $this->build_action_url('uc', $user, $email);
+            if ('page' === $context) {
+                $url = wp_nonce_url($url, 'newsletter-unsubscribe');
+            }
+            $text = $this->replace_url($text, 'unsubscription_confirm_url', $url);
             $text = $this->replace_url($text, 'unsubscription_url', $this->build_action_url('u', $user, $email));
             $text = $this->replace_url($text, 'unsubscribe_url', $this->build_action_url('u', $user, $email));
-            $text = $this->replace_url($text, 'reactivate_url', $this->build_action_url('reactivate', $user, $email));
-            $text = $this->replace_url($text, 'reactivation_url', $this->build_action_url('reactivate', $user, $email));
+
+            $url = $this->build_action_url('reactivate', $user, $email);
+            if ('page' === $context) {
+                $url = wp_nonce_url($url, 'newsletter-reactivate');
+            }
+
+            $text = $this->replace_url($text, 'reactivate_url', $url);
+            $text = $this->replace_url($text, 'reactivation_url', $url);
         } else {
             $text = $this->replace_url($text, 'unsubscription_confirm_url', $this->build_action_url('nul'));
             $text = $this->replace_url($text, 'unsubscription_url', $this->build_action_url('nul'));

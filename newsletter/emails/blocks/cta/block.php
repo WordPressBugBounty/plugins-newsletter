@@ -6,6 +6,11 @@
  * Description: Call to action button
  */
 
+/** @var array $options */
+/** @var array $composer */
+/** @var array $info */
+/** @var string $context */
+
 $defaults = array(
     'button_label' => 'Call to action',
     'button_url' => home_url(),
@@ -86,11 +91,9 @@ if (method_exists('NewsletterReports', 'build_lists_change_url')) {
         $lists[$options['unlist']] = 0;
     }
     if ($lists) {
+        // @phpstan-ignore-next-line
         $button_options["button_url"] = NewsletterReports::build_lists_change_url($options["button_url"], $lists);
     }
 }
-?>
 
-<?php echo TNP_Composer::button($button_options, 'button', $composer); ?>
-
-
+echo TNP_Composer::button($button_options, 'button', $composer);

@@ -1,9 +1,12 @@
 <?php
-/* @var $this NewsletterSubscriptionAdmin */
-/* @var $controls NewsletterControls */
-/* @var $logger NewsletterLogger */
+/** @var NewsletterSubscriptionAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
+/** @var string $language */
 
 defined('ABSPATH') || exit;
+
+$email = null;
 
 if (!$controls->is_action()) {
 

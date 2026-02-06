@@ -1,6 +1,8 @@
 <?php
-/* @var $this NewsletterAutomated */
-/* @var $controls NewsletterControls */
+/** @var NewsletterMainAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
+/** @var wpdb $wpdb  */
 
 defined('ABSPATH') || exit;
 

@@ -1,4 +1,8 @@
 <?php
+/** @var array $options */
+/** @var array $composer */
+/** @var TNP_Media $media */
+
 defined('ABSPATH') || exit;
 $widths = [];
 if ($layout === 'right13') {

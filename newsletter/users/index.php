@@ -1,7 +1,9 @@
 <?php
-/* @var $wpdb wpdb */
-/* @var $this NewsletterUsersAdmin */
-/* @var $controls NewsletterControls */
+/** @var wpdb $wpdb */
+/** @var NewsletterUsersAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
+/** @var string $is_multilanguage */
 
 defined('ABSPATH') || exit;
 

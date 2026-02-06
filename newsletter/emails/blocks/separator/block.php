@@ -6,7 +6,8 @@
  *
  */
 
-/* @var $options array */
+/** @var array $options */
+/** @var array $composer */
 
 $default_options = array(
     'color'=>'#dddddd',

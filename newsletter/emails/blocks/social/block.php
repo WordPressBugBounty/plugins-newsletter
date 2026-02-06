@@ -6,7 +6,9 @@
  *
  */
 
-/* @var $options array */
+/** @var array $options */
+/** @var array $composer */
+/** @var array $info */
 
 $defaults = array(
     'type' => 1,

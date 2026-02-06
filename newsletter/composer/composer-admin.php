@@ -112,7 +112,16 @@ class NewsletterComposerAdmin extends NewsletterModuleAdmin {
 
         $controls = new NewsletterControls();
         $email = new TNP_Email();
+        $email->track = (int)Newsletter::instance()->get_option('track');
         NewsletterComposer::update_email($email, $controls);
+
+        $email->track = $controls->data['track'] ?? (int)Newsletter::instance()->get_option('track');
+        if (!empty($controls->data['sender_email'])) {
+            $email->options['sender_email'] = $controls->data['sender_email'];
+        }
+        if (!empty($controls->data['sender_name'])) {
+            $email->options['sender_name'] = $controls->data['sender_name'];
+        }
 
         if (isset($_POST['to_email'])) {
             $message = NewsletterEmailsAdmin::instance()->send_test_newsletter_to_email_address($email, $controls->data['test_email']);

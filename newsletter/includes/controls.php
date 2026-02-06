@@ -499,9 +499,6 @@ class NewsletterControls {
     }
 
     /**
-     *
-     * @return string
-     *
      * @todo Internationalization
      */
     function language_notice() {
@@ -509,8 +506,6 @@ class NewsletterControls {
     }
 
     /**
-     *
-     * @return string
      * @deprecated
      */
     function switch_to_all_languages_notice() {
@@ -519,7 +514,7 @@ class NewsletterControls {
         }
         echo '<div class="tnpc-language-notice">';
 
-        echo 'You are configuring the language <strong>', esc_html(NewsletterAdmin::instance()->get_language_label($current_language)), '</strong>. Switch to "all languages" to see all options.';
+        echo 'Switch to "all languages" to see all options.';
 
         echo '</div>';
     }
@@ -1042,6 +1037,13 @@ class NewsletterControls {
         echo '<input name="options[', esc_attr($name), ']" id="options-', esc_attr($name), '" type="hidden" value="', esc_attr($value), '">';
     }
 
+    function hidden_encoded($name) {
+        $value = $this->get_value($name, '');
+        $value = base64_encode(rawurlencode($value));
+        echo '<input name="options[', esc_attr($name), ']" id="options-', esc_attr($name), '" type="hidden" value="', esc_attr($value), '">';
+        echo '<input type="hidden" name="tnp_fields[', esc_attr($name), ']" value="encoded">';
+    }
+
     /**
      * General button. Attributes:
      * - id: the element HTML id
@@ -1195,6 +1197,7 @@ class NewsletterControls {
     function button_icon_copy($data = '') {
         $this->btn('copy', '', ['secondary' => true, 'data' => $data, 'icon' => 'fa-copy', 'confirm' => true, 'title' => __('Duplicate', 'newsletter')]);
     }
+
 
     /**
      * Creates a button with "delete" action.
@@ -2156,7 +2159,7 @@ class NewsletterControls {
         echo '<select class="tnpf-font-family" id="options-', esc_attr($name), '" name="options[', esc_attr($name), ']">';
 
         if ($show_empty_option) {
-            echo '<option value="">', esc_html('Default', 'newsletter');
+            echo '<option value="">', esc_html__('Default', 'newsletter');
         }
 
         echo '<optgroup label="', esc_attr__('Email safe fonts', 'newsletter'), '">';
@@ -2226,6 +2229,8 @@ class NewsletterControls {
      * @param string $name
      */
     function media($name) {
+        $media_id = 0;
+        $media_full = ['', '', ''];
         if (isset($this->data[$name]['id'])) {
             $media_id = (int) $this->data[$name]['id'];
             $media = wp_get_attachment_image_src($media_id, 'medium');
@@ -2256,7 +2261,7 @@ class NewsletterControls {
         if (!empty($label)) {
             echo '<label class="select" for="tnp_' . esc_attr($name) . '">' . esc_html($label) . ':</label>';
         }
-        echo '<input id="tnp_' . esc_attr($name) . '" type="text" size="36" name="' . esc_attr($option) . '[' . esc_attr($name) . ']" value="' . esc_attr($val) . '" />';
+        echo '<input id="tnp_' . esc_attr($name) . '" type="text" size="36" name="' . esc_attr($option) . '[' . esc_attr($name) . ']" value="" />';
         echo '<input id="tnp_' . esc_attr($name) . '_button" class="button-primary" type="button" value="Select Image" />';
         echo '<br class="clear"/>';
     }
@@ -2391,7 +2396,7 @@ class NewsletterControls {
         if (substr($url, 0, 4) !== 'http') {
             $url = 'https://www.thenewsletterplugin.com/documentation' . $url;
         }
-        if (empty($text)) {
+        if (!$text) {
             $text = __('Need help?', 'newsletter');
         }
         echo '<p class="tnp-panel-help"><a href="', esc_attr($url), '" target="_blank">', wp_kses_post($text), '</a></p>';
@@ -2403,7 +2408,7 @@ class NewsletterControls {
      * @param type $text
      */
     static function page_help($url, $text = '') {
-        if (empty($text)) {
+        if (!$text) {
             $text = __('Need help?', 'newsletter');
         }
         echo '<div class="tnp-page-help"><a href="', esc_attr($url), '" target="_blank">', wp_kses_post($text), '</a></div>';

@@ -1,7 +1,9 @@
 <?php
-/* @var $wpdb wpdb */
-/* @var $this NewsletterUsersAdmin */
-/* @var $controls NewsletterControls */
+
+/** @var NewsletterUsersAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
+/** @var wpdb $wpdb */
 
 defined('ABSPATH') || exit;
 
@@ -66,12 +68,12 @@ if ($controls->is_action('language')) {
 if ($controls->is_action('list_manage')) {
     if ($controls->data['list_action'] == 'move') {
         $wpdb->query("update " . NEWSLETTER_USERS_TABLE . ' set list_' . ((int) $controls->data['list_1']) . '=0, list_' . ((int) $controls->data['list_2']) . '=1' .
-                ' where list_' . $controls->data['list_1'] . '=1');
+                ' where list_' . ((int) $controls->data['list_1']) . '=1');
     }
 
     if ($controls->data['list_action'] == 'add') {
         $wpdb->query("update " . NEWSLETTER_USERS_TABLE . ' set list_' . ((int) $controls->data['list_2']) . '=1' .
-                ' where list_' . $controls->data['list_1'] . '=1');
+                ' where list_' . ((int) $controls->data['list_1']) . '=1');
     }
 }
 
@@ -322,7 +324,5 @@ if ($controls->is_action('change_status')) {
 
         </form>
     </div>
-
-    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

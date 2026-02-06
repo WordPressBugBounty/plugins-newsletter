@@ -51,6 +51,11 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
         if ($count) {
             echo '<div class="notice notice-error"><p style="font-size: 1.2em">One or more newsletters have been blocked due to severe delivery error. <a href="admin.php?page=newsletter_system_delivery#newsletters-error">Check and restart</a>.</p></div>';
         }
+
+//        $options = NewsletterUnsubscriptionAdmin::instance()->get_main_options();
+//        if (strpos($options['unsubscribe_text'], '{unsubscription')) {
+//            echo '<div class="notice notice-warning"><p style="font-size: 1.2em">Unsubscription</div>';
+//        }
     }
 
     function admin_menu() {

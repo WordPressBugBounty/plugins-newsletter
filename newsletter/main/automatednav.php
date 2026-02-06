@@ -1,4 +1,7 @@
 <?php
+/** @var NewsletterControls $controls */
+/** @var object $channel */
+
 defined('ABSPATH') || exit;
 ?>
 <?php $controls->title_help('/addons/extended-features/automated-extension/') ?>

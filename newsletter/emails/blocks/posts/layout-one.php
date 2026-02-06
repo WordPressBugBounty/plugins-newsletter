@@ -124,7 +124,7 @@ global $authordata, $post;
 
     <?php echo TNP_Composer::grid($items, ['columns' => count($items), 'width' => $composer['width'] - $options['block_padding_left'] - $options['block_padding_right']]); ?>
 
-<?php } ?>
+<?php } 
 
 
 

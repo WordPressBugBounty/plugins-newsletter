@@ -237,6 +237,16 @@ function _tnp_get_default_media($media_id, $size) {
     return $media;
 }
 
+/**
+ * Returns a TNP_Media object with the media found by WP using the media ID and the specified size.
+ *
+ * WP makes a number of calculus when a size is specified as an array (width and height) selecting the image
+ * version that best fit.
+ *
+ * @param type $media_id
+ * @param string|array $size
+ * @return null|\TNP_Media
+ */
 function tnp_get_media($media_id, $size) {
     if (!$media_id) {
         return null;
@@ -263,6 +273,13 @@ function tnp_get_media($media_id, $size) {
 function tnp_resize($media_id, $size) {
     if (empty($media_id)) {
         return null;
+    }
+
+    if (defined('NEWSLETTER_MEDIA_RESIZE') && !NEWSLETTER_MEDIA_RESIZE) {
+        if (defined('NEWSLETTER_MEDIA_USE_FULL_SIZE') && NEWSLETTER_MEDIA_USE_FULL_SIZE) {
+            return tnp_get_media($media_id, 'full');
+        }
+        return tnp_get_media($media_id, $size);
     }
 
     //Newsletter::instance()->logger->error($size);
@@ -403,8 +420,9 @@ function tnp_resize_2x($media_id, $size) {
     $size[0] = $size[0] * 2;
     $size[1] = $size[1] * 2;
     $media = tnp_resize($media_id, $size);
-    if (!$media)
+    if (!$media) {
         return $media;
+    }
     $media->set_width($size[0] / 2);
     return $media;
 }

@@ -6,8 +6,10 @@
  * Description: Last posts list with different layouts
  */
 
-/* @var $options array */
-/* @var $wpdb wpdb */
+/** @var array $options */
+/** @var array $composer */
+/** @var array $context */
+/** @var string $dir */
 
 $defaults = array(
     'title' => 'Last news',

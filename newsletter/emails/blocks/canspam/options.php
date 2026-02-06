@@ -1,6 +1,7 @@
 <?php
-
-/* @var $fields NewsletterFields */
+/** @var array $options */
+/** @var NewsletterControls $controls  */
+/** @var NewsletterFields $fields */
 ?>
 
 <p>
@@ -12,6 +13,7 @@
 	'size_default'   => true,
 	'weight_default' => true
 ] ) ?>
-<?php $fields->block_commons() ?>
+<?php
+$fields->block_commons();
 
 

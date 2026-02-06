@@ -149,6 +149,7 @@ class NewsletterWidget extends WP_Widget {
             Use the tag {subscription_form} to place the subscription form within your personal text.
         </p>
         <?php
+        return '';
     }
 }
 

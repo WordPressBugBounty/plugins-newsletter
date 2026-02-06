@@ -6,8 +6,8 @@
  *
  */
 
-/* @var $options array */
-/* @var $wpdb wpdb */
+/** @var array $options */
+/** @var array $composer */
 
 $defaults = array(
     'view' => 'View online',

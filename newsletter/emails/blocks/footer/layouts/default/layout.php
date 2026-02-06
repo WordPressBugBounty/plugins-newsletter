@@ -1,4 +1,9 @@
 <?php
+/** @var array $options */
+/** @var array $composer */
+/** @var array $info */
+/** @var string $context */
+
 $text_style = TNP_Composer::get_text_style($options, '', $composer, ['scale' => 0.8]);
 ?>
 

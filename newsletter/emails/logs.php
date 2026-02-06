@@ -1,12 +1,10 @@
 <?php
 /** @var NewsletterEmailsAdmin $this */
 /** @var NewsletterControls $controls */
-
 $email = $this->get_email($_GET['id']);
 
-if (empty($email)) {
-    echo 'Newsletter not found';
-    return;
+if (!$email) {
+    die('Newsletter not found');
 }
 ?>
 
@@ -14,6 +12,7 @@ if (empty($email)) {
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
     <div id="tnp-heading">
         <h2><?php echo esc_html($email->subject); ?></h2>
+        <?php include __DIR__ . '/edit-nav.php'; ?>
     </div>
 
     <div id="tnp-body">

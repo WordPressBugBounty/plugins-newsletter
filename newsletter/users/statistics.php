@@ -1,6 +1,8 @@
 <?php
-/* @var $this NewsletterUsersAdmin */
-/* @var $controls NewsletterControls */
+/** @var wpdb $wpdb */
+/** @var NewsletterUsersAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
 
 defined('ABSPATH') || exit;
 
@@ -373,13 +375,6 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
 
             </div>
 
-            <?php
-            if (isset($panels['user_statistics'])) {
-                foreach ($panels['user_statistics'] as $panel) {
-                    call_user_func($panel['callback'], $id, $controls);
-                }
-            }
-            ?>
         </div>
 
     </div>

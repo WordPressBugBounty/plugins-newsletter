@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
-Tested up to: 6.8.2
-Stable tag: 8.9.9
+Tested up to: 6.9
+Stable tag: 9.1.2
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,9 +125,88 @@ Thank you, The Newsletter Team
 
 1. The responsive email Drag and Drop composer
 2. The plugin dashboard
-3. The Reports extension
+3. The Reports addon
 
 == Changelog ==
+
+= 9.1.2 =
+
+* Fixed unverified request on reactivate
+
+= 9.1.1 =
+
+* Fixed buttons width on composer blocks
+* Added check on registered schedules to show possible wrong interval settings
+* Fixed vulnerability (CVE-2026-1051)
+
+= 9.1.0 =
+
+* Added configurable fallback for tags name and full_name when empty
+* Security fix on maintenance actions (with logging in user and enabled to use the plugin)
+
+= 9.0.9 =
+
+* Added check and fix for newsletter job scheduiled on the "far future"
+* Fixed "saved" message on custom profile pages
+* Added aria-label to the minimal widget
+* Improved email error check on sending loop
+* Fixed the composer backgrounds when selecting a template
+
+= 9.0.8 =
+
+* Fixed PHP warning
+* Fixed heading block with HTML filters removing tabel attributes
+
+= 9.0.7 =
+
+* Fixed hide/show of the block options
+
+= 9.0.6 =
+
+* Fixed JS error with the "Heading" block
+
+= 9.0.5 =
+
+* Removed PHP memory optimisation
+* Addded more infos on Help/Sending
+* Code review with PHPStan level 1
+
+= 9.0.4 =
+
+* Code review with PHPStan level 1
+* Managed the Permission-Policy blocking synch-xhr
+* Fixed sending start error when the contacts are less than 20 (anyway the newsletter is queued)
+
+= 9.0.3 =
+
+* Code review with PHPStan
+* Fixed error when the site is not able to get the addons list
+
+= 9.0.2 =
+
+* Long time deprecated filters (newsletter_message_*) has been remove (use the newsletter_message filter instead)
+* Fixed test email from the raw HTML editor not using the custom sender email and name
+* Fixed the license checking
+
+= 9.0.1 =
+
+* Fixed test message
+
+= 9.0.0 =
+
+* Extended the constant NEWSLETTER_MEDIA_RESIZE to all images
+* Added the constant NEWSLETTER_MEDIA_USE_FULL_SIZE to use always full size images
+* Improved the delivery error management
+* Fixed link on Sending diagnostic panel for automated newsletters
+* Improved test sending to use the track, sender name and sender email
+* Added new test button to the HTML editor
+* New top menu on newsletter settings targeting
+* New logs page for each newsletter
+* New newsletter versioning with restore
+* Improved editor performances and controls
+* Sending engine optimization and logging
+* General performance optimization
+* New test procedure on raw HTML newsletter editor
 
 = 8.9.9 =
 

@@ -1,6 +1,9 @@
 <?php
 /** @var NewsletterEmailsAdmin $this */
-/* @var $controls NewsletterControls */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
+/** @var wpdb $wpdb */
+
 defined('ABSPATH') || exit;
 
 global $wpdb;
@@ -18,7 +21,7 @@ $email_id = (int)$_GET['id'];
 // Always required
 $email = $this->get_email($email_id, ARRAY_A);
 
-if (empty($email)) {
+if (!$email) {
     echo 'Newsletter not found';
     return;
 }
@@ -237,7 +240,7 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
             }
         }
 
-        if (!empty($profile_clause)) {
+        if ($profile_clause) {
             $query .= ' and (' . implode(' and ', $profile_clause) . ')';
         }
 
@@ -309,11 +312,12 @@ if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_a
 
         // Immadiate first batch sending since people has no patience
 
-        if ($controls->is_action('send') && $email['total'] < 20 && !Newsletter::instance()->skip_this_run()) {
+        if ($controls->is_action('send') && $email['total'] < 20) {
+
             // Avoid the first batch if there are other newsletters delivering otherwise we can get over the per hour quota
-            $sending_count = $wpdb->get_results("select count(*) from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time());
+            $sending_count = $wpdb->get_var("select count(*) from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<=" . time());
             if ($sending_count <= 1) { // This newsletter is counted as well
-                Newsletter::instance()->hook_newsletter();
+                NewsletterEngine::instance()->run();
             }
         }
 
@@ -333,7 +337,6 @@ if (TNP_Email::STATUS_ERROR === $email['status'] && isset($email['options']['err
     $controls->errors .= sprintf(__('Stopped by fatal error: %s', 'newsletter'), esc_html($email['options']['error_message']));
 }
 
-
 if ($email['status'] != 'sent') {
     $subscriber_count = $wpdb->get_var(str_replace('*', 'count(*)', $email['query']));
 } else {
@@ -352,6 +355,7 @@ if ($email['status'] != 'sent') {
         <?php $controls->title_help('/newsletter-targeting'); ?>
 
         <h2><?php echo esc_html($email['subject']); ?></h2>
+        <?php include __DIR__ . '/edit-nav.php'; ?>
 
     </div>
 
@@ -371,7 +375,7 @@ if ($email['status'] != 'sent') {
                         <?php } ?>
                     <?php } else { ?>
 
-                        <?php $controls->btn_link($this->get_editor_url($email_id, $editor_type), __('Edit', 'newsletter'), ['icon' => 'fa-edit', 'secondary' => true]); ?>
+                        <?php //$controls->btn_link($this->get_editor_url($email_id, $editor_type), __('Edit', 'newsletter'), ['icon' => 'fa-edit', 'secondary' => true]); ?>
 
                     <?php } ?>
 
@@ -394,7 +398,7 @@ if ($email['status'] != 'sent') {
 
                 <div class="tnp-emails-status">
 
-                    <div style="display: flex; justify-content: space-between">
+                    <div style="display: flex; justify-content: space-between; align-items: center">
                         <div style="flex-grow: 1">
                             <?php $this->show_email_status_label($email) ?>
                         </div>
@@ -407,10 +411,9 @@ if ($email['status'] != 'sent') {
                                 $this->show_email_progress_bar($email);
                             }
                             ?>
-
                         </div>
 
-                        <div style="flex-grow: 1; text-align: right">
+                        <div style="flex-grow: 1; text-align: right; white-space: nowrap">
                             <?php if ($email['status'] == 'new') { ?>
                                 <i class="fas fa-users"></i> <?php echo $subscriber_count ?>
                             <?php } else { ?>

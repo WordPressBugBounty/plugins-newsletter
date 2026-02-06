@@ -40,7 +40,8 @@ class NewsletterModuleBase {
     }
 
     function is_html_allowed() {
-        if (defined('NEWSLETTER_HTML_ALLOWED') && NEWSLETTER_HTML_ALLOWED) return true;
+        if (defined('NEWSLETTER_HTML_ALLOWED') && NEWSLETTER_HTML_ALLOWED)
+            return true;
         return current_user_can('unfiltered_html');
     }
 
@@ -98,7 +99,7 @@ class NewsletterModuleBase {
      * Switch the internal language and locale variables, then used to get language
      * specific URLs, translations, ...
      *
-     * @param string $language
+     * @param mixed $language
      */
     function switch_language($language) {
         if (!self::$is_multilanguage) {
@@ -173,6 +174,25 @@ class NewsletterModuleBase {
     function get_text($key, $sub = '') {
         $text = $this->get_option($key, $sub);
         return !empty($text) ? $text : $this->get_default_text($key, $sub);
+    }
+
+    /**
+     * To be implemented by derived classes.
+     *
+     * @param string $key
+     * @param string $sub
+     * @param string $language
+     * @return mixed
+     */
+    function get_option($key, $sub = '', $language = null) {
+        return null;
+    }
+
+    /**
+     * To be implemented by derived classes.
+     */
+    function get_main_options($sub = '') {
+        return [];
     }
 
     function get_default_options($sub = '') {
@@ -406,7 +426,7 @@ class NewsletterModuleBase {
      * @param TNP_User $user
      * @return string
      */
-    function get_user_token() {
+    function get_user_token($user) {
         // Just in case...
         if (empty($user->token)) {
             $this->refresh_user_token($user);
@@ -498,7 +518,6 @@ class NewsletterModuleBase {
      *
      * @global wpdb $wpdb
      * @param TNP_User $user
-     * @return TNP_User
      */
     function refresh_user_token($user) {
         global $wpdb;
@@ -553,7 +572,6 @@ class NewsletterModuleBase {
      * @global wpdb $wpdb
      * @param TNP_User $user
      * @param string $source
-     * @return type
      */
     function add_user_log($user, $source = '') {
         global $wpdb;
@@ -806,19 +824,17 @@ class NewsletterModuleBase {
         return $email->id . '-' . $email->token;
     }
 
+    /**
+     *
+     * @param type $filters
+     * @param string|null $language
+     * @return type
+     */
     function get_posts($filters = [], $language = '') {
 
         if ($language) {
-            //if (class_exists('SitePress')) {
-            if (empty($language)) {
-                $language = 'all';
-            }
             do_action('wpml_switch_language', $language);
             $filters['suppress_filters'] = false;
-            //} else if (class_exists('Polylang')) {
-            //    $filters['lang'] = $language;
-            //}
-
             $filters = apply_filters('newsletter_get_posts_filters', $filters, $language);
         }
 
@@ -831,9 +847,7 @@ class NewsletterModuleBase {
         $posts = get_posts($filters);
 
         if ($language) {
-            //if (class_exists('SitePress')) {
             do_action('wpml_switch_language', Newsletter::$language);
-            //}
         }
         return $posts;
     }
@@ -841,9 +855,6 @@ class NewsletterModuleBase {
     function get_wp_query($filters, $language = '') {
         if ($language) {
             if (class_exists('SitePress')) {
-                if (empty($language)) {
-                    $language = 'all';
-                }
                 do_action('wpml_switch_language', $language);
                 $filters['suppress_filters'] = false;
             } else if (class_exists('Polylang')) {
@@ -856,17 +867,21 @@ class NewsletterModuleBase {
         $posts = new WP_Query($filters);
 
         if ($language) {
-            if (class_exists('SitePress')) {
                 do_action('wpml_switch_language', Newsletter::$language);
-            }
         }
 
         return $posts;
     }
 
+    /**
+     * Process a collected IP to be stored following the privacy settings.
+     *
+     * @param string $ip
+     * @return string
+     */
     static function process_ip($ip) {
         $option = Newsletter::instance()->get_option('ip');
-        if (empty($option)) {
+        if (!$option) {
             return $ip;
         }
         if ($option === 'anonymize') {
@@ -875,6 +890,12 @@ class NewsletterModuleBase {
         return '';
     }
 
+    /**
+     * Remove the last byte of an IPv4 address.
+     *
+     * @param string $ip
+     * @return string
+     */
     static function anonymize_ip($ip) {
         if (empty($ip)) {
             return $ip;
@@ -891,7 +912,6 @@ class NewsletterModuleBase {
      * @return int A timestamp
      */
     static function m2t($s) {
-
         // TODO: use the wordpress function I don't remember the name
         $s = explode(' ', $s);
         $d = explode('-', $s[0]);
@@ -913,6 +933,14 @@ class NewsletterModuleBase {
         } else {
             return $url . '?' . $qs;
         }
+    }
+
+    static function get_home_url() {
+        static $url = false;
+        if (!$url) {
+            $url = home_url('/');
+        }
+        return $url;
     }
 
     function get_action_base_url() {
@@ -1030,7 +1058,7 @@ class NewsletterModuleBase {
     }
 
     static function sanitize_country($value) {
-        return sanitize_user_field($value, 2);
+        return self::sanitize_user_field($value, 2);
     }
 
     /**
@@ -1317,7 +1345,6 @@ class NewsletterModuleBase {
      *
      * @param type $email
      * @param type $attrs
-     * @return type
      */
     function show_email_progress_bar($email, $attrs = []) {
 
@@ -1327,7 +1354,7 @@ class NewsletterModuleBase {
 
         if ($email->status == 'sending' && $email->send_on > time()) {
             if ($attrs['scheduled']) {
-                echo '<span class="tnp-progress-date">', esc_html($this->format_date($email->send_on)), '</span>';
+                echo '<span class="tnp-progress-date">', esc_html(wp_date(get_option('date_format') . ' ' . get_option('time_format'), $email->send_on)), '</span>';
             }
             return;
         } else if ($email->status == 'new') {

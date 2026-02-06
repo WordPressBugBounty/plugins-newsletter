@@ -149,6 +149,7 @@ class Integrations {
             return [];
         }
 
+        // @phpstan-ignore-next-line
         $forms = \GFAPI::get_forms();
 
         $sources = [];
@@ -191,6 +192,8 @@ class Integrations {
         if (!self::is_forminator_active()) {
             return [];
         }
+
+        // @phpstan-ignore-next-line
         $forms = \Forminator_API::get_forms();
 
         $sources = [];
@@ -212,6 +215,8 @@ class Integrations {
         if (!self::is_formidable_active()) {
             return [];
         }
+
+        // @phpstan-ignore-next-line
         $forms = \FrmForm::get_published_forms();
 
         $sources = [];
@@ -233,6 +238,8 @@ class Integrations {
         if (!self::is_ninjaforms_active()) {
             return [];
         }
+
+        // @phpstan-ignore-next-line
         $forms = Ninja_Forms()->form()->get_forms();
 
         $sources = [];
@@ -254,8 +261,9 @@ class Integrations {
         if (!self::is_fluentforms_active()) {
             return [];
         }
-
+        // @phpstan-ignore-next-line
         $formApi = fluentFormApi('forms');
+        
         $atts = [
             'status' => 'all',
             'sort_column' => 'id',
@@ -278,7 +286,7 @@ class Integrations {
         return $sources;
     }
 
-    static function config_button(Source $source, \NewsletterControls $controls) {
+    static function config_button(Source $source, $controls) {
         static $default_url;
         if (!$default_url) {
             if (class_exists('NewsletterExtensions')) {

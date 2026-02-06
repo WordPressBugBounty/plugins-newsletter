@@ -1,6 +1,7 @@
 <?php
-
-/* @var $fields NewsletterFields */
+/** @var array $options */
+/** @var NewsletterControls $controls  */
+/** @var NewsletterFields $fields */
 ?>
 <p>Obsolete: use the snippet global option instead.</p>
 

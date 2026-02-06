@@ -231,7 +231,7 @@ class NewsletterStore {
         $value = (string) $value;
 
         if (preg_match('/^[a-zA-Z0-9_]+$/', $field) == 0) {
-            $this->logger->error('Invalis field name: ' . $field_name);
+            $this->logger->error('Invalid field name: ' . $field);
             return false;
         }
         $result = $wpdb->query($wpdb->prepare("update $table set $field=%s where id=%d limit 1", $value, $id));

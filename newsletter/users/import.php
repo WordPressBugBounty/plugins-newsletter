@@ -1,4 +1,8 @@
 <?php
+/** @var NewsletterUsersAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
+
 defined('ABSPATH') || exit;
 ?>
 

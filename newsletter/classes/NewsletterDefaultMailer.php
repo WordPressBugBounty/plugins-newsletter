@@ -40,7 +40,6 @@ class NewsletterDefaultMailer extends NewsletterMailer {
     /**
      *
      * @param PHPMailer $mailer
-     * @return
      */
     function fix_mailer($mailer) {
 
@@ -141,10 +140,7 @@ class NewsletterDefaultMailer extends NewsletterMailer {
 
                 // Still not used
                 $error_data = $this->last_error->get_error_data();
-                $error_code = '';
-                if (isset($mail_data['phpmailer_exception_code'])) {
-                    $error_code = $mail_data['phpmailer_exception_code'];
-                }
+                $error_code = $error_data['phpmailer_exception_code'] ?? '';
 
                 if (stripos($error_message, 'Could not instantiate mail function') || stripos($error_message, 'Failed to connect to mailserver')) {
                     return new WP_Error(self::ERROR_FATAL, $error_message);

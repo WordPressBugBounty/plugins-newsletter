@@ -1,8 +1,8 @@
 <?php
-/* @var $this NewsletterUnsubscriptionAdmin */
-/* @var $controls NewsletterControls */
-/* @var $logger NewsletterLogger */
-
+/** @var NewsletterUnsubscriptionAdmin $this */
+/** @var NewsletterControls $controls */
+/** @var NewsletterLogger $logger */
+/** @var string $language */
 
 defined('ABSPATH') || exit;
 

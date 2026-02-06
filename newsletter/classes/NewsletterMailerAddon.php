@@ -186,7 +186,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
 
         Newsletter::instance()->set_user_status($user, TNP_User::STATUS_COMPLAINED);
         Newsletter::instance()->add_user_log($user, $this->name);
-        Newsletter\Logs::add($this->name, $email . ' - ' . $type . ' complaint', 0, $data);
+        Newsletter\Logs::add($this->name, $email . ' complaint', 0, $data);
         do_action('newsletter_user_complained', $user);
     }
 
@@ -206,7 +206,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
 
         Newsletter::instance()->set_user_status($user, TNP_User::STATUS_UNSUBSCRIBED);
         Newsletter::instance()->add_user_log($user, $this->name);
-        Newsletter\Logs::add($this->name, $email . ' - ' . $type . ' unsubscribe', 0, $data);
+        Newsletter\Logs::add($this->name, $email . ' unsubscribe', 0, $data);
         do_action('newsletter_user_unsubscribed', $user);
     }
 

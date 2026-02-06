@@ -1,4 +1,6 @@
-<?php ?>
+<?php
+/** @var array $system_warnings */
+?>
 <ul class="tnp-nav">
     <li class="tnp-nav-title"><?php esc_html_e('System', 'newsletter') ?></li>
     <li class="<?php echo $_GET['page'] === 'newsletter_system_status' ? 'active' : '' ?>">
