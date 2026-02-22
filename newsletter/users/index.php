@@ -239,7 +239,7 @@ $lists_options['-1'] = __('Without list', 'newsletter');
                             <?php if ($s->status == "C") { ?>
                                 <?php $controls->btn('resend_welcome', '', ['secondary' => true, 'data' => $s->id, 'icon' => 'fa-redo', 'confirm' => true, 'title' => __('Resend the welcome email', 'newsletter')]); ?>
                             <?php } else { ?>
-                                <?php $controls->btn('resend', '', ['secondary' => true, 'data' => $s->id, 'icon' => 'fa-redo', 'confirm' => true, 'title' => __('Resend the confirmaton email', 'newsletter')]); ?>
+                                <?php $controls->btn('resend', '', ['secondary' => true, 'data' => $s->id, 'icon' => 'fa-redo', 'confirm' => true, 'title' => __('Resend the confirmation email', 'newsletter')]); ?>
                             <?php } ?>
 
                             <?php $controls->button_icon_delete($s->id); ?>

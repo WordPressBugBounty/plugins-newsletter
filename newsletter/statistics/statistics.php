@@ -94,6 +94,9 @@ class NewsletterStatistics extends NewsletterModule {
             if (!$email) {
                 $this->dienow('Invalid newsletter', 'The link originates from a newsletter not found (it could have been deleted)', 404);
             }
+
+            // Check for bots
+            
             setcookie('tnpe', $email->id . '-' . $email->token, time() + 60 * 60 * 24 * 365, '/');
 
             // Quick fix to fix

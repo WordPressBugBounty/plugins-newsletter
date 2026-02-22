@@ -49,7 +49,7 @@ if ($controls->is_action('abort')) {
     $wpdb->query("update " . NEWSLETTER_EMAILS_TABLE . " set last_id=0, sent=0, status='new' where id=" . $email_id);
     $email = $this->get_email($email_id, ARRAY_A);
     tnp_prepare_controls($email, $controls);
-    $controls->messages = __('Delivery definitively cancelled', 'newsletter');
+    $controls->messages = __('Delivery definitively canceled', 'newsletter');
 }
 
 if ($controls->is_action('change-private')) {
@@ -383,7 +383,7 @@ if ($email['status'] != 'sent') {
                     <?php if ($email['status'] == 'new') $controls->button_confirm('send', __('Send now', 'newsletter'), __('Start real delivery?', 'newsletter')); ?>
                     <?php if ($email['status'] == 'sending') $controls->button_confirm('pause', __('Pause', 'newsletter'), __('Pause the delivery?', 'newsletter')); ?>
                     <?php if ($email['status'] == 'paused' || $email['status'] == 'error') $controls->button_confirm('continue', __('Continue', 'newsletter'), 'Continue the delivery?'); ?>
-                    <?php if ($email['status'] == 'paused') $controls->button_confirm('abort', __('Stop', 'newsletter'), __('This totally stop the delivery, ok?', 'newsletter')); ?>
+                    <?php if ($email['status'] == 'paused') $controls->button_confirm('abort', __('Stop', 'newsletter'), __('This will stop the delivery. Proceed?', 'newsletter')); ?>
                     <?php if ($email['status'] == 'new' || ( $email['status'] == 'paused' && $email['send_on'] > time() )) { ?>
                         <a id="tnp-schedule-button" class="button-secondary" href="javascript:tnp_toggle_schedule()"><i class="far fa-clock"></i> <?php _e("Schedule") ?></a>
                         <span id="tnp-schedule" style="display: none;">
@@ -454,7 +454,7 @@ if ($email['status'] != 'sent') {
                                 <?php $controls->select2('options_lists', $lists, null, true, null, __('All', 'newsletter')); ?>
 
                                 <br>
-                                <?php esc_html_e('must not in one of', 'newsletter') ?>
+                                <?php esc_html_e('must not be in one of', 'newsletter') ?>
 
                                 <?php $controls->select2('options_lists_exclude', $lists, null, true, null, __('None', 'newsletter')); ?>
                             </td>

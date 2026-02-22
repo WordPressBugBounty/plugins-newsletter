@@ -1,10 +1,11 @@
 <?php
+
+defined('ABSPATH') || exit;
+
 /** @var NewsletterSubscriptionAdmin $this */
 /** @var NewsletterControls $controls */
 /** @var NewsletterLogger $logger */
 /** @var string $language */
-
-defined('ABSPATH') || exit;
 
 $email = null;
 
@@ -164,12 +165,12 @@ if (!empty($controls->data['confirmation_email'])) {
 
                     <?php $controls->select('confirmation_email', ['0' => __('Default', 'newsletter'), '1' => __('Composer', 'newsletter')]); ?>
 
+                    <?php $controls->button_save() ?>
+
                     <?php
                     $controls->button_icon_statistics(NewsletterStatisticsAdmin::instance()->get_statistics_url($controls->data['confirmation_email_id']),
                             ['secondary' => true, 'target' => '_blank', 'data-tnpshow' => 'confirmation_email=1'])
                     ?>
-
-                    <?php $controls->button_save() ?>
 
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <?php $controls->btn_link(home_url('/') . '?na=json&id=' . $email->id, '{}') ?>

@@ -3,7 +3,6 @@
 /** @var NewsletterControls $controls */
 /** @var NewsletterLogger $logger */
 /** @var wpdb $wpdb  */
-
 defined('ABSPATH') || exit;
 
 wp_enqueue_script('tnp-chart');
@@ -76,7 +75,6 @@ $steps_completed = count($steps) >= 10;
     <div id="tnp-heading">
         <?php $controls->title_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration') ?>
 
-<!--        <h2><?php esc_html_e('Dashboard', 'newsletter'); ?></h2>-->
         <?php include __DIR__ . '/dashboard-nav.php' ?>
 
     </div>
@@ -101,13 +99,13 @@ $steps_completed = count($steps) >= 10;
                         <div class="tnp-card-upper-buttons"><a href="?page=newsletter_users_statistics"><i class="fas fa-chart-bar"></i></a></div>
                     </div>
                     <div class="tnp-card-value"><?php echo esc_html($subscribers_count); ?></div>
-                    <div class="tnp-card-description">Confirmed subscribers</div>
+                    <div class="tnp-card-description"><?php esc_html_e('Confirmed subscribers', 'newsletter') ?></div>
                 </div>
 
                 <div class="tnp-card">
                     <div class="tnp-card-title"><?php esc_html_e('Last 30 days', 'newsletter') ?></div>
                     <div class="tnp-card-value"><?php echo esc_html($subscribers_count_last_30_days); ?></div>
-                    <div class="tnp-card-description">Confirmed subscribers</div>
+                    <div class="tnp-card-description"><?php esc_html_e('Confirmed subscribers', 'newsletter') ?></div>
 
                 </div>
 
@@ -115,7 +113,7 @@ $steps_completed = count($steps) >= 10;
                 <div class="tnp-card">
                     <div class="tnp-card-title"><?php esc_html_e('Queued emails', 'newsletter') ?></div>
                     <div class="tnp-card-value"><?php echo esc_html($queued); ?></div>
-                    <div class="tnp-card-description">Delivering at <?php echo esc_html($speed); ?> emails per hour.</div>
+                    <div class="tnp-card-description"><?php esc_html_e('Sending speed', 'newsletter') ?>: <?php echo esc_html($speed); ?> <?php esc_html_e('emails per hour', 'newsletter') ?>.</div>
                 </div>
 
                 <div class="tnp-card">

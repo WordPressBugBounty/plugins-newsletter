@@ -118,8 +118,6 @@ function tnp_describe_table($table) {
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
-
-<!--        <h2><?php esc_html_e('System', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
     </div>
 
@@ -140,7 +138,6 @@ function tnp_describe_table($table) {
             <div class="tnp-tabs">
 
                 <ul>
-
                     <li><a href="#tabs-general"><?php esc_html_e('General', 'newsletter') ?></a></li>
                     <li><a href="#tabs-filters"><?php esc_html_e('Filters', 'newsletter') ?></a></li>
                     <li><a href="#tabs-plugins"><?php esc_html_e('Plugins', 'newsletter') ?></a></li>
@@ -152,14 +149,14 @@ function tnp_describe_table($table) {
 
 
                 <div id="tabs-general">
-                    <h3>General checks</h3>
+                    <h3><?php esc_html_e('General checks', 'newsletter') ?></h3>
                     <table class="widefat" id="tnp-status-table">
 
                         <thead>
                             <tr>
-                                <th>Parameter</th>
+                                <th><?php esc_html_e('Parameter', 'newsletter') ?></th>
                                 <th></th>
-                                <th>Note</th>
+                                <th><?php esc_html_e('Note', 'newsletter') ?></th>
                             </tr>
 
                         </thead>

@@ -73,7 +73,7 @@ header('Cache-Control: no-cache,no-store,private');
                         echo '<input type="hidden" name="';
                         echo esc_attr($name);
                         echo '[', esc_attr($k), ']" value="';
-                        echo esc_attr(stripslashes($v));
+                        echo esc_attr(stripslashes($v ?? ''));
                         echo '">';
                     }
                 } else {

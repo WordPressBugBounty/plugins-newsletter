@@ -155,13 +155,15 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                     <?php $fields->color('options_composer_background', __('Main background', 'newsletter')) ?>
                 </div>
                 <div class="tnp-field-col-2">
-                    <?php $fields->color('options_composer_block_background', 'Blocks background') ?>
+                    <?php $fields->color('options_composer_block_background', __('Blocks background', 'newsletter')) ?>
                 </div>
             </div>
 
             <?php $fields->font('options_composer_title_font', __('Titles font', 'newsletter')) ?>
             <?php $fields->font('options_composer_text_font', __('Text font', 'newsletter')) ?>
-            <?php $fields->button_style('options_composer_button', __('Button style', 'newsletter')); ?>
+
+            <?php $fields->button('options_composer_button', __('Button style', 'newsletter'), ['url'=>false, 'label'=>false]); ?>
+
             <div class="tnp-field-row">
                 <div class="tnp-field-col-2">
                     <?php
@@ -174,6 +176,7 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                     <?php $fields->text('options_composer_padding', __('Mobile padding', 'newsletter'), ['size' => '40', 'description' => 'For boxed layouts']); ?>
                 </div>
             </div>
+            <p>Custom CSS can be added from the <a href="?page=newsletter_emails_settings" target="_blank">Settings page</a>.</p>
 
             <input id="tnpb-settings-apply" type="button" class="button-secondary" value="<?php esc_attr_e("Apply", 'newsletter') ?>">
 

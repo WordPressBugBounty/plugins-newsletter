@@ -6,7 +6,7 @@
 
 defined('ABSPATH') || exit;
 
-$user = $this->get_user((int) $_GET['id'] ?? -1);
+$user = $this->get_user((int) ($_GET['id'] ?? -1));
 
 if (!$user) {
     echo 'Subscriber not found.';
@@ -21,7 +21,7 @@ if (!$user) {
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscribers-and-management/') ?>
-        <h2><?php echo esc_html($user->email) ?></h2>
+        <h2><?= esc_html($user->email) ?></h2>
         <?php include __DIR__ . '/edit-nav.php' ?>
     </div>
 

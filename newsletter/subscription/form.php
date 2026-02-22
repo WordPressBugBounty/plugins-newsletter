@@ -11,20 +11,6 @@ if (!$controls->is_action()) {
 } else {
     if ($controls->is_action('save')) {
 
-        // Processing profile fields
-        if (!$language) {
-            for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
-                if (empty($controls->data['profile_' . $i])) {
-                    unset($controls->data['profile_' . $i]);
-                }
-                if (empty($controls->data['profile_' . $i . '_options'])) {
-                    unset($controls->data['profile_' . $i . '_options']);
-                }
-                if (empty($controls->data['profile_' . $i . '_placeholder'])) {
-                    unset($controls->data['profile_' . $i . '_placeholder']);
-                }
-            }
-        }
         $controls->data = wp_kses_post_deep($controls->data);
         $this->save_options($controls->data, 'form', $language);
         $controls->data = $this->get_options('form', $language);
@@ -32,11 +18,8 @@ if (!$controls->is_action()) {
     }
 }
 
-$status = array(0 => __('Hide', 'newsletter'), 1 => __('Show', 'newsletter'));
-$rules = array(0 => __('Optional', 'newsletter'), 1 => __('Required', 'newsletter'));
-$extra_type = array('text' => __('Text', 'newsletter'), 'select' => __('List', 'newsletter'));
+$rules = [0 => __('Optional', 'newsletter'), 1 => __('Required', 'newsletter')];
 
-$main_options = $this->get_main_options('form');
 ?>
 
 <div class="wrap" id="tnp-wrap">
@@ -188,7 +171,7 @@ $main_options = $this->get_main_options('form');
                             <tr>
                                 <th><?php esc_html_e('Enabled?', 'newsletter') ?></th>
                                 <td>
-                                    <?php $controls->select('privacy_status', array(0 => __('No', 'newsletter'), 1 => __('Yes', 'newsletter'), 2 => __('Only the notice', 'newsletter'))); ?>
+                                    <?php $controls->select('privacy_status', [0 => __('No', 'newsletter'), 1 => __('Yes', 'newsletter'), 2 => __('Only the notice', 'newsletter')]); ?>
                                 </td>
                             </tr>
                         <?php } ?>
@@ -218,7 +201,7 @@ $main_options = $this->get_main_options('form');
                         </tr>
                     </table>
                     <p>
-                        <?php esc_html_e('The privacy acceptance checkbox (required in many Europen countries) forces the subscriber to check it before proceeding. If an URL is specified the label becomes a link.', 'newsletter') ?>
+                        <?php esc_html_e('The privacy acceptance checkbox (required in many European countries) forces the subscriber to check it before proceeding. If an URL is specified the label becomes a link.', 'newsletter') ?>
                     </p>
 
                     <h3><?php esc_html_e('Salutation', 'newsletter') ?></h3>

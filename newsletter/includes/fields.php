@@ -247,7 +247,7 @@ class NewsletterFields {
         $this->_close();
     }
 
-        public function wp_editor_simple($name, $label = '', $attrs = []) {
+    public function wp_editor_simple($name, $label = '', $attrs = []) {
         global $wp_version;
 
         $attrs = $this->_merge_attrs($attrs);
@@ -447,7 +447,8 @@ class NewsletterFields {
                     'size_default' => false,
                     'weight_default' => false,
                     'align' => false,
-                    'description' => ''
+                    'description' => '',
+                    'label' => true,
         ]);
 
         $this->_open('tnpf-button');
@@ -455,12 +456,13 @@ class NewsletterFields {
         $value = $this->controls->get_value($name . '_label');
         $name_esc = esc_attr($name);
         echo '<div class="tnp-field-row" style="margin-bottom: 5px">';
-        echo '<div class="tnp-field-col-2">';
-        echo '<input id="', $this->_id($name . '_label'), '" placeholder="', esc_attr($attrs['placeholder']), '" name="options[', $name_esc, '_label]" type="text"';
-        echo ' style="width: 100%"';
-        echo ' value="', esc_attr($value), '">';
-        echo '</div>';
-
+        if ($attrs['label']) {
+            echo '<div class="tnp-field-col-2">';
+            echo '<input id="', $this->_id($name . '_label'), '" placeholder="', esc_attr($attrs['placeholder']), '" name="options[', $name_esc, '_label]" type="text"';
+            echo ' style="width: 100%"';
+            echo ' value="', esc_attr($value), '">';
+            echo '</div>';
+        }
         if ($attrs['url']) {
             $value = $this->controls->get_value($name . '_url');
             echo '<div class="tnp-field-col-2">';
@@ -487,6 +489,7 @@ class NewsletterFields {
         ]);
         $this->controls->color($name . '_background');
         $this->controls->color($name . '_border_color');
+        $this->controls->select($name . '_border_radius', ['' => 'Default', 'squared' => __('Squared'), 'rounded' => __('Rounded'), '5' => '5 px', '10' => '10 px', '15' => '15 px'], null, ['title'=>'Border radius']);
         $this->_description($attrs);
         $this->_close();
     }
@@ -881,7 +884,6 @@ class NewsletterFields {
         //$this->controls->checkbox('block_background_gradient');
         $this->controls->select('block_background_angle', ['180' => '180°', '90°' => '90°']);
         echo '</div>';
-
 
         echo '<div class="tnp-field-col-4">';
         $this->_label('Full width');

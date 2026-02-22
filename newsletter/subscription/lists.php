@@ -4,7 +4,6 @@
 /** @var NewsletterLogger $logger */
 /** @var string $language */
 /** @var bool $is_multilanguage */
-
 defined('ABSPATH') || exit;
 
 if (!$controls->is_action()) {
@@ -17,6 +16,13 @@ if (!$controls->is_action()) {
             for ($i = 0; $i <= NEWSLETTER_LIST_MAX; $i++) {
                 if (empty($controls->data['list_' . $i])) {
                     unset($controls->data['list_' . $i]);
+                }
+            }
+        } else {
+            for ($i = 0; $i <= NEWSLETTER_LIST_MAX; $i++) {
+                if (empty($controls->data['list_' . $i])) {
+                    unset($controls->data['list_' . $i]);
+                    unset($controls->data['list_' . $i . '_status']);
                 }
             }
         }
@@ -75,7 +81,9 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription/newsletter-lists/') ?>
-        <h2><?php esc_html_e('Lists', 'newsletter') ?></h2>
+        <ul class="tnp-nav">
+            <li class="tnp-nav-title"><?php esc_html_e('Lists', 'newsletter') ?></li>
+        </ul>
     </div>
 
     <div id="tnp-body">
@@ -167,7 +175,7 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
                                     <?php } ?>
 
                                     <td>
-                                        <?php //echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where list_" . $i . "=1 and status='C'");   ?>
+                                        <?php //echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where list_" . $i . "=1 and status='C'");     ?>
                                         <?php
                                         $field = 'list_' . $i;
                                         echo $count->$field;
@@ -186,7 +194,7 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
                                 <tr>
                                     <td>&nbsp;</td>
                                     <td colspan="7">
-                                        <?php $notes = apply_filters('newsletter_lists_notes', array(), $i); ?>
+                                        <?php $notes = apply_filters('newsletter_lists_notes', [], $i); ?>
                                         <?php
                                         $text = '';
                                         foreach ($notes as $note) {

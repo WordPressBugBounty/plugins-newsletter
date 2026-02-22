@@ -261,4 +261,5 @@ abstract class NewsletterMembershipAddon extends NewsletterAddon {
     }
 
     abstract function import_run();
+
 }

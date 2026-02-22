@@ -4,84 +4,87 @@ var tnp_backup_block_options;
 
 // add delete buttons
 jQuery.fn.add_block_delete = function () {
-    this.append('<div class="tnpc-row-action tnpc-row-delete" title="Delete"><img src="' + TNP_PLUGIN_URL + '/composer/assets/delete.png" width="32"></div>');
     this.find('.tnpc-row-delete').on('click', function (ev) {
         ev.preventDefault();
         ev.stopPropagation();
         NewsletterComposer.close_block_options();
-        jQuery(this).parent().remove();
+        jQuery(this).closest("table.tnpc-row-block").remove();
     });
 };
 
 // add edit button
 jQuery.fn.add_block_edit = function () {
-    this.append('<div class="tnpc-row-action tnpc-row-edit" title="Edit"><img src="' + TNP_PLUGIN_URL + '/composer/assets/edit.png" width="32"></div>');
-
     this.find('.tnpc-row-edit').on('click', function (ev) {
         ev.preventDefault();
         ev.stopPropagation();
 
-        target = jQuery(this).parent().find('.edit-block');
-        tnp_container = jQuery(this).closest("table");
-
-        if (tnp_container.hasClass('tnpc-row-block')) {
-
-            NewsletterComposer.hide_block_options();
-
-            var options = tnp_container.find(".tnpc-block-content").attr("data-json");
-
-            var data = {
-                action: "tnpc_block_form",
-                id: tnp_container.data("id"),
-                context_type: tnp_context_type,
-                options: options
-            };
-
-            NewsletterComposer.add_composer_options(data);
-
-            //builderAreaHelper.lock();
-            jQuery.ajax({
-                url: ajaxurl,
-                method: 'POST',
-                data: data,
-                //async: false,
-                success: function (response) {
-                    jQuery("#tnpc-block-options-form").html(response.form);
-                    jQuery("#tnpc-block-options-title").html(response.title);
-                    tnp_backup_block_options = jQuery("#tnpc-block-options-form :input").serializeArray();
-                    NewsletterComposer.show_block_options();
-                }
-            });
-
-        } else {
+        tnp_container = jQuery(this).closest("table.tnpc-row-block");
+        if (!tnp_container) {
             alert("This is deprecated block version and cannot be edited. Please replace it with a new one.");
+            return;
         }
 
+        target = tnp_container.find('td.edit-block');
+
+
+        NewsletterComposer.hide_block_options();
+
+        var options = tnp_container.find(".tnpc-block-content").attr("data-json");
+
+        var data = {
+            action: "tnpc_block_form",
+            id: tnp_container.data("id"),
+            context_type: tnp_context_type,
+            options: options
+        };
+
+        NewsletterComposer.add_composer_options(data);
+
+        //builderAreaHelper.lock();
+        jQuery.ajax({
+            url: ajaxurl,
+            method: 'POST',
+            data: data,
+            //async: false,
+            success: function (response) {
+                jQuery("#tnpc-block-options-form").html(response.form);
+                jQuery("#tnpc-block-options-title").html(response.title);
+                tnp_backup_block_options = jQuery("#tnpc-block-options-form :input").serializeArray();
+                NewsletterComposer.show_block_options();
+            }
+        });
+
     });
-}
+};
 
 // add clone button
 jQuery.fn.add_block_clone = function () {
-    this.append('<div class="tnpc-row-action tnpc-row-clone" title="Clone"><img src="' + TNP_PLUGIN_URL + '/composer/assets/copy.png" width="32"></div>');
     this.find('.tnpc-row-clone').on('click', function (ev) {
         ev.preventDefault();
         ev.stopPropagation();
         NewsletterComposer.close_block_options();
-        // find the row
-        let row = jQuery(this).closest('.tnpc-row');
+
+        let row = jQuery(this).closest("table.tnpc-row-block");
 
         let new_row = row.clone();
         new_row.add_block_actions();
         new_row.insertAfter(row);
     });
-}
+};
 
 jQuery.fn.add_block_actions = function () {
-    this.find(".tnpc-row-action").remove();
+    this.find(".tnpc-row-actions").remove();
+
+    let html = '<div class="tnpc-row-actions">';
+    html += '<div class="tnpc-row-action tnpc-row-edit" title="Edit"><span class="dashicons dashicons-edit"></span></div>';
+    html += '<div class="tnpc-row-action tnpc-row-clone" title="Clone"><span class="dashicons dashicons-admin-page"></span></div>';
+    html += '<div class="tnpc-row-action tnpc-row-delete" title="Delete"><span class="dashicons dashicons-trash"></span></div>';
+    html += '</div>';
+    this.append(html);
     this.add_block_delete();
     this.add_block_edit();
     this.add_block_clone();
-}
+};
 
 const NewsletterComposer = {
     initialized: false,
@@ -263,7 +266,7 @@ const NewsletterComposer = {
         });
 
         jQuery('#tnpc-block-options-form').on('change', function (event) {
-            var data = NewsletterComposer.get_block_options();
+            let data = NewsletterComposer.get_block_options();
 
             jQuery.post(ajaxurl, data, function (response) {
                 target.html(response);
@@ -309,6 +312,14 @@ const NewsletterComposer = {
                         loading_row.before(new_row);
                         loading_row.remove();
                         new_row.add_block_actions();
+//                        new_row.on('click', function (ev) {
+//                            let target = jQuery(ev.target);
+//                            if (target.hasClass('tnpc-inline-editable')) {
+//                                return;
+//                            }
+//                            debugger;
+//                            jQuery(this).find(".tnpc-row-edit").click();
+//                        });
                         if (new_row.hasClass('tnpc-row-block')) {
                             new_row.find(".tnpc-row-edit").click();
                         }
@@ -501,6 +512,7 @@ jQuery(document).ready(function () {
             // find all inline editable elements
             jQuery('#tnpb-content').on('click', '.' + className, function (e) {
                 e.preventDefault();
+                //e.stopPropagation();
                 removeAllActiveElements();
 
                 var originalEl = jQuery(this).hide();

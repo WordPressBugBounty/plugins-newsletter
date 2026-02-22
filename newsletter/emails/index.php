@@ -153,7 +153,7 @@ $emails = $pagination_controller->get_items();
                 </tbody>
             </table>
             <p>
-                (*) <?php esc_html_e('Expected total at the end of the delivery may differ due to subscriptions/unsubscriptions occurred meanwhile.', 'newsletter') ?>
+                (*) <?php esc_html_e('Expected total at the end of the delivery may differ due to subscriptions/unsubscriptions occurred in the meantime.', 'newsletter') ?>
             </p>
         </form>
     </div>

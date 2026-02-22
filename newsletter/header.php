@@ -425,6 +425,17 @@ if (isset($_GET['debug']) || !defined('NEWSLETTER_CRON_WARNINGS') || NEWSLETTER_
 ?>
 
 <?php
+$temp = NewsletterUnsubscription::instance()->get_main_options();
+if (strpos($temp['unsubscribe_text'] ?? '', '{unsubscription_confirm') !== false) {
+    echo '<div class="tnp-notice tnp-notice-warning">';
+    echo 'The unsubscribe page uses old links. ';
+    echo 'For a safer unsubscribe procedure <a href="?page=newsletter_unsubscription_index">change the <em>Confirm</em> text</a> to the default value and then customize it, if needed.<br>';
+    echo '<a href="https://www.thenewsletterplugin.com/documentation/subscribers-and-management/cancellation/#how-it-works">Read more on our documentation</a>.';
+    echo '</div>';
+}
+?>
+
+<?php
 $hook_paused = get_option('wp_crontrol_paused');
 if (isset($_GET['debug']) || isset($hook_paused['newsletter']) && $hook_paused['newsletter']) {
     echo '<div class="tnp-notice tnp-notice-error">The delivery engine has been paused using WP Crontrol. Please <a href="tools.php?page=crontrol_admin_manage_page">reactivate the <code>newsletter</code> hook</a>.</div>';

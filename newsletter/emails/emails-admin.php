@@ -157,7 +157,7 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
      */
     function send_test_email($email, $controls) {
         if (!$email) {
-            $controls->errors = __('Newsletter should be saved before send a test', 'newsletter');
+            $controls->errors = __('Newsletter should be saved before sending a test', 'newsletter');
             return;
         }
 

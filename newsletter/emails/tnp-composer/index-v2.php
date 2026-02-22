@@ -228,7 +228,7 @@ wp_enqueue_script('tnp-composer', plugins_url('newsletter') . '/emails/tnp-compo
         <li>{name} - <?php esc_html_e('First name', 'newsletter') ?></li>
         <li>{surname} - <?php esc_html_e('Last name', 'newsletter') ?></li>
         <li>{email} - <?php esc_html_e('Email', 'newsletter') ?></li>
-        <li>{profile_N} - <?php esc_html_e('Profile numner N with N=1, 2, 3, ...', 'newsletter') ?></li>
+        <li>{profile_N} - <?php esc_html_e('Profile number N with N=1, 2, 3, ...', 'newsletter') ?></li>
         <li>{email_url} - <?php esc_html_e('Email online view', 'newsletter') ?></li>
     </ul>
     <p>

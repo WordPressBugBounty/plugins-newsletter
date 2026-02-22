@@ -108,7 +108,7 @@ function percentValue($value, $total) {
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscribers-and-management/') ?>
-        <h2><?php echo esc_html($user->email) ?></h2>
+        <h2><?= esc_html($user->email) ?></h2>
         <?php include __DIR__ . '/edit-nav.php' ?>
     </div>
 

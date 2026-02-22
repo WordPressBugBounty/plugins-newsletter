@@ -1,3 +1,184 @@
+= 8.9.9 =
+
+* Changed the test newsletter procedure to be compatible with some delivery addons
+
+= 8.9.8 =
+
+* Added button to create newsletter with raw html and the legacy themes
+* Better separation of the three editors
+
+= 8.9.7 =
+
+* Fixed newsletter creation error
+
+= 8.9.6 =
+
+* Package fix
+
+= 8.9.5 =
+
+* Added common class to integrate membership plugins
+* Added notice when the main sending speed is overridden by a delivery addon
+* Added warning when the public page is misconfigured
+* Fixed PHP warning on the main settings
+* Changed the minimum WP version to 6.1
+
+= 8.9.4 =
+
+* Added notifications for sending fatal errors
+
+= 8.9.3 =
+
+* Fixed deprecated PHP function
+* Fixed excerpt with non breakable spaces
+
+= 8.9.2 =
+
+* Fixed wrong escape on sender name
+* Fixed notice when NEWSLETTER_SEND_DELAY is set
+* Fixed max emails per seconds option
+* Changed the sending window
+
+= 8.9.1 =
+
+* Fixed max emails per second to be a decimal number less than 1
+* Fixed subscribers pagination when the database is empty
+* Improved "controls" for post selection
+* Added the NEWSLETTER_MULTILANGUAGE constant: when set to false the multilanguage features are disabled
+* Added the NEWSLETTER_SEND_DELAY constant (see our documentation)
+
+= 8.9.0 =
+
+* Fixed PHP admin warning
+
+= 8.8.9 =
+
+* Fixed the primary button alert
+
+= 8.8.8 =
+
+* Optimized the mailer addon code to be loaded only when needed
+* Added role and aria-level attribute to heading block
+* Style fix on admin panels
+* Fixed some PHP warnings
+
+= 8.8.7 =
+
+* Fixed link to the legacy themes
+
+= 8.8.6 =
+
+* Fixed hero block image alt attribute
+* Fixed the minimal widget
+* Composer code refactoring
+* Fixed composer modals on welcome email
+* Removed the old presets
+* Updated the composer templates
+* Added warning if the confirmation email is missing the correct URL
+* Added sending time window (see main settings)
+* Improved the Help/Delivery page
+* Removed HTML filter for users with unfiltered html capability to avoid custom block breaking
+
+= 8.8.5 =
+
+* Added more content filters to prevent XSS (write us if you have issues on saving options or editing content)
+* Fixed PHP warnings
+* Optimized composer code
+* Limited access to delivery addon to administrators
+
+= 8.8.4 =
+
+* Fixed fatal error on welcome email editing
+
+= 8.8.3 =
+
+* Fixed the S. Valentine template
+* Changed the main CSS configuration validation
+* Fixed button padding lost when saving a newsletter
+
+= 8.8.2 =
+
+* Added full editor to the title block
+* Added no list filter on subscribers' page
+* WP 6.8.1 check
+* Option to get the reason when the email cannot be refreshed (mainly for Automated)
+* Added more checks on "unfiltered_html" capability
+
+= 8.8.1 =
+
+* Added nfid hidden form field to manage form submission custom data
+
+= 8.8.0 =
+
+* Added shortcode attributes support to old HTML forms
+* Improved popup code to be compatibile with js minifiers and lazy loading
+
+= 8.7.9 =
+
+* Fixed commit
+
+= 8.7.8 =
+
+* Added Spotify
+* Improved license, addons and news caching
+* WP 6.8 check
+* Added ajax attribute to the newsletter_form shortcode
+* Added filter "subscription date" for targeting
+* Moved geo filters on the targeting panel
+* Improved the antispam logging
+
+= 8.7.7 =
+
+* Fixed conflict with Revolution Slider
+* Fixed Automated and Autoresponder menu entries
+* Added constant NEWSLETTER_TEST_SUBJECT_POSTFIX to control the test email subject
+
+= 8.7.6 =
+
+* Fixed logger group for delivery addons
+* Added data on log for unresolved subscribers
+* Added referrer to subscriptions from 3rd party integrated forms
+* New way to add top menu entries (more efficient and clean)
+* Fixed welcome email saving loosing the subject (when a posts block is included)
+* Fixed confirmation button on confirmation email (when created with the provided template)
+* Improved footer block on mobile devices
+
+= 8.7.5 =
+
+* Fixed the template refresh when composing a newsletter
+* Fixed subscription settings saving for custom texts on multilanguage blogs
+
+= 8.7.4 =
+
+* Fixed the composer for the confirmation and welcome emails
+
+= 8.7.3 =
+
+* Fixed not editable blocks on first newsletter creation or template change
+
+= 8.7.2 =
+
+* Added custom confirmation email
+* Removed old code and reorganized the packaged templates
+* Revisited the subscription, confirmation and welcome configuration
+* Reorganized some admin pages
+* Changed scheduler related messages
+* Added preview to the confirmation page
+* Added the forms menu to make the configuration clearer
+* Fixed unsubscription page preview with multilanguage plugins
+* Fixed profile edit page preview with multilanguage plugins
+* Added a few new values to the system page
+
+= 8.7.1 =
+
+* Cleaned up custom css on main configuration (available only to administrators)
+* Fixed error on System page when DB_CHARSET is not defined
+* WP 6.7.2 check
+
+= 8.7.0 =
+
+* Fixed referrer
+
 = 8.6.9 =
 
 * Fixed tracking of action links with the ajax format

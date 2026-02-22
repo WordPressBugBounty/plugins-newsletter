@@ -1,22 +1,15 @@
 <?php
+
+defined('ABSPATH') || exit;
+
 /** @var NewsletterSubscriptionAdmin $this */
 /** @var NewsletterControls $controls */
 /** @var NewsletterLogger $logger */
 /** @var string $language */
-
-defined('ABSPATH') || exit;
-
 if (!$controls->is_action()) {
     $controls->data = $this->get_options('customfields', $language);
 } else {
     if ($controls->is_action('save')) {
-        if ($language) {
-            foreach ($controls->data as $k => $v) {
-                if ($v === '') {
-                    //unset($controls->data[$k]);
-                }
-            }
-        }
 
         // Processing profile fields
         if ($language) {
@@ -31,6 +24,17 @@ if (!$controls->is_action()) {
                     unset($controls->data['profile_' . $i . '_placeholder']);
                 }
             }
+        } else {
+            for ($i = 0; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
+                if (empty($controls->data['profile_' . $i]) && $controls->data['profile_' . $i . '_placeholder']) {
+                    unset($controls->data['profile_' . $i]);
+                    unset($controls->data['profile_' . $i . '_options']);
+                    unset($controls->data['profile_' . $i . '_type']);
+                    unset($controls->data['profile_' . $i . '_status']);
+                    unset($controls->data['profile_' . $i . '_rules']);
+                    unset($controls->data['profile_' . $i . '_placeholder']);
+                }
+            }
         }
         $controls->data = wp_kses_post_deep($controls->data);
         $this->save_options($controls->data, 'customfields', $language);
@@ -39,9 +43,9 @@ if (!$controls->is_action()) {
     }
 }
 
-$status = array(0 => __('Private', 'newsletter'), 1 => __('Public', 'newsletter'));
-$rules = array(0 => __('Optional', 'newsletter'), 1 => __('Required', 'newsletter'));
-$extra_type = array('text' => __('Text', 'newsletter'), 'select' => __('List', 'newsletter'));
+$status = [0 => __('Private', 'newsletter'), 1 => __('Public', 'newsletter')];
+$rules = [0 => __('Optional', 'newsletter'), 1 => __('Required', 'newsletter')];
+$extra_type = ['text' => __('Text', 'newsletter'), 'select' => __('List', 'newsletter')];
 
 $main_options = $this->get_main_options('customfields');
 ?>
@@ -51,8 +55,9 @@ $main_options = $this->get_main_options('customfields');
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
-        <h2><?php esc_html_e('Custom fields', 'newsletter') ?></h2>
-        <?php //include __DIR__ . '/nav.php' ?>
+        <ul class="tnp-nav">
+            <li class="tnp-nav-title"><?php esc_html_e('Custom fields', 'newsletter') ?></li>
+        </ul>
     </div>
 
     <div id="tnp-body">

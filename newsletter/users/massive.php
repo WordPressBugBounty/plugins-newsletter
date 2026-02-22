@@ -181,7 +181,7 @@ if ($controls->is_action('change_status')) {
                             </td>
                         </tr>
                         <tr>
-                            <td><?php esc_html_e('Not comfirmed', 'newsletter') ?></td>
+                            <td><?php esc_html_e('Not confirmed', 'newsletter') ?></td>
                             <td>
                                 <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='S'"); ?>
                             </td>

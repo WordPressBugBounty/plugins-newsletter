@@ -23,7 +23,7 @@ class NewsletterEngine {
         }
         return self::$instance;
     }
-
+    
     function __construct() {
         $this->logger = new NewsletterLogger('engine');
         $this->options = Newsletter::instance()->get_main_options(); // Language indipendent main options

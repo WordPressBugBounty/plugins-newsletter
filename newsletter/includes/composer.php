@@ -116,28 +116,40 @@ class TNP_Composer {
             $prefix . '_font_color' => $composer['button_font_color'] ?? '#000',
             $prefix . '_font_weight' => $composer['button_font_weight'] ?? 'normal',
             $prefix . '_font_size' => $composer['button_font_size'] ?? '16',
-            $prefix . '_background' => $composer['button_background_color'] ?? '',
-            $prefix . '_border_radius' => '5',
+            $prefix . '_background' => $composer['button_background'] ?? '',
+            $prefix . '_border_radius' => $composer['button_border_radius'] ?? '0',
+            $prefix . '_border_color' => $composer['button_border_color'] ?? '0',
             $prefix . '_align' => 'center',
             $prefix . '_width' => 'auto'
         ];
+
+        $options = array_merge($defaults, array_filter($options));
 
         $width = $options[$prefix . '_width'];
         if (is_numeric($width)) {
             $width .= 'px';
         }
 
-        $options = array_merge($defaults, array_filter($options));
+        switch ($options[$prefix . '_border_radius']) {
+            case 'squared':
+                $border_radius = 0;
+                break;
+            case 'rounded':
+                $border_radius = 999;
+                break;
+            default:
+                $border_radius = (int)$options[$prefix . '_border_radius'];
+        }
 
         $a_style = 'display:inline-block;'
                 . 'color:' . $options[$prefix . '_font_color'] . ';font-family:' . $options[$prefix . '_font_family'] . ';'
                 . 'font-size:' . $options[$prefix . '_font_size'] . 'px;font-weight:' . $options[$prefix . '_font_weight'] . ';'
                 . 'line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;';
-        $a_style .= 'border-radius:' . $options[$prefix . '_border_radius'] . 'px;';
+        $a_style .= 'border-radius:' . $border_radius . 'px;';
         $table_style = 'border-collapse:separate !important;line-height:100%;';
 
         $td_style = 'border-collapse:separate !important;cursor:auto;mso-padding-alt:10px 25px;background:' . $options[$prefix . '_background'] . ';';
-        $td_style .= 'border-radius:' . $options[$prefix . '_border_radius'] . 'px;';
+        $td_style .= 'border-radius:' . $border_radius . 'px;';
         if ($width) {
             $a_style .= ' width:' . $width . ';';
             $table_style .= 'width:' . $width . ';';
