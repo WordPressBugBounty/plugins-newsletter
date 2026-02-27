@@ -260,6 +260,10 @@ function tnp_get_media($media_id, $size) {
     $media->url = $src[0];
     $media->width = $src[1];
     $media->height = $src[2];
+    $alt = (string) get_post_meta($media_id, '_wp_attachment_image_alt', true);
+    if ($alt) {
+        $media->alt = $alt;
+    }
     return $media;
 }
 
@@ -283,7 +287,6 @@ function tnp_resize($media_id, $size) {
     }
 
     //Newsletter::instance()->logger->error($size);
-
     // Try to use wp_get_attachment_metadata()
     // https://developer.wordpress.org/reference/functions/wp_get_attachment_metadata/
     $relative_file = get_post_meta($media_id, '_wp_attached_file', true);
@@ -327,6 +330,10 @@ function tnp_resize($media_id, $size) {
             $media->set_width($width);
         }
         $media->url = $uploads['baseurl'] . '/' . $relative_file;
+        $alt = (string) get_post_meta($media_id, '_wp_attachment_image_alt', true);
+        if ($alt) {
+            $media->alt = $alt;
+        }
         return $media;
     }
 
@@ -411,6 +418,11 @@ function tnp_resize($media_id, $size) {
         $media->width = $new_size[0];
         $media->height = $new_size[1];
         $media->url = $uploads['baseurl'] . '/newsletter/thumbnails/' . $relative_thumb;
+    }
+
+    $alt = (string) get_post_meta($media_id, '_wp_attachment_image_alt', true);
+    if ($alt) {
+        $media->alt = $alt;
     }
 
     return $media;

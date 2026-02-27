@@ -58,17 +58,19 @@ class TNP_Media {
     var $url;
     var $width;
     var $height;
-    var $alt;
+    var $alt = 'Photo';
     var $link;
     var $align = 'center';
 
     /** Sets the width recalculating the height */
     public function set_width($width) {
         $width = (int) $width;
-        if (empty($width))
+        if (empty($width)) {
             return;
-        if ($this->width < $width)
+        }
+        if ($this->width < $width) {
             return;
+        }
         $this->height = floor(($width / $this->width) * $this->height);
         $this->width = $width;
     }

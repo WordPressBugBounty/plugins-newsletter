@@ -1087,7 +1087,8 @@ class NewsletterModule extends NewsletterModuleBase {
             return false;
         }
 
-        if (!isset($_POST['ts']) || time() - $_POST['ts'] > 60) {
+        $ts = (int)($_POST['ts'] ?? 0);
+        if (time() - $ts > 60) {
             return false;
         }
 

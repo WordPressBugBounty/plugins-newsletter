@@ -182,6 +182,7 @@ const NewsletterComposer = {
     get_content: function () {
         var el = jQuery('#tnpb-content').clone();
 
+        el.find('.tnpc-row-actions').remove();
         el.find('.tnpc-row-action').remove();
         el.find('.tnpc-row').removeClass('ui-draggable');
         el.find('#tnpb-sortable-helper').remove();

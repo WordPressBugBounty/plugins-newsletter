@@ -2,13 +2,31 @@
 /** @var NewsletterSystemAdmin $this */
 /** @var NewsletterControls $controls */
 /** @var wpfb $wpdb */
-
 defined('ABSPATH') || exit;
 
 wp_enqueue_script('tnp-chart');
 
 $newsletter = Newsletter::instance();
 $mailer = $newsletter->get_mailer();
+
+function get_smtp_plugin() {
+    if (is_plugin_active('wp-mail-smtp/wp_mail_smtp.php')) {
+        return 'SMTP plugin:  WP Mail SMTP';
+    }
+    if (is_plugin_active('wp-mail-smtp-pro/wp_mail_smtp.php')) {
+        return 'WP Mail SMTP Pro';
+    }
+    if (is_plugin_active('fluent-smtp/fluent-smtp.php')) {
+        return 'FluentSMTP';
+    }
+    if (is_plugin_active('suremails/suremails.php')) {
+        return 'SureMail';
+    }
+    if (is_plugin_active('gosmtp/gosmtp.php')) {
+        return 'GoSMTP';
+    }
+    return '';
+}
 
 if ($controls->is_action('test')) {
 
@@ -31,10 +49,16 @@ if ($controls->is_action('test')) {
         if (!is_wp_error($r)) {
             $options['mail'] = 1;
 
-            $controls->messages .= 'A test email has been sent.<br>';
+            $controls->messages .= 'A test email has been sent.<br><br>';
             $controls->messages .= 'Mailer: ' . esc_html($mailer->get_description()) . '<br>';
+            if ($mailer instanceof NewsletterDefaultMailer) {
+                $smtp_plugin = get_smtp_plugin();
+                if ($smtp_plugin) {
+                    $controls->messages .= 'SMTP plugin: ' . $smtp_plugin . '<br><br>';
+                }
+            }
             $controls->messages .= 'If you did not receive the message in your mailbox within 5 minutes '
-                    . '(check also the spam folder), please contact your hosting provider.<br>'
+                    . '(check also the spam folder), please contact your hosting provider.<br><br>'
                     . '<a href="https://www.thenewsletterplugin.com/documentation/?p=15170" target="_blank"><strong>Read more here</strong></a>.';
 
             NewsletterMainAdmin::instance()->set_completed_step('test-email');
@@ -42,15 +66,27 @@ if ($controls->is_action('test')) {
             $options['mail'] = 0;
             $options['mail_error'] = $r->get_error_message();
 
-            $controls->errors .= '<strong>FAILED</strong> (' . esc_html($r->get_error_message()) . ')<br>';
+            $controls->errors .= '<strong>FAILED</strong> (' . esc_html($r->get_error_message()) . ')<br><br>';
 
             $controls->errors .= 'Mailer: ' . esc_html($mailer->get_description()) . '<br>';
-
-            if (!empty($newsletter->options['return_path'])) {
-                $controls->errors .= '- Try to remove the return path on main settings.<br>';
+            if ($mailer instanceof NewsletterDefaultMailer) {
+                $smtp_plugin = get_smtp_plugin();
+                if ($smtp_plugin) {
+                    $controls->errors .= 'SMTP plugin: ' . $smtp_plugin . '<br><br>';
+                }
             }
 
-            $controls->errors .= '<a href="https://www.thenewsletterplugin.com/documentation/?p=15170" target="_blank"><strong>' . __('Read more', 'newsletter') . '</strong></a>.<br>';
+
+
+            if (stripos($options['mail_error'], 'gmail.googleapis.com')) {
+                $controls->errors .= '<strong>This error is from Gmail/Google</strong>. Plesse check the SMTP plugin you\'re using ti connect the site to Gmail<br><br>';
+            }
+
+            if (!empty($newsletter->options['return_path'])) {
+                $controls->errors .= '- Try to remove the return path on main settings.<br><br>';
+            }
+
+            $controls->errors .= '<a href="https://www.thenewsletterplugin.com/documentation/?p=15170" target="_blank"><strong>' . __('Read more', 'newsletter') . '</strong></a>.<br><br>';
             $controls->errors .= 'PLEASE REPORT ALL THE DATA ON THIS PAGE WHEN ASKING FOR SUPPORT, THANK YOU' .
                     $parts = explode('@', $newsletter->get_sender_email());
             $sitename = strtolower($_SERVER['SERVER_NAME']);
