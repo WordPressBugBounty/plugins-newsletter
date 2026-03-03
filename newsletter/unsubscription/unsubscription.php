@@ -63,7 +63,7 @@ class NewsletterUnsubscription extends NewsletterModule {
         }
 
         $label = empty($attrs['label']) ? __('Resubscribe', 'newsletter') : $attrs['label'];
-        $b = '<form action="' . esc_attr($this->build_action_url('reactivate')) . '" method="post" class="tnp-button-form tnp-reactivate">';
+        $b = '<form action="' . esc_attr($this->build_action_url('rc')) . '" method="post" class="tnp-button-form tnp-reactivate">';
         $b .= wp_nonce_field('newsletter-reactivate', '_wpnonce', true, false);
         $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
@@ -88,7 +88,13 @@ class NewsletterUnsubscription extends NewsletterModule {
                 $this->redirect($url);
                 break;
 
+            case 'r':
+                $url = $this->build_message_url(null, 'reactivate', $user, $email);
+                $this->redirect($url);
+                break;
+
             case 'reactivate':
+            case 'rc':
                 $url = $this->build_message_url(null, 'reactivated', $user);
                 $this->redirect($url);
                 break;
@@ -102,7 +108,7 @@ class NewsletterUnsubscription extends NewsletterModule {
      */
     function hook_newsletter_action($action, $user, $email) {
 
-        if (!in_array($action, ['u', 'uc', 'ocu', 'reactivate'])) {
+        if (!in_array($action, ['u', 'uc', 'ocu', 'r', 'rc', 'reactivate'])) {
             return;
         }
 
@@ -157,6 +163,12 @@ class NewsletterUnsubscription extends NewsletterModule {
                 die('ko');
                 break;
 
+            case 'r':
+                $url = $this->build_message_url(null, 'reactivate', $user, $email);
+                $this->redirect($url);
+                break;
+
+            case 'rc':
             case 'reactivate':
                 $verified = wp_verify_nonce($_REQUEST['_wpnonce'], 'newsletter-reactivate');
                 if (!$verified) {
@@ -241,6 +253,10 @@ class NewsletterUnsubscription extends NewsletterModule {
         return $this->build_action_url('u', $user, $email);
     }
 
+    function get_reactivate_url($user, $email = null) {
+        return $this->build_action_url('r', $user, $email);
+    }
+
     function hook_newsletter_replace($text, $user, $email, $html = true, $context = null) {
 
         if ($user) {
@@ -252,7 +268,7 @@ class NewsletterUnsubscription extends NewsletterModule {
             $text = $this->replace_url($text, 'unsubscription_url', $this->build_action_url('u', $user, $email));
             $text = $this->replace_url($text, 'unsubscribe_url', $this->build_action_url('u', $user, $email));
 
-            $url = $this->build_action_url('reactivate', $user, $email);
+            $url = $this->build_action_url('r', $user, $email);
             if ('page' === $context) {
                 $url = wp_nonce_url($url, 'newsletter-reactivate');
             }
@@ -279,7 +295,7 @@ class NewsletterUnsubscription extends NewsletterModule {
     function hook_newsletter_page_text($text, $key, $user = null) {
 
         // For this module?
-        if (!in_array($key, ['unsubscribe', 'unsubscribed', 'reactivated'])) {
+        if (!in_array($key, ['unsubscribe', 'reactivate', 'unsubscribed', 'reactivated'])) {
             return $text;
         }
 

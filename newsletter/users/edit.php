@@ -311,6 +311,13 @@ function percentValue($value, $total) {
                                 <a href='<?php echo esc_attr($unsubscribe_url) ?>' target="_blank"><?php echo esc_html($unsubscribe_url) ?></a>
                             </td>
                         </tr>
+                        <tr>
+                            <th><?php esc_html_e('Resubscribe URL', 'newsletter'); ?></th>
+                            <td>
+                                <?php $resubscribe_url = NewsletterUnsubscription::instance()->get_reactivate_url($user) ?>
+                                <a href='<?php echo esc_attr($resubscribe_url) ?>' target="_blank"><?php echo esc_html($resubscribe_url) ?></a>
+                            </td>
+                        </tr>
 
                     </table>
                 </div>

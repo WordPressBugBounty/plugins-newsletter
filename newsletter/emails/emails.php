@@ -145,17 +145,31 @@ class NewsletterEmails extends NewsletterModule {
         switch ($action) {
             case 'v':
             case 'view':
-                $id = $_GET['id'];
+                $id = $_GET['id'] ?? 0;
                 if ($id == 'last') {
                     $email = $wpdb->get_row("select * from " . NEWSLETTER_EMAILS_TABLE . " where private=0 and type='message' and status='sent' order by send_on desc limit 1");
                 } else {
                     $email = $this->get_email($id);
                 }
+
                 if (empty($email)) {
                     header("HTTP/1.0 404 Not Found");
                     die('Email not found');
                 }
 
+                // Templates
+                if (strpos($email->type, 'template') !== false) {
+                    header("HTTP/1.0 404 Not Found");
+                    die();
+                }
+
+                // Those types of emails DO NOT contain user data, even if shown, they're templates
+                // Anmyway we shoe them only if the subscriber is identified
+                if ($email->type == 'welcome' || $email->type == 'confirmation') {
+                    $email->private = 1;
+                }
+
+                // Request by non logged in users or logged in but not allowed to use the plugin
                 if (!$this->is_allowed()) {
 
                     if ($email->status == 'new') {
@@ -164,18 +178,22 @@ class NewsletterEmails extends NewsletterModule {
                     }
 
                     if ($email->private == 1) {
+
+                        // No subscriber identified (missing, non existant, ...)
                         if (!$user) {
                             header("HTTP/1.0 404 Not Found");
                             die('No available for online view');
                         }
+
+                        // Was the newsletter sent to that subscriber?
                         $sent = $wpdb->get_row($wpdb->prepare("select * from " . NEWSLETTER_SENT_TABLE . " where email_id=%d and user_id=%d limit 1", $email->id, $user->id));
+
                         if (!$sent) {
                             header("HTTP/1.0 404 Not Found");
                             die('No available for online view');
                         }
                     }
                 }
-
 
                 header('Content-Type: text/html;charset=UTF-8');
                 header('X-Robots-Tag: noindex,nofollow,noarchive');

@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.9.1
-Stable tag: 9.1.5
+Stable tag: 9.1.6
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -88,10 +88,12 @@ Collects subscribers at checkout or registration and assign to lists based on pu
 
 = Integration with Form Builders =
 
-* [Contact Form 7 Integration](https://www.thenewsletterplugin.com/documentation/contact-form-7-extension) - integrate the subscription on Contact Form 7 forms
-* Elementor
-* [Ninja Forms Integration](https://www.thenewsletterplugin.com/documentation/ninjaforms-extension)
-* [WP Forms Integration](https://www.thenewsletterplugin.com/documentation/wpforms-extension)
+Add the subscription option to your existing contact forms or create subscription forms with your preferred tool.
+
+* [Contact Form 7](https://www.thenewsletterplugin.com/documentation/contact-form-7-extension)
+* Elementor Forms
+* [Ninja Forms](https://www.thenewsletterplugin.com/documentation/ninjaforms-extension)
+* [WP Forms](https://www.thenewsletterplugin.com/documentation/wpforms-extension)
 * Gravity Forms
 * Fluent Forms
 * Formidable
@@ -117,6 +119,8 @@ Each integration is provided with bounces and complaints management, and an effi
 * Brevo (free)
 
 = Integration with Event Managers =
+
+Include in newsletters your events with specialized composer blocks.
 
 * Events Manager
 * The Events Calendar
@@ -173,6 +177,10 @@ Thank you, The Newsletter Team
 3. The Reports addon
 
 == Changelog ==
+
+= 9.1.6 =
+
+* Fixed the resubscribe url when used on the goodbye email
 
 = 9.1.5 =
 

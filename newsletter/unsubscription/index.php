@@ -140,6 +140,23 @@ foreach (['unsubscribe_text', 'error_text', 'unsubscribed_text', 'unsubscribed_m
 
                 <div id="tabs-reactivation">
                     <?php $this->language_notice(); ?>
+
+                    <table class="form-table">
+                            <tr>
+                                <th><?php esc_html_e('Reactivate message', 'newsletter') ?></th>
+                                <td>
+                                    <?php $controls->checkbox2('reactivate_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
+                                    <div data-bind="options-reactivate_text_custom">
+                                        <?php $controls->wp_editor('reactivate_text', ['editor_height' => 250], ['default' => wp_kses_post($this->get_default_text('reactivate_text'))]); ?>
+                                    </div>
+                                    <div data-bind="!options-reactivate_text_custom" class="tnpc-default-text">
+                                        <?php echo wp_kses_post($this->get_default_text('reactivate_text')) ?>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        </table>
+
                     <table class="form-table">
                         <tr>
                             <th><?php esc_html_e('Reactivated message', 'newsletter') ?></th>
