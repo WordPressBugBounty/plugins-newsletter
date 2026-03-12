@@ -25,7 +25,6 @@ class News {
         }
 
         $news = json_decode(wp_remote_retrieve_body($response), true);
-        error_log(wp_remote_retrieve_body($response));
 
         // Firewall returns an invalid response
         if (!$news || !is_array($news)) {

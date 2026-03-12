@@ -12,7 +12,6 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
     const JOB_SKIPPED = 3;
     const JOB_FAR_FUTURE = 4;
 
-
     /**
      * @return NewsletterSystemAdmin
      */
@@ -121,7 +120,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
 
         // If the job is scheduled in the future but too far (yes, we saw even that one...)
         // Should never happen since there is a check and a fix on NewsletterAdmin
-        if ($x > time() + NEWSLETTER_CRON_INTERVAL*2) {
+        if ($x > time() + NEWSLETTER_CRON_INTERVAL * 2) {
             return self::JOB_FAR_FUTURE;
         }
 
@@ -129,16 +128,20 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
         // It happens when another job has a fatal error or with bad working object caches
         // that make the scheduler loop to end prematurely.
         $calls = $this->get_option_array('newsletter_diagnostic_cron_calls');
-        if (!empty($calls)) {
+        if (!empty($calls) && !get_transient('doing_cron')) {
             $last = end($calls);
             if ($last > $x + 300) {
                 return self::JOB_SKIPPED;
             }
         }
 
-        if (time() - $x > NEWSLETTER_CRON_INTERVAL*3) {
-            return self::JOB_LATE;
+        // If the stats have been reset, we don't know
+        if (!empty($calls)) {
+            if (time() - $x > NEWSLETTER_CRON_INTERVAL * 3) {
+                return self::JOB_LATE;
+            }
         }
+
         return self::JOB_OK;
     }
 
@@ -181,7 +184,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
             $send_total_emails += $send_calls[$i][2];
 
             $send_mean = $delta / $send_calls[$i][2];
-            $send_speed = $send_calls[$i][2]/$delta;
+            $send_speed = $send_calls[$i][2] / $delta;
             $stats->means[] = $send_mean;
             $stats->sizes[] = $send_calls[$i][2];
             $stats->speeds[] = $send_speed;
@@ -326,7 +329,6 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
     function reset_warnings() {
         update_option('newsletter_system_warnings', [], false);
     }
-
 }
 
 class TNP_Cron_Stats {
@@ -364,6 +366,4 @@ class TNP_Send_Stats {
     /* Number of emails in the single batches */
     var $sizes = [];
     var $speeds = [];
-
 }
-

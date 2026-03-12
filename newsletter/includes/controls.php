@@ -715,38 +715,57 @@ class NewsletterControls {
      */
     function page($name = 'page', $first = null, $language = '', $show_id = false) {
 
-        $front_page_id = (int)get_option('page_on_front');
-        $blog_page_id = (int)get_option('page_for_posts');
+        $front_page_id = (int) get_option('page_on_front');
+        $blog_page_id = (int) get_option('page_for_posts');
         $args = array(
             'post_type' => 'page',
             // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page
-            'posts_per_page' => 1500,
-            'offset' => 0,
+            'posts_per_page' => 50,
+            //'offset' => 0,
             'orderby' => 'post_title',
             'order' => 'ASC',
             'post_status' => 'any',
-            'suppress_filters' => true
+            'suppress_filters' => false,
+            'ignore_sticky_posts' => 1
         );
 
-        $pages = get_posts($args);
+        $paged = 1;
         $options = [];
-        foreach ($pages as $page) {
-            /* @var $page WP_Post */
-            $label = $page->post_title;
-            if ($page->post_status != 'publish') {
-                $label .= ' (' . $page->post_status . ')';
-            }
-            if ($show_id) {
-                $label .= ' [#' . $page->ID . ']';
+
+        while (true) {
+            $args['paged'] = $paged;
+            $paged++;
+
+            $pages = get_posts($args);
+
+            if (!$pages) {
+                break;
             }
 
-            if ($page->ID == $front_page_id) {
-                $label .= ' (front page)';
-            } elseif ($page->ID == $blog_page_id) {
-                $label .= ' (post list page)';
+            if ($paged == 30) {
+                break;
             }
 
-            $options[$page->ID] = $label;
+            foreach ($pages as $page) {
+                /* @var $page WP_Post */
+                $label = $page->post_title;
+                if ($page->post_status != 'publish') {
+                    $label .= ' (' . $page->post_status . ')';
+                }
+                if ($show_id) {
+                    $label .= ' [#' . $page->ID . ']';
+                }
+
+                if ($page->ID == $front_page_id) {
+                    $label .= ' (front page)';
+                } elseif ($page->ID == $blog_page_id) {
+                    $label .= ' (post list page)';
+                }
+
+                $options[$page->ID] = $label;
+            }
+            unset($pages);
+            gc_collect_cycles();
         }
         $this->select($name, $options, $first);
     }
@@ -1198,7 +1217,6 @@ class NewsletterControls {
         $this->btn('copy', '', ['secondary' => true, 'data' => $data, 'icon' => 'fa-copy', 'confirm' => true, 'title' => __('Duplicate', 'newsletter')]);
     }
 
-
     /**
      * Creates a button with "delete" action.
      * @param type $data
@@ -1362,22 +1380,22 @@ class NewsletterControls {
             <div class = "tnp-tabs">
                 <ul>
                     <li><a href = "#tabs-a">Default</a></li>
-                    <?php foreach ($languages as $key => $value) {
-                        ?>
+            <?php foreach ($languages as $key => $value) {
+                ?>
                         <li><a href="#tabs-a-<?php echo esc_attr($key) ?>"><?php echo esc_html($value) ?></a></li>
                     <?php } ?>
                 </ul>
 
                 <div id="tabs-a">
-                    <?php $this->wp_editor('confirmation_text'); ?>
+            <?php $this->wp_editor('confirmation_text'); ?>
                 </div>
-                <?php foreach ($languages as $key => $value) { ?>
+                    <?php foreach ($languages as $key => $value) { ?>
                     <div id="tabs-a-<?php echo esc_attr($key) ?>">
-                        <?php $this->wp_editor($key . '_confirmation_text', $settings); ?>
+                    <?php $this->wp_editor($key . '_confirmation_text', $settings); ?>
                     </div>
-                <?php } ?>
+                    <?php } ?>
             </div>
-        <?php } else { ?>
+            <?php } else { ?>
             <?php $this->wp_editor('confirmation_text', $settings); ?>
         <?php } ?>
 

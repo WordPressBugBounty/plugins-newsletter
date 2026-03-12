@@ -688,6 +688,7 @@ if ($mailer->get_name() === 'default') {
                                                 ?>
 
                                             </td>
+
                                         </tr>
                                     <?php } ?>
                                 </tbody>

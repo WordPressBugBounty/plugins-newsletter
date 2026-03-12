@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.9.1
-Stable tag: 9.1.6
+Stable tag: 9.1.7
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -177,6 +177,13 @@ Thank you, The Newsletter Team
 3. The Reports addon
 
 == Changelog ==
+
+= 9.1.7 =
+
+* Removed a debug log ending on the php error log
+* Improved the main settings for sites with big number of pages
+* Added "newsletter_user_saved" event on admin saving
+* Improved the scheduler help page
 
 = 9.1.6 =
 

@@ -58,12 +58,18 @@ if ($controls->is_action('save')) {
             }
         }
 
-        $user = $this->save_user($controls->data);
-        $this->add_user_log($user, 'edit');
+        $new_user = $this->save_user($controls->data);
+
         //$this->save_user_meta($id, 'ip', $controls->data['ip']);
-        if ($user === false) {
-            $controls->errors = esc_html__('Error. Check the log files.', 'newsletter');
+
+        if ($new_user === false) {
+            $controls->errors = esc_html__('Database error. Check the log files.', 'newsletter');
         } else {
+            $this->add_user_log($new_user, 'edit');
+
+            do_action('newsletter_user_saved', $new_user, $old_user, 'admin');
+            $user = $new_user;
+
             $controls->add_toast_saved();
             $controls->data = (array) $user;
         }
