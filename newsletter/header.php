@@ -429,7 +429,7 @@ $temp = NewsletterUnsubscription::instance()->get_main_options();
 if (strpos($temp['unsubscribe_text'] ?? '', '{unsubscription_confirm') !== false) {
     echo '<div class="tnp-notice tnp-notice-warning">';
     echo 'The unsubscribe page uses old links. ';
-    echo 'For a safer unsubscribe procedure <a href="?page=newsletter_unsubscription_index">change the <em>Confirm</em> text</a> to the default value and then customize it, if needed.<br>';
+    echo 'For a safer unsubscribe procedure <a href="?page=newsletter_unsubscription_index">click here and change the <em>Unsubscribe confirm</em> text</a> to the default value and then customize it, if needed.<br>';
     echo '<a href="https://www.thenewsletterplugin.com/documentation/subscribers-and-management/cancellation/#how-it-works">Read more on our documentation</a>.';
     echo '</div>';
 }

@@ -16,12 +16,15 @@
  * @author roby
  */
 class TNP {
-    /*
-     * The full process of subscription
+    /**
+     * Starts a subscriprion process. It0 reocmmended to use as $params, a TNP_Subscription object
+     * instead of the HTTP API array of keys and values.
+     *
+     * @param TNP_Subscription|array $params
+     * @return TNP_User (really an stdClass with the same attributes)
      */
-
     public static function subscribe($params) {
-        
+
         if ($params instanceof TNP_Subscription) {
             return NewsletterSubscription::instance()->subscribe2($params);
         }
@@ -30,17 +33,17 @@ class TNP {
         $logger->debug($params);
 
         apply_filters('newsletter_api_subscribe', $params);
-        
+
         $newsletter = Newsletter::instance();
-        
+
         $subscription = NewsletterSubscription::instance()->get_default_subscription();
         $subscription->spamcheck = isset($params['spamcheck']);
         $data = $subscription->data;
-        
+
         $subscription->send_emails = !empty($params['send_emails']);
 
         // Form field configuration
-        $options_profile = get_option('newsletter_profile', array());
+        $options_profile = NewsletterProfile::instance()->get_main_options('customfields');
         
         $data->email = $params['email'];
 
@@ -51,17 +54,17 @@ class TNP {
         if (isset($params['surname'])) {
             $data->surname = $params['surname'];
         }
-        
+
         // Lists
         if (isset($params['lists']) && is_array($params['lists'])) {
             $public_lists = array_keys($newsletter->get_lists_public());
             $list_ids = array_intersect($public_lists, $params['lists']);
-            
+
             foreach ($list_ids as $list_id) {
                 $data->lists['' . $list_id] = 1;
             }
-        } 
-        
+        }
+
         for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
             // If the profile cannot be set by  subscriber, skip it.
             if ($options_profile['profile_' . $i . '_status'] == 0) {

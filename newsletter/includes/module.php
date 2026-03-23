@@ -491,7 +491,7 @@ class NewsletterModule extends NewsletterModuleBase {
         //if (is_null($customfields)) {
         $customfields = [];
         $options = $this->get_options('customfields');
-        $main_options = $this->get_options('customfields', '');
+        $main_options = $this->get_main_options('customfields');
         for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
             $prefix = 'profile_' . $i;
             if (!empty($main_options[$prefix])) {

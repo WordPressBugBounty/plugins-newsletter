@@ -110,15 +110,17 @@ class TNP_Composer {
             return;
         }
 
+        $composer = array_filter($composer);
+
         $defaults = [
             $prefix . '_url' => '#',
             $prefix . '_font_family' => $composer['button_font_family'] ?? 'sans-serif',
-            $prefix . '_font_color' => $composer['button_font_color'] ?? '#000',
+            $prefix . '_font_color' => $composer['button_font_color'] ?? '#fff',
             $prefix . '_font_weight' => $composer['button_font_weight'] ?? 'normal',
             $prefix . '_font_size' => $composer['button_font_size'] ?? '16',
-            $prefix . '_background' => $composer['button_background'] ?? '',
+            $prefix . '_background' => $composer['button_background'] ?? '#000',
             $prefix . '_border_radius' => $composer['button_border_radius'] ?? '0',
-            $prefix . '_border_color' => $composer['button_border_color'] ?? '0',
+            $prefix . '_border_color' => $composer['button_border_color'] ?? '#000',
             $prefix . '_align' => 'center',
             $prefix . '_width' => 'auto'
         ];
@@ -350,7 +352,9 @@ class TNP_Composer {
             'options_composer_button_font_size' => 16,
             'options_composer_button_font_weight' => 'normal',
             'options_composer_button_font_color' => '#FFFFFF',
-            'options_composer_button_background_color' => '#256F9C',
+            'options_composer_button_background' => '#256F9C',
+            'options_composer_button_border_color' => '#256F9C',
+            'options_composer_button_border_radius' => '0',
             'options_composer_background' => '#FFFFFF',
             'options_composer_block_background' => '#FFFFFF',
             'options_composer_width' => '600'
