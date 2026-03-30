@@ -34,7 +34,7 @@ if (!$controls->is_action()) {
     }
 }
 
-foreach (['unsubscribe_text', 'error_text', 'unsubscribed_text', 'unsubscribed_message', 'reactivated_text'] as $key) {
+foreach (['unsubscribe_text', 'error_text', 'unsubscribed_text', 'unsubscribed_message', 'reactivate_text', 'reactivated_text'] as $key) {
     if (!empty($controls->data[$key])) {
         $controls->data[$key . '_custom'] = '1';
     }

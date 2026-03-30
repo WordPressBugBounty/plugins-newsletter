@@ -587,7 +587,7 @@ class NewsletterComposer extends NewsletterModule {
         $global_button_font_size = $composer['button_font_size'];
         $global_button_font_color = $composer['button_font_color'];
         $global_button_font_weight = $composer['button_font_weight'];
-        $global_button_background_color = $composer['button_background_color'];
+        $global_button_background_color = $composer['button_background_color'] ?? '#000';
 
         $global_block_background = sanitize_hex_color($composer['block_background']);
 

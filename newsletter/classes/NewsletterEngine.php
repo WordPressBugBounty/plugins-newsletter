@@ -23,7 +23,7 @@ class NewsletterEngine {
         }
         return self::$instance;
     }
-    
+
     function __construct() {
         $this->logger = new NewsletterLogger('engine');
         $this->options = Newsletter::instance()->get_main_options(); // Language indipendent main options
@@ -429,14 +429,16 @@ class NewsletterEngine {
      * @return int Milliseconds
      */
     function get_send_delay() {
+        $delay = 0;
         if (defined('NEWSLETTER_SEND_DELAY')) {
-            return (int) NEWSLETTER_SEND_DELAY;
+            $delay = (int) NEWSLETTER_SEND_DELAY;
+        } else {
+            $max = (float) $this->options['max_per_second'];
+            if ($max > 0) {
+                $delay = (int) (1000 / $max);
+            }
         }
-        $max = (float) $this->options['max_per_second'];
-        if ($max > 0) {
-            return (int) (1000 / $max);
-        }
-        return 0;
+        return max($delay, 10000); // Max 10 seconds
     }
 
     function time_exceeded() {
