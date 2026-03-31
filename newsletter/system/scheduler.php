@@ -187,7 +187,7 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
                                 <td>Scheduler working?</td>
                                 <td class="status">&nbsp;</td>
                                 <td>
-                                    <?php echo get_transient('doing_cron') ? 'Yes':'No'; ?>
+                                    <?php echo get_transient('doing_cron') ? 'Yes' : 'No'; ?>
                                 </td>
                             </tr>
 
@@ -363,6 +363,9 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
 
                             <?php
                             $condition = NEWSLETTER_CRON_INTERVAL == 300 ? 1 : 2;
+                            if (NEWSLETTER_CRON_INTERVAL < 60) {
+                                $condition = 0;
+                            }
                             ?>
                             <tr>
                                 <td><code>NEWSLETTER_CRON_INTERVAL</code></td>
@@ -372,6 +375,10 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
                                 <td>
                                     <?php echo NEWSLETTER_CRON_INTERVAL, ' seconds'; ?>
                                     <br><br>
+                                    <?php if ($condition == 0) { ?>
+                                        <span style="color: red; font-weight: bold;">The interval is too short, se it to at least 60 seconds.</span>
+                                        <br><br>
+                                    <?php } ?>
                                     How often the Newsletter engine should be activated. Default 300 seconds. Different value can be set on your <code>wp-config.php</code>
                                     (not recommended).
                                 </td>

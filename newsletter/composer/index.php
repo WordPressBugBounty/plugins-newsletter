@@ -104,15 +104,15 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 
             <div class="tnpb-actions">
 
-                <a class="button-primary" href="#templates-modal" rel="modal:open" title="<?php esc_attr_e('Templates', 'newsletter') ?>"><i class="far fa-file"></i></a>
+                <a href="#templates-modal" rel="modal:open" title="<?php esc_attr_e('Templates', 'newsletter') ?>"><i class="far fa-file"></i></a>
 
-                <a class="button-primary" href="#tnpc-placeholders-modal" rel="modal:open" title="<?php esc_attr_e('Placeholders', 'newsletter') ?>"><i class="fas fa-user"></i></a>
+                <a href="#tnpc-placeholders-modal" rel="modal:open" title="<?php esc_attr_e('Placeholders', 'newsletter') ?>"><i class="fas fa-user"></i></a>
 
-                <a class="button-primary" href="#tnpc-attachment-modal" rel="modal:open" title="<?php esc_attr_e('Attachments', 'newsletter') ?>"><i class="fas fa-paperclip"></i></a>
+                <a href="#tnpc-attachment-modal" rel="modal:open" title="<?php esc_attr_e('Attachments', 'newsletter') ?>"><i class="fas fa-paperclip"></i></a>
 
-                <a class="button-primary" href="#test-newsletter-modal" rel="modal:open" title="<?php esc_attr_e('Test', 'newsletter') ?>"><i class="fas fa-paper-plane"></i></a>
+                <a href="#test-newsletter-modal" rel="modal:open" title="<?php esc_attr_e('Test', 'newsletter') ?>"><i class="fas fa-paper-plane"></i></a>
 
-                <span class="button-primary" id="tnpc-view-mode" title="<?php esc_attr_e('Switch preview mode', 'newsletter') ?>">
+                <span id="tnpc-view-mode" title="<?php esc_attr_e('Switch preview mode', 'newsletter') ?>">
                     <i id="tnpc-view-mode-icon" class="fas fa-desktop"></i>
                 </span>
 

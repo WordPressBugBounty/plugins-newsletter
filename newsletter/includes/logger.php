@@ -16,6 +16,8 @@ class NewsletterLogger {
     const INFO = 3;
     const DEBUG = 4;
 
+    static $pid = '';
+
     var $level;
     var $module;
     var $file;
@@ -31,6 +33,12 @@ class NewsletterLogger {
         }
 
         $this->is_debug = $this->level == self::DEBUG;
+
+        if (!self::$pid) {
+            self::$pid = random_int(1000, 9999);
+        }
+
+        $this->pid = getmypid();
 
         $secret = get_option('newsletter_logger_secret', '');
         if (strlen($secret) < 8) {
@@ -94,7 +102,7 @@ class NewsletterLogger {
         $memory_limit = size_format(wp_convert_hr_to_bytes(ini_get('memory_limit')));
 
         // The "logs" dir is created on Newsletter constructor.
-        $res = @file_put_contents($this->file, $time . ' - ' . NEWSLETTER_VERSION . ' - ' . size_format(memory_get_usage(), 1) . '/' . $memory_limit . ' - ' . $user . ' > ' . $text . "\n", FILE_APPEND);
+        $res = @file_put_contents($this->file, $time . ' - ' . NEWSLETTER_VERSION . ' - ' . self::$pid . ' - ' . size_format(memory_get_usage(), 1) . '/' . $memory_limit . ' - ' . $user . ' > ' . $text . "\n", FILE_APPEND);
         if ($res === false) {
             //$this->level = self::NONE;
         }

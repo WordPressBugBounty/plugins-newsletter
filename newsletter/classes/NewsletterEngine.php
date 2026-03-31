@@ -438,7 +438,7 @@ class NewsletterEngine {
                 $delay = (int) (1000 / $max);
             }
         }
-        return max($delay, 10000); // Max 10 seconds
+        return min($delay, 10000); // Max 10 seconds
     }
 
     function time_exceeded() {

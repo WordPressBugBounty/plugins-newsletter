@@ -103,16 +103,26 @@
     color: #000 !important;
 }
 
-.tnpb-actions {
+/* Buttons on top of the editing area (mobile preview, send test, ...) */
+#tnp-body .tnpb-actions {
     /*padding-right: 1rem;*/
 }
 
-.tnpb-actions .button-primary {
-    background-color: #777;
+#tnp-body .tnpb-actions>a, .tnpb-actions>span {
+    display: inline-block;
+    padding: 7px;
+    background-color: #777 !important;
+    text-align: center;
+    vertical-align: baseline;
+    margin-left: 5px;
+    border: 0;
+    border-radius: 3px;
+    color: #fff !important;
+    text-decoration: none !important;
 }
 
-.tnpb-actions .button-primary:hover {
-    background-color: #333;
+#tnp-body .tnpb-actions>a:hover, #tnp-body .tnpb-actions>span:hover {
+    background-color: #333 !important;
 }
 
 #options-subject,
@@ -221,6 +231,7 @@
     transition: box-shadow 0.5s;
     position: relative;
 }
+
 .tnpc-row:hover {
     cursor: move;
     border: 1px dashed #ccc;
@@ -238,10 +249,10 @@
 .tnpc-row-actions {
     z-index: 10;
     position: absolute;
-    top: 5px;
+    top: -5px;
     right: 5px;
     border: 1px solid #ddd;
-    padding: 3px;
+    padding: 0;
     opacity: 0;
     transition: all 0.5s;
     background-color: #f4f4f4;
