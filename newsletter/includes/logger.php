@@ -38,8 +38,6 @@ class NewsletterLogger {
             self::$pid = random_int(1000, 9999);
         }
 
-        $this->pid = getmypid();
-
         $secret = get_option('newsletter_logger_secret', '');
         if (strlen($secret) < 8) {
             $secret = NewsletterModule::get_token(8);
