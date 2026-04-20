@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.9.1
-Stable tag: 9.2.1
+Stable tag: 9.2.2
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -179,6 +179,13 @@ Thank you, The Newsletter Team
 3. The Reports addon
 
 == Changelog ==
+
+= 9.2.2 =
+
+* Added the NEWSLETTER_REAL_CRON_INTERVAL to avoid wrong custom values of NEWSLETTER_CRON_INTERVAL
+* Limited the cron interval custom setting between 60 and 900 seconds
+* Fixed template preview
+* Fixed possible multiple admin subscription notifications
 
 = 9.2.1 =
 

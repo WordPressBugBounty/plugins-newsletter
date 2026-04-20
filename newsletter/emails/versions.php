@@ -5,7 +5,7 @@ defined('ABSPATH') || exit;
 
 global $wpdb;
 
-$email = $this->get_email((int)$_GET['id']);
+$email = $this->get_email((int) $_GET['id']);
 
 if (!$email) {
     die('Newsletter not found');
@@ -17,7 +17,7 @@ if ($controls->is_action('restore')) {
     if (!$can_restore) {
         die('Cannot restore');
     }
-    $log = $wpdb->get_row($wpdb->prepare("select * from {$wpdb->prefix}newsletter_logs where id=%d limit 1", (int)$controls->button_data));
+    $log = $wpdb->get_row($wpdb->prepare("select * from {$wpdb->prefix}newsletter_logs where id=%d limit 1", (int) $controls->button_data));
     if (!$log) {
         die('Invalid log');
     }
@@ -41,18 +41,16 @@ require_once NEWSLETTER_INCLUDES_DIR . '/paginator.php';
 
 $paginator = new TNP_Pagination_Controller($wpdb->prefix . 'newsletter_logs', 'id', ['source' => 'newsletter-version-' . $email->id]);
 $logs = $paginator->get_items();
-
 ?>
 
 <div class="wrap" id="tnp-wrap">
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
     <div id="tnp-heading">
-        <h2><?php echo esc_html($email->subject); ?></h2>
         <?php include __DIR__ . '/edit-nav.php'; ?>
     </div>
 
     <div id="tnp-body">
-
+        <h2><?php echo esc_html($email->subject); ?></h2>
         <form method="post" action="">
             <?php $controls->init(); ?>
 

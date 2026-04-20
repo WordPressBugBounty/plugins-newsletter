@@ -4,7 +4,6 @@
 /** @var NewsletterUsersAdmin $this */
 /** @var NewsletterControls $controls */
 /** @var NewsletterLogger $logger */
-
 defined('ABSPATH') || exit;
 
 $user = $this->get_user((int) $_GET['id'] ?? -1);
@@ -114,12 +113,12 @@ function percentValue($value, $total) {
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscribers-and-management/') ?>
-        <h2><?= esc_html($user->email) ?></h2>
+
         <?php include __DIR__ . '/edit-nav.php' ?>
     </div>
 
     <div id="tnp-body">
-
+        <h2><?= esc_html($user->email) ?></h2>
         <?php $controls->show(); ?>
 
         <form method="post" action="">

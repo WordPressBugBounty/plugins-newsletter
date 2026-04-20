@@ -157,12 +157,6 @@ class NewsletterEmails extends NewsletterModule {
                     die('Email not found');
                 }
 
-                // Templates
-                if (strpos($email->type, 'template') !== false) {
-                    header("HTTP/1.0 404 Not Found");
-                    die();
-                }
-
                 // Those types of emails DO NOT contain user data, even if shown, they're templates
                 // Anmyway we shoe them only if the subscriber is identified
                 if ($email->type == 'welcome' || $email->type == 'confirmation') {
@@ -171,6 +165,12 @@ class NewsletterEmails extends NewsletterModule {
 
                 // Request by non logged in users or logged in but not allowed to use the plugin
                 if (!$this->is_allowed()) {
+
+                    // Templates
+                    if (strpos($email->type, 'template') !== false) {
+                        header("HTTP/1.0 404 Not Found");
+                        die();
+                    }
 
                     if ($email->status == 'new') {
                         header("HTTP/1.0 404 Not Found");
@@ -200,9 +200,8 @@ class NewsletterEmails extends NewsletterModule {
                 header('Cache-Control: no-cache,no-store,private');
 
                 $message = $this->replace($email->message, $user, $email);
-                if (Newsletter::instance()->get_option('do_shortcodes')) {
-                    $message = do_shortcode($message);
-                }
+                $message = do_shortcode($message);
+                
                 echo apply_filters('newsletter_view_message', $message);
 
                 die();

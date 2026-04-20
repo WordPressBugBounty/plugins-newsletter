@@ -32,7 +32,7 @@ class NewsletterEngine {
     function run() {
         $this->logger->debug('START');
 
-        if (!$this->set_lock(NEWSLETTER_CRON_INTERVAL * 1.2)) {
+        if (!$this->set_lock(HOUR_IN_SECONDS)) {
             $this->logger->fatal('Delivery engine lock already set: can be due to concurrent executions or fatal error during delivery');
             return;
         }
@@ -218,7 +218,7 @@ class NewsletterEngine {
                 }
             }
 
-            if (!$supplied_users && !$test && $this->time_exceeded()) {
+            if (!$test && $this->time_exceeded()) {
                 $this->logger->error('Time excedeed');
                 $result = false;
                 break;
@@ -257,11 +257,11 @@ class NewsletterEngine {
             $this->logger->debug('Max emails: ' . $this->max_emails);
             ignore_user_abort(true);
 
-            @set_time_limit(NEWSLETTER_CRON_INTERVAL + 30);
+            @set_time_limit(NEWSLETTER_REAL_CRON_INTERVAL + 30);
 
             $max_time = (int) (@ini_get('max_execution_time') * 0.95);
-            if ($max_time == 0 || $max_time > NEWSLETTER_CRON_INTERVAL) {
-                $max_time = (int) (NEWSLETTER_CRON_INTERVAL * 0.95);
+            if ($max_time == 0 || $max_time > NEWSLETTER_REAL_CRON_INTERVAL) {
+                $max_time = intval(NEWSLETTER_REAL_CRON_INTERVAL * 0.95);
             }
 
             // time_start is when the plugin has been loaded, but other task could have been executed and
@@ -429,16 +429,12 @@ class NewsletterEngine {
      * @return int Milliseconds
      */
     function get_send_delay() {
-        $delay = 0;
         if (defined('NEWSLETTER_SEND_DELAY')) {
-            $delay = (int) NEWSLETTER_SEND_DELAY;
+            $delay = intval(NEWSLETTER_SEND_DELAY);
         } else {
-            $max = (float) $this->options['max_per_second'];
-            if ($max > 0) {
-                $delay = (int) (1000 / $max);
-            }
+            $delay = intval($this->options['send_delay']);
         }
-        return min($delay, 10000); // Max 10 seconds
+        return max(0, min($delay, 5000));
     }
 
     function time_exceeded() {

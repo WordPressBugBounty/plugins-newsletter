@@ -106,6 +106,7 @@ class NewsletterAddon {
 
         // The periodic check
         wp_unschedule_hook('newsletter_addon_' . $this->name);
+        //delete_option('newsletter_' . $this->name . '_version');
     }
 
     function admin_menu() {

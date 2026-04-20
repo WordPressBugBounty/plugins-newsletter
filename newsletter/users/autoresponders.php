@@ -3,7 +3,6 @@
 /** @var NewsletterControls $controls */
 /** @var NewsletterLogger $logger */
 /** @var wpdb $wpdb */
-
 defined('ABSPATH') || exit;
 
 $user = $this->get_user((int) $_GET['id'] ?? -1);
@@ -14,7 +13,6 @@ if (!$user) {
 }
 
 do_action('newsletter_users_edit_autoresponders_init', $user, $controls);
-
 ?>
 
 <div class="wrap tnp-users tnp-users-edit" id="tnp-wrap">
@@ -23,14 +21,13 @@ do_action('newsletter_users_edit_autoresponders_init', $user, $controls);
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscribers-and-management/') ?>
-        <h2><?php echo esc_html($user->email) ?></h2>
         <?php include __DIR__ . '/edit-nav.php' ?>
     </div>
 
     <div id="tnp-body">
 
         <?php $controls->show(); ?>
-
+        <h2><?= esc_html($user->email) ?></h2>
         <?php if (!class_exists('NewsletterAutoresponder')) { ?>
 
             <div class="tnp-notice">

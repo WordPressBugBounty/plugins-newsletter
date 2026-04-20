@@ -354,12 +354,14 @@ if ($email['status'] != 'sent') {
     <div id="tnp-heading">
         <?php $controls->title_help('/newsletter-targeting'); ?>
 
-        <h2><?php echo esc_html($email['subject']); ?></h2>
+
         <?php include __DIR__ . '/edit-nav.php'; ?>
+
 
     </div>
 
     <div id="tnp-body">
+        <h2><?php echo esc_html($email['subject']); ?></h2>
         <?php $controls->show() ?>
 
         <form method="post" action="" id="newsletter-form">
@@ -385,7 +387,7 @@ if ($email['status'] != 'sent') {
                     <?php if ($email['status'] == 'paused' || $email['status'] == 'error') $controls->button_confirm('continue', __('Continue', 'newsletter'), 'Continue the delivery?'); ?>
                     <?php if ($email['status'] == 'paused') $controls->button_confirm('abort', __('Stop', 'newsletter'), __('This will stop the delivery. Proceed?', 'newsletter')); ?>
                     <?php if ($email['status'] == 'new' || ( $email['status'] == 'paused' && $email['send_on'] > time() )) { ?>
-                        <a id="tnp-schedule-button" class="button-secondary" href="javascript:tnp_toggle_schedule()"><i class="far fa-clock"></i> <?php _e("Schedule") ?></a>
+                        <a id="tnp-schedule-button" class="button button-secondary tnpc-button" href="javascript:tnp_toggle_schedule()"><i class="far fa-clock"></i> <?php _e("Schedule") ?></a>
                         <span id="tnp-schedule" style="display: none;">
                             <?php $controls->datetime('send_on') ?>
                             <?php $controls->button_confirm('schedule', __('Schedule', 'newsletter'), __('Schedule delivery?', 'newsletter')); ?>

@@ -537,6 +537,16 @@ class NewsletterUpgrade {
         delete_transient('tnp_extensions_json');
         touch(NEWSLETTER_LOG_DIR . '/index.html');
 
+        $main_options = $this->get_option_array('newsletter_main');
+
+        if (isset($main_options['max_per_second'])) {
+            $max_per_second = intval($main_options['max_per_second']);
+            if ($max_per_second) {
+                $main_options['send_delay'] = intval(1000.0 / $max_per_second);
+                update_option('newsletter_main', $main_options);
+            }
+        }
+
         $this->logger->info('End');
     }
 

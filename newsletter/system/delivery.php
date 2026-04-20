@@ -394,6 +394,17 @@ if ($mailer->get_name() === 'default') {
                                 </tr>
                                 <tr>
                                     <td>
+                                        NEWSLETTER_REAL_CRON_INTERVAL
+                                    </td>
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                    <td>
+                                        <?php echo esc_html(NEWSLETTER_REAL_CRON_INTERVAL) ?> seconds
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
                                         NEWSLETTER_CRON_INTERVAL
                                     </td>
                                     <td>

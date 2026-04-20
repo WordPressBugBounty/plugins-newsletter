@@ -23,7 +23,7 @@ class NewsletterDefaults {
                 'sender_name' => get_option('blogname'),
                 'editor' => 0,
                 'scheduler_max' => 100,
-                'max_per_second' => 0,
+                'send_delay' => 0,
                 'phpmailer' => 0,
                 'debug' => 0,
                 'track' => 1,

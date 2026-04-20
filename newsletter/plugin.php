@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 9.2.1
+  Version: 9.2.2
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '9.2.1');
+define('NEWSLETTER_VERSION', '9.2.2');
 
 global $wpdb, $newsletter;
 
@@ -460,6 +460,7 @@ class Newsletter extends NewsletterModule {
      */
     function hook_newsletter() {
         NewsletterEngine::instance()->run();
+        do_action('newsletter_engine_run');
     }
 
     function get_send_speed($email = null) {
@@ -473,14 +474,14 @@ class Newsletter extends NewsletterModule {
             $this->logger->debug(__METHOD__ . '> Speed set by mailer');
         }
 
-        $speed = max($speed, (int) (3600 / NEWSLETTER_CRON_INTERVAL));
+        $speed = max($speed, (int) (3600 / NEWSLETTER_REAL_CRON_INTERVAL));
 
         $this->logger->debug(__METHOD__ . '> Speed: ' . $speed);
         return $speed;
     }
 
     function get_runs_per_hour() {
-        return (int) (3600 / NEWSLETTER_CRON_INTERVAL);
+        return (int) (3600 / NEWSLETTER_REAL_CRON_INTERVAL);
     }
 
     /**

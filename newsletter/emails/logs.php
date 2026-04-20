@@ -11,12 +11,12 @@ if (!$email) {
 <div class="wrap" id="tnp-wrap">
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
     <div id="tnp-heading">
-        <h2><?php echo esc_html($email->subject); ?></h2>
+
         <?php include __DIR__ . '/edit-nav.php'; ?>
     </div>
 
     <div id="tnp-body">
-
+<h2><?php echo esc_html($email->subject); ?></h2>
         <form method="post" action="">
             <?php $controls->init(); ?>
 

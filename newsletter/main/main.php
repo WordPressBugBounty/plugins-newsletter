@@ -3,8 +3,8 @@
 /** @var NewsletterControls $controls */
 /** @var NewsletterLogger $logger */
 /** @var wpdb $wpdb */
-/** @var string $language */
 
+/** @var string $language */
 use Newsletter\License;
 
 defined('ABSPATH') || exit;
@@ -46,14 +46,9 @@ if (!$controls->is_action()) {
                 $controls->data['scheduler_max'] = 12;
             }
 
-            if (defined('NEWSLETTER_SEND_DELAY')) {
-                $controls->data['max_per_second'] = (float) $controls->data['max_per_second'];
-            } else {
-                $controls->data['max_per_second'] = (float) $controls->data['max_per_second'];
-                if ($controls->data['max_per_second'] <= 0) {
-                    $controls->data['max_per_second'] = 0;
-                }
-            }
+            $send_delay = intval($controls->data['send_delay'] ?? 0);
+            $send_delay = min(max(0, $send_delay), 5000);
+            $controls->data['send_delay'] = $send_delay;
 
             if (!$this->is_email($controls->data['reply_to'], true)) {
                 $controls->errors .= __('Reply to email is not correct.', 'newsletter') . '<br>';
@@ -331,16 +326,27 @@ if (!empty($controls->data['page'])) {
 
                             <tr>
                                 <th>
-                                    <?php esc_html_e('Max emails per second', 'newsletter') ?>
+                                    <?php esc_html_e('Delay between emails', 'newsletter') ?>
                                     <?php $controls->field_help('/installation/newsletter-configuration/#speed') ?>
                                 </th>
                                 <td>
                                     <?php if (defined('NEWSLETTER_SEND_DELAY')) { ?>
-                                        Delay set to <?php echo esc_html(NEWSLETTER_SEND_DELAY); ?> in <code>wp-config.php</code>
+
+                                            This value is set by the constant <code>NEWSLETTER_SEND_DELAY</code> in the site <code>wp-config.php</code>
+                                            with value <?php echo esc_html(NEWSLETTER_SEND_DELAY); ?>.
+                                        
                                     <?php } else { ?>
-                                        <?php $controls->text('max_per_second', 5); ?>
-                                        <span class="description"><?php esc_html_e('0 for unlimited', 'newsletter') ?></span>
+                                        <?php $controls->text('send_delay', 5); ?> milliseconds
                                     <?php } ?>
+                                    <p class="description">
+                                        From 0 (default) to 5000 (5 seconds). It's a time delay added after each email
+                                        to respect specific provider contraints.
+                                        <br>
+                                        For example when your provider requires you to:<br>
+                                        - send no more than 1 email every 2 seconds: set it to 2000.
+                                        <br>
+                                        - send no more than 10 emails per second: set it to 100 (1 second / 10 emails = 100 milliseconds).
+                                    </p>
                                 </td>
                             </tr>
 

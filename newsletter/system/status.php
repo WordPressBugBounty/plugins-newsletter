@@ -858,8 +858,8 @@ function tnp_describe_table($table) {
                                 $value = (int) ini_get('max_execution_time');
                                 $res = true;
                                 $condition = 1;
-                                if ($value != 0 && $value < NEWSLETTER_CRON_INTERVAL) {
-                                    $res = set_time_limit(NEWSLETTER_CRON_INTERVAL);
+                                if ($value != 0 && $value < NEWSLETTER_REAL_CRON_INTERVAL) {
+                                    $res = set_time_limit(NEWSLETTER_REAL_CRON_INTERVAL);
                                     if ($res)
                                         $condition = 1;
                                     else
@@ -1293,6 +1293,13 @@ function tnp_describe_table($table) {
                                 <td>NEWSLETTER_VERSION</td>
                                 <td>
                                     <?php echo esc_html(NEWSLETTER_VERSION) ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>NEWSLETTER_REAL_CRON_INTERVAL</td>
+                                <td>
+                                    <?php echo esc_html(NEWSLETTER_REAL_CRON_INTERVAL) ?> (seconds)
                                 </td>
                             </tr>
 

@@ -545,7 +545,7 @@ class NewsletterControls {
     function yesno($name) {
         $value = isset($this->data[$name]) ? (int) $this->data[$name] : 0;
 
-        echo '<select style="width: 60px" name="options[', esc_attr($name), ']">';
+        echo '<select style="width: auto" name="options[', esc_attr($name), ']">';
         echo '<option value="0"';
         if ($value == 0) {
             echo ' selected';

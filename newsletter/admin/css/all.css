@@ -1559,7 +1559,7 @@ span.tnp-user-status {
 
 #tnp-heading ul.tnp-nav li.tnp-nav-title a {
     color: #fff !important;
-    font-size: .9rem;
+    font-size: .8rem;
     text-decoration: none;
 }
 
@@ -1867,11 +1867,11 @@ span.tnp-user-status {
 .tnp-flow-fieldset>div>p {
     color: #000 !important;
 }
-.tnp-paginator {
+#tnp-body .tnp-paginator {
     margin: 10px 0px 5px 0px;
 }
 
-.tnp-paginator .button-secondary {
+#tnp-body .tnp-paginator .button-secondary {
     padding: 5px;
     line-height: normal;
     height: auto;
@@ -1882,15 +1882,15 @@ span.tnp-user-status {
     vertical-align: baseline;
 }
 
-.tnp-paginator [value="Go"] {
+#tnp-body .tnp-paginator [value="Go"] {
     background-color: #27AE60 !important;
 }
 
-.tnp-paginator [value="Go"]:hover {
+#tnp-body .tnp-paginator [value="Go"]:hover {
     background-color: #2ECC71 !important;
 }
 
-.tnp-paginator input {
+#tnp-body .tnp-paginator input {
     /*background-color: #2C3E50;*/
     /*border: none;*/
     border-radius: 3px;
@@ -1899,6 +1899,7 @@ span.tnp-user-status {
     line-height: normal;
     font-size: 12px;
     height: 25px;
+    min-height: 30px !important;
 }
 /* Since #tabs has a white background, all elements should be made dark */
 
@@ -2110,7 +2111,7 @@ span.tnp-user-status {
     /*text-align: right;*/
     text-align: left;
     position: relative;
-    font-weight: normal;
+    font-weight: bold;
     max-width: 200px;
     width: 150px;
     color: var(--tnp-text);
@@ -2190,6 +2191,7 @@ span.tnp-user-status {
 
 #tnp-body select {
     vertical-align: baseline;
+    padding-right: 30px;
 }
 
 #tnp-body .form-table input,
@@ -2198,9 +2200,21 @@ span.tnp-user-status {
 #tnp-body .widefat input,
 #tnp-body .widefat textarea,
 #tnp-body .widefat select
-
 {
     border: var(--tnp-input-border);
+}
+
+#tnp-body .form-table input,
+#tnp-body .form-table select,
+#tnp-body .widefat input,
+#tnp-body .widefat select
+{
+    min-height: 30px !important;
+    line-height: normal !important;
+}
+
+#tnp-body input[type=checkbox] {
+    min-height: auto !important;
 }
 
 #tnp-body .form-table input::placeholder,
@@ -2333,10 +2347,10 @@ span.tnp-user-status {
 
 
 /* Hint text after a field */
-.tnpc-hint, p.description {
+#tnp-body .tnpc-hint, #tnp-body p.description {
     margin-top: 15px;
     clear: both;
-    font-size: .9rem !important;
+    font-size: .9em !important;
     color: #666;
     font-style: italic;
 }

@@ -11,7 +11,7 @@ $editor_type = $this->get_editor_type($nav_email);
 $edit_url = $this->get_editor_url($nav_email->id, $editor_type);
 ?>
 <ul class="tnp-nav">
-<!--    <li class="tnp-nav-title"><?php esc_html_e('Newsletters', 'newsletter'); ?></li>-->
+    <li class="tnp-nav-title"><a href="?page=newsletter_emails_index"><i class="fas fa-chevron-left"></i></a></li>
     <?php if ($can_edit) { ?>
         <li class="<?php echo $p === 'newsletter_emails_composer' ? 'active' : '' ?>"><a href="<?php echo $edit_url; ?>"><?php esc_html_e('Edit', 'newsletter') ?></a></li>
     <?php } ?>

@@ -18,14 +18,13 @@ if (!$user) {
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscribers-and-management/') ?>
-        <h2><?php echo esc_html($user->email) ?></h2>
         <?php include __DIR__ . '/edit-nav.php' ?>
     </div>
 
     <div id="tnp-body">
 
         <?php $controls->show(); ?>
-
+<h2><?= esc_html($user->email) ?></h2>
         <form method="post" action="">
 
             <?php $controls->init(); ?>

@@ -71,7 +71,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
             }
         }
         $stats->avg = round(array_sum($stats->deltas) / count($stats->deltas));
-        $stats->good = $stats->avg < NEWSLETTER_CRON_INTERVAL * 1.2; // 10% error
+        $stats->good = $stats->avg < NEWSLETTER_REAL_CRON_INTERVAL * 1.2; // 10% error
         return $stats;
     }
 
@@ -120,7 +120,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
 
         // If the job is scheduled in the future but too far (yes, we saw even that one...)
         // Should never happen since there is a check and a fix on NewsletterAdmin
-        if ($x > time() + NEWSLETTER_CRON_INTERVAL * 2) {
+        if ($x > time() + NEWSLETTER_REAL_CRON_INTERVAL * 2) {
             return self::JOB_FAR_FUTURE;
         }
 
@@ -137,7 +137,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
 
         // If the stats have been reset, we don't know
         if (!empty($calls)) {
-            if (time() - $x > NEWSLETTER_CRON_INTERVAL * 3) {
+            if (time() - $x > NEWSLETTER_REAL_CRON_INTERVAL * 3) {
                 return self::JOB_LATE;
             }
         }
