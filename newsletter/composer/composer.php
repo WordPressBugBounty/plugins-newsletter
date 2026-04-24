@@ -940,13 +940,13 @@ class NewsletterComposer extends NewsletterModule {
         if (!empty($email->options['sender_email'])) {
             $controls->data['sender_email'] = $email->options['sender_email'];
         } else {
-            $controls->data['sender_email'] = Newsletter::instance()->get_sender_email();
+            $controls->data['sender_email'] = '';
         }
 
         if (!empty($email->options['sender_name'])) {
             $controls->data['sender_name'] = $email->options['sender_name'];
         } else {
-            $controls->data['sender_name'] = Newsletter::instance()->get_sender_name();
+            $controls->data['sender_name'] = '';
         }
 
         $controls->data = array_merge(TNP_Composer::get_global_style_defaults(), $controls->data);

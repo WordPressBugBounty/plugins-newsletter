@@ -49,6 +49,10 @@ class NewsletterUpgrade {
 
         wp_cache_flush();
 
+        //update_option('newsletter_engine_heartbeat', 0, false); // to have the autoload set to false once, for optimization
+        delete_option('newsletter_lock_engine');
+        update_option('newsletter_engine_lock', 0, false); // to have the autoload set to false once, for optimization
+
         if (!get_option('newsletter_install_time')) {
             update_option('newsletter_install_time', time(), false);
         }

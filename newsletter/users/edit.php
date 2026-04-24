@@ -66,7 +66,7 @@ if ($controls->is_action('save')) {
         } else {
             $this->add_user_log($new_user, 'edit');
 
-            do_action('newsletter_user_saved', $new_user, $old_user, 'admin');
+            do_action('newsletter_user_saved', $new_user, $user, 'admin');
             $user = $new_user;
 
             $controls->add_toast_saved();

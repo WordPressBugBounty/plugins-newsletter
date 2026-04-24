@@ -116,6 +116,8 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                     <i id="tnpc-view-mode-icon" class="fas fa-desktop"></i>
                 </span>
 
+                <?php do_action('newsletter_composer_actions'); ?>
+
             </div>
 
         </div>

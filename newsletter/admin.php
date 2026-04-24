@@ -216,6 +216,8 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
 
             wp_enqueue_script('tnp-toastify', $url . '/vendor/toastify/toastify.js', [], NEWSLETTER_VERSION);
             wp_enqueue_style('tnp-toastify', $url . '/vendor/toastify/toastify.css', [], NEWSLETTER_VERSION);
+
+            wp_enqueue_script('tnp-marked', $url . '/vendor/marked/marked.umd.js', [], NEWSLETTER_VERSION);
         }
     }
 

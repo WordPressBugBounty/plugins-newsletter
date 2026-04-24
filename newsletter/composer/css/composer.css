@@ -91,8 +91,8 @@
     text-align: right;
 }
 
-#tnp-body #tnpc-subject-wrap .tnpb-actions a,
-#tnp-body #tnpc-subject-wrap .tnpb-actions span
+#tnp-body #tnpc-subject-wrap .tnpb-actions > a,
+#tnp-body #tnpc-subject-wrap .tnpb-actions > span
 {
     display: inline-block;
     width: 40px;
