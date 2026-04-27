@@ -174,6 +174,14 @@ class NewsletterDefaults {
             ];
         }
 
+        if ($sub === 'emails') {
+            return [
+                'css' => '',
+                'post_image_use_gallery' => '1',
+                'post_image_use_content' => '1'
+            ];
+        }
+
         return [];
     }
 

@@ -2,7 +2,6 @@
 /** @var NewsletterEmailsAdmin $this */
 /** @var NewsletterControls $controls */
 /** @var NewsletterLogger $logger */
-
 defined('ABSPATH') || exit;
 
 if ($controls->is_action()) {
@@ -38,7 +37,7 @@ if ($controls->is_action()) {
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
-        <?php //$controls->title_help('/profile-page')  ?>
+        <?php //$controls->title_help('/profile-page')   ?>
 <!--        <h2><?php esc_html_e('Newsletters', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
@@ -65,6 +64,19 @@ if ($controls->is_action()) {
                         <?php $controls->textarea('css'); ?>
                         <p class="description">
                             CSS added to the main newsletter CSS.
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('Post featured image', 'newsletter') ?>
+                    </th>
+                    <td>
+
+                        <?php $controls->checkbox2('post_image_use_gallery', 'Use the first gallery image'); ?>
+                        <br>
+                        <?php $controls->checkbox2('post_image_use_content', 'Use the first content image'); ?>
+                        <p class="description">
+                            When the featured image is not set.
                         </p>
                     </td>
                 </tr>

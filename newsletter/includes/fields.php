@@ -871,7 +871,9 @@ class NewsletterFields {
         $this->_open('tnp-block-commons');
 
         echo '<div class="tnp-field-row">';
-        echo '<div class="tnp-field-col-4">';
+
+        echo '<div class="tnp-field-col-3">';
+
         $this->_label('Background');
         $this->controls->color('block_background');
         echo '&nbsp;&rarr;&nbsp;';
@@ -879,32 +881,42 @@ class NewsletterFields {
 
         echo '</div>';
 
-        echo '<div class="tnp-field-col-4">';
+        echo '<div class="tnp-field-col-3">';
+
         $this->_label('Angle');
-        //$this->controls->checkbox('block_background_gradient');
         $this->controls->select('block_background_angle', ['180' => '180°', '90°' => '90°']);
+
         echo '</div>';
 
-        echo '<div class="tnp-field-col-4">';
+        echo '<div class="tnp-field-col-3">';
+
         $this->_label('Full width');
         $this->yesno('block_background_wide', '');
-        echo '</div>';
 
-        echo '<div class="tnp-field-col-4">';
+        echo '</div>';
+        echo '<div style="clear: both"></div>';
+
+        echo '</div>';
+        echo '<div class="tnpf-description">Borders and gradients are not widely supported</div>';
+
+
         $this->_label('Border');
         $this->controls->color('block_border_color');
         echo $this->controls->text('block_border_radius', ['width' => 40]), '<span style="font-size: 20px">⌀</span>';
-        echo '</div>';
 
-        echo '<div style="clear: both"></div>';
-        echo '<div class="tnpf-description">Borders and gradients are not widely supported</div>';
-        echo '</div>';
+
+
 
         $this->_close();
 
         $this->_open('tnp-block-commons');
         $this->_label('Padding');
         $this->padding('block_padding', '', ['field_only' => true]);
+
+        $this->_close();
+        $this->_open('tnp-block-commons');
+        //$this->_label('CSS class');
+        $this->text('block_class', 'CSS class', ['description' => 'To be used with custom CSS']);
 
         $this->_close();
     }

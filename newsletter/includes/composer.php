@@ -140,7 +140,7 @@ class TNP_Composer {
                 $border_radius = 999;
                 break;
             default:
-                $border_radius = (int)$options[$prefix . '_border_radius'];
+                $border_radius = (int) $options[$prefix . '_border_radius'];
         }
 
         $a_style = 'display:inline-block;'
@@ -251,6 +251,7 @@ class TNP_Composer {
      * The media ID is not checked for real existance of the associated attachment.
      *
      * @param int $post_id
+     * @param array $attrs 'use_gallery' (default: true) to search in the gallery, 'use_content' (default: true) to search into the content
      * @return int
      */
     static function get_post_thumbnail_id($post_id) {
@@ -264,18 +265,24 @@ class TNP_Composer {
             return $media_id;
         }
 
-        $attachments = get_children(array('numberpost' => 1, 'post_parent' => $post_id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => 'ASC', 'orderby' => 'menu_order'));
-        if (!empty($attachments)) {
-            foreach ($attachments as $id => &$attachment) {
-                return $id;
+        $emails_options = NewsletterEmails::instance()->get_main_options();
+
+        if (!empty($emails_options['post_image_use_gallery'])) {
+            $attachments = get_children(array('numberpost' => 1, 'post_parent' => $post_id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => 'ASC', 'orderby' => 'menu_order'));
+            if (!empty($attachments)) {
+                foreach ($attachments as $id => &$attachment) {
+                    return $id;
+                }
             }
         }
 
-        $post = get_post($post_id);
+        if (!empty($emails_options['post_image_use_content'])) {
+            $post = get_post($post_id);
 
-        $r = preg_match('/wp-image-(\d+)/', $post->post_content, $matches);
-        if ($matches) {
-            return (int) $matches[1];
+            $r = preg_match('/wp-image-(\d+)/', $post->post_content, $matches);
+            if ($matches) {
+                return (int) $matches[1];
+            }
         }
 
         return false;
@@ -288,7 +295,7 @@ class TNP_Composer {
      *
      * @param int $media_id
      * @param array $size
-     * @return \TNP_Media
+     * @return \TNP_Media Returns null if no media can be found
      */
     function get_media($media_id, $size) {
         $src = wp_get_attachment_image_src($media_id, $size);
@@ -833,4 +840,3 @@ class TNP_Composer_Grid_Cell {
                 </table>";
     }
 }
-

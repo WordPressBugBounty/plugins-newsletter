@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.9.4
-Stable tag: 9.2.3
+Stable tag: 9.2.4
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -179,6 +179,12 @@ Thank you, The Newsletter Team
 3. The Reports addon
 
 == Changelog ==
+
+= 9.2.4 =
+
+* Added settings for newsletter to control how featured images are extraxcted.
+* WP7 controls layout fixes
+* Custom CSS class for Composer blocks
 
 = 9.2.3 =
 

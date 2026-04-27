@@ -913,9 +913,9 @@ iframe.tnp-editor-preview-desktop {
     display: none;
 }
 
-.sp-replacer, .tnp-sp-replacer {
-    width:  30px!important;
-    height: 30px!important;
+#tnp-body .sp-replacer, #tnp-body .tnp-sp-replacer {
+    width:  32px!important;
+    height: 32px!important;
 }
 
 
@@ -1375,7 +1375,10 @@ span.tnp-user-status {
     text-transform: uppercase;
 }
 
-#tnp-heading h2 span {
+#tnp-heading h2 span,
+#tnp-heading li span,
+#tnp-wrap span.tnp-badge
+{
     background-color: transparent;
     /*border: 1px solid #999;*/
     font-weight: normal;
@@ -1385,12 +1388,14 @@ span.tnp-user-status {
     border-radius: 7px;
     vertical-align: middle;
     color: #444;
-    margin-left: 2em;
+    /*margin-left: 1rem;*/
     box-shadow: 0 0 3px #ccc;
 }
 
 #tnp-heading h2 span.tnp-badge-green,
-#tnp-heading h2 span.tnp-badge-green a
+#tnp-heading h2 span.tnp-badge-green a,
+#tnp-heading li span.tnp-badge-green,
+#tnp-wrap span.tnp-badge-green
 {
     background-color: green;
     /*border: 1px solid #999;*/
@@ -1407,7 +1412,10 @@ span.tnp-user-status {
 }
 
 #tnp-heading h2 span.tnp-badge-orange,
-#tnp-heading h2 span.tnp-badge-orange {
+#tnp-heading h2 span.tnp-badge-orange,
+#tnp-heading li span.tnp-badge-orange,
+#tnp-wrap span.tnp-badge-orange
+{
     background-color: var(--tnp-orange);
     /*border: 1px solid #999;*/
     font-weight: normal;
@@ -2530,10 +2538,47 @@ html {
 }
 
 /* Single field container */
-.tnpf-field, .tnpf-field {
+.tnpf-field {
     display: block;
     width: 100%;
     margin-bottom: 10px;
+}
+
+#tnp-body .tnpf-field select,
+#tnp-body .tnpf-field input {
+    min-height: 32px;
+    height: 32px;
+    max-height: 32px;
+    line-height: normal;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-right: 3px;
+    margin-bottom: 5px;
+    display: inline;
+}
+
+#tnp-body .tnpf-field select {
+    padding-right: 25px;
+}
+
+#tnp-body .tnpf-field input[type=checkbox] {
+    /*min-height: auto;*/
+    height: 16px;
+    width: 16px;
+    /*max-height: auto;*/
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Color picker button */
+#tnp-body .tnp-sp-replacer {
+    margin-right: 3px;
+    min-height: 32px;
+    height: 32px;
+    max-height: 32px;
+    width: 32px;
+    box-sizing: border-box;
+
 }
 
 .tnpf-field select.tnpf-small,
@@ -2644,11 +2689,11 @@ html {
 
 }
 
-.tnpf-field-block-style input[type=radio] {
-    display: none;
+#tnp-body .tnpf-field-block-style input[type=radio] {
+    display: none !important;
 }
 
-.tnpf-field-block-style label.tnpf-style {
+#tnp-body .tnpf-field-block-style label.tnpf-style {
     display: inline-block;
     background-color: #eee;
     font-size: 12px;
