@@ -28,7 +28,7 @@ class NewsletterMailer {
             $this->speed = max(12, (int) $this->options['speed']);
         }
         if (!empty($this->options['turbo'])) {
-            $this->batch_size = max(1, (int) $this->options['turbo']);
+            $this->batch_size = min(max(1, (int) $this->options['turbo']), 10);
         }
         if (!empty($this->options['sender_email'])) {
             $this->sender_email = $this->options['sender_email'];

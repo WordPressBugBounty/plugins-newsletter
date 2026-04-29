@@ -92,11 +92,6 @@ class NewsletterEngine {
 
         $this->send_setup();
 
-        if ($this->max_emails <= 0) {
-            $this->logger->error('No more capacity');
-            return false;
-        }
-
         $this->fix_email($email);
 
         // This stops the update of last_id and sent fields since
@@ -218,6 +213,12 @@ class NewsletterEngine {
                     $this->notify_fatal_error($email, $r->get_error_message());
                     return $r;
                 }
+            }
+
+            if (!$test && $this->max_emails <= 0) {
+                $this->logger->error('No more capacity');
+                $result = false;
+                break;
             }
 
             if (!$test && $this->time_exceeded()) {
