@@ -936,6 +936,7 @@ class NewsletterComposer extends NewsletterModule {
 
             // Extra data used when testing
             $controls->data['track'] = $email->track;
+            $controls->data['email_id'] = $email->id;
 
         }
 

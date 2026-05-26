@@ -201,7 +201,13 @@ class NewsletterEmails extends NewsletterModule {
 
                 $message = $this->replace($email->message, $user, $email);
                 $message = do_shortcode($message);
-                
+
+                if ($email->status === TNP_Email::STATUS_DRAFT) {
+                    $note = '<style>body {margin-top: 3rem !important}</style><div style="position: absolute; top: 0; left: 0; right: 0; background-color: black !important; color: white !important; font-family: sans-serif; text-align: center; font-size: 1rem; padding: 1rem;">The online view of draft newsletters could not match the editor content. Save before send a test.</div>';
+
+                    $message = str_replace('</body>', $note . '</body>', $message);
+                }
+
                 echo apply_filters('newsletter_view_message', $message);
 
                 die();

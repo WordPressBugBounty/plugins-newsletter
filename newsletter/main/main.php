@@ -60,6 +60,12 @@ if (!$controls->is_action()) {
                 $controls->data['contract_key'] = trim($controls->data['contract_key']);
             }
 
+            $controls->data['schedule_start'] = (int)$controls->data['schedule_start'];
+            $controls->data['schedule_end'] = (int)$controls->data['schedule_end'];
+            if ($controls->data['schedule_start'] === $controls->data['schedule_end']) {
+                $controls->data['schedule'] = 0;
+            }
+
             update_option('newsletter_log_level', $controls->data['log_level']);
         }
 
@@ -334,7 +340,7 @@ if (!empty($controls->data['page'])) {
 
                                             This value is set by the constant <code>NEWSLETTER_SEND_DELAY</code> in the site <code>wp-config.php</code>
                                             with value <?php echo esc_html(NEWSLETTER_SEND_DELAY); ?>.
-                                        
+
                                     <?php } else { ?>
                                         <?php $controls->text('send_delay', 5); ?> milliseconds
                                     <?php } ?>
@@ -364,7 +370,25 @@ if (!empty($controls->data['page'])) {
                                     </p>
                                 </td>
                             </tr>
+                            <!--
+                            <tr valign="top">
+                                <th>Sending time window</th>
+                                <td>
+                            <?php
+                            /*
 
+        $schedule_end_hours = [];
+        for ($i = 0; $i < 24; $i++) {
+            echo '<div style="float:left; width: 30px; margin-right: 3px;">';
+            echo '<label>';
+            echo sprintf('%02d', $i);
+            echo '<br>';
+            $controls->checkbox_group('schedule_hours', $i);
+            echo '</label>';
+            echo '</div>';
+        } */?></td>
+                            </tr>
+-->
                         </table>
 
                         <?php do_action('newsletter_panel_main_speed', $controls) ?>

@@ -62,6 +62,7 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
     <?php $this->hidden('sender_email'); ?>
     <?php $this->hidden('sender_name'); ?>
     <?php $this->hidden('track'); ?>
+    <?php $this->hidden('email_id'); ?>
 
     <div id="tnpb-main">
 

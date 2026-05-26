@@ -10,7 +10,7 @@
         <input type="button" class="button-secondary" onclick="tnpc_test(true);return false;" value="<?php esc_attr_e("Send", 'newsletter') ?>">
 
 
-        <div class="tnp-separator"><?php _e("or", 'newsletter') ?></div>
+        <div class="tnp-separator"><?php esc_html_e("or", 'newsletter') ?></div>
 
         <div class="test-subscribers">
             <?php if (!empty(NewsletterUsersAdmin::instance()->get_test_users())): ?>
