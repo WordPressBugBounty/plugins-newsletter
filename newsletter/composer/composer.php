@@ -730,6 +730,8 @@ class NewsletterComposer extends NewsletterModule {
     static function hook_safe_style_css($rules) {
         $rules[] = 'display';
         $rules[] = 'mso-*';
+        $rules[] = 'background';
+        $rules[] = 'background-*';
         return $rules;
     }
 
