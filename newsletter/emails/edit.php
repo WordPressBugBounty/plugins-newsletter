@@ -335,6 +335,11 @@ if (isset($email['options']['status']) && $email['options']['status'] === 'S') {
 
 if (TNP_Email::STATUS_ERROR === $email['status'] && isset($email['options']['error_message'])) {
     $controls->errors .= sprintf(__('Stopped by fatal error: %s', 'newsletter'), esc_html($email['options']['error_message']));
+    $recovery_time = wp_next_scheduled('newsletter_send_error_recover', ['id' => (int)$email['id']]);
+    if ($recovery_time) {
+        $controls->errors .= '<br>Autorecover on ' . esc_html($controls->print_date($recovery_time, false, true));
+    }
+    $controls->errors .= '<br>Press "Continue" to continue the delivery';
 }
 
 if ($email['status'] != 'sent') {
@@ -342,6 +347,7 @@ if ($email['status'] != 'sent') {
 } else {
     $subscriber_count = $email['sent'];
 }
+
 ?>
 <style>
 <?php readfile(__DIR__ . '/assets/edit.css') ?>

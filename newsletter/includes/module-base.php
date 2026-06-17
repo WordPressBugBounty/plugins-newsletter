@@ -533,6 +533,14 @@ class NewsletterModuleBase {
         $user->token = $token;
     }
 
+    function set_email_status($email, $status) {
+        global $wpdb;
+
+        $this->logger->debug('Status change to ' . $status . ' of email ' . $email->id . ' from ' . $_SERVER['REQUEST_URI']);
+
+        $this->query($wpdb->prepare("update " . NEWSLETTER_EMAILS_TABLE . " set status=%s where id=%d limit 1", $status, $email->id));
+    }
+
     /**
      * @param string $language The language for the list labels (it does not affect the lists returned)
      * @return TNP_List[]
