@@ -49,6 +49,10 @@ class NewsletterModuleBase {
         return self::$is_multilanguage;
     }
 
+    function is_ai_enabled() {
+        return true;
+    }
+
     static function plugin_url() {
         return self::$plugin_url;
     }

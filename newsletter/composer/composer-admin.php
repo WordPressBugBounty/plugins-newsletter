@@ -31,7 +31,94 @@ class NewsletterComposerAdmin extends NewsletterModuleAdmin {
             add_action('wp_ajax_tnpc_css', array($this, 'ajax_tnpc_css'));
             add_action('wp_ajax_tnpc_regenerate_email', array($this, 'ajax_tnpc_regenerate_email'));
             add_action('wp_ajax_tnpc_block_form', array($this, 'ajax_tnpc_block_form'));
+
+            // AI
+            add_action('wp_ajax_newsletter_ai_subjects', [$this, 'ajax_ai_subjects']);
+            add_action('wp_ajax_newsletter_composer_ai_generate', [$this, 'ajax_composer_ai_generate']);
         }
+    }
+
+    function get_site_language() {
+        require_once ABSPATH . 'wp-admin/includes/translation-install.php';
+        $translations = wp_get_available_translations();
+        $language = 'English';
+        $locale = get_locale();
+        if (isset($translations[$locale])) {
+            $language = $translations[$locale]['english_name'];
+        }
+        return $language;
+    }
+
+    function ajax_composer_ai_generate() {
+        check_ajax_referer('tnp-ai');
+
+        header('Content-Type: application/json');
+
+        if (!function_exists('wp_ai_client_prompt')) {
+            wp_send_json_error(['message' => 'WordPress 7 required']);
+        }
+
+        $post = wp_unslash($_POST);
+
+        $language = $this->get_site_language();
+        $hint = wp_strip_all_tags($post['prompt']);
+        $prompt = "You are a copywriter. Write 200 words in $language about: $hint";
+
+        //error_log($prompt);
+
+        $builder = wp_ai_client_prompt($prompt);
+        $reply = $builder->generate_text();
+
+        if (is_wp_error($reply)) {
+            wp_send_json_error(['message' => $reply->get_error_message()]);
+        }
+
+        wp_send_json_success(['message' => wp_strip_all_tags($reply)]);
+    }
+
+    function ajax_ai_subjects() {
+        check_ajax_referer('tnp-ai');
+
+        header('Content-Type: application/json');
+
+        if (!function_exists('wp_ai_client_prompt')) {
+            wp_send_json_error(['message' => 'WordPress 7 required']);
+        }
+
+        $post = wp_unslash($_POST);
+
+        $language = $this->get_site_language();
+
+        $prompt = 'You help creating a newsletter for the site ' . get_bloginfo('name') . ' - '
+                . get_bloginfo('description') . ' using the language ' . $language . "\n";
+        $prompt .= 'Generate 5 alternatives for the newsletter subject: "' . wp_strip_all_tags($post['subject']) . '"' . "\n";
+        $prompt .= 'Return only the subjects without any other text or request to do more';
+
+        $schema = [
+            'type' => 'array',
+            'items' => [
+                'type' => 'string',
+            ],
+        ];
+
+        $builder = wp_ai_client_prompt($prompt);
+        $reply = $builder
+                ->as_json_response($schema)
+                ->generate_text();
+
+        if (is_wp_error($reply)) {
+            wp_send_json_error(['message' => $reply->get_error_message()]);
+        }
+
+        $reply = wp_strip_all_tags($reply);
+
+        $list = json_decode($reply);
+
+        if (empty($list)) {
+            wp_send_json_error(['message' => 'No ideas generated...']);
+        }
+
+        wp_send_json_success($list);
     }
 
     /**
@@ -114,8 +201,8 @@ class NewsletterComposerAdmin extends NewsletterModuleAdmin {
         $email = new TNP_Email();
         NewsletterComposer::update_email($email, $controls);
 
-        $email->id = (int)($controls->data['email_id'] ?? 0);
-        $email->track = $controls->data['track'] ?? (int)Newsletter::instance()->get_option('track');
+        $email->id = (int) ($controls->data['email_id'] ?? 0);
+        $email->track = $controls->data['track'] ?? (int) Newsletter::instance()->get_option('track');
 
         if (!empty($controls->data['sender_email'])) {
             $email->options['sender_email'] = $controls->data['sender_email'];

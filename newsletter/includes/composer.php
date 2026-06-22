@@ -15,7 +15,7 @@ function tnpc_button($options, $prefix = 'button') {
 class TNP_Composer {
 
     /**
-     * @deprecated since version 8.8.3
+     * @deprecated since version 8.8.3 user NewsletterComposer::register_block()
      * @param string $dir
      * @return type
      */

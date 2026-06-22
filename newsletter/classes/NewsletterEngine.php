@@ -204,12 +204,6 @@ class NewsletterEngine {
                 }
             }
 
-            if (NEWSLETTER_DEBUG) {
-                $this->set_error_state_of_email($email, 'test fatal error');
-                //$this->notify_fatal_error($email, $r->get_error_message());
-                return new WP_Error('1', 'test fatal error');
-            }
-
             // The batch went in error
             if (is_wp_error($r)) {
                 $this->logger->error($r);

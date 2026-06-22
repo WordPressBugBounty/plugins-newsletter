@@ -2557,6 +2557,11 @@ html {
     display: inline;
 }
 
+#tnp-body .tnpf-field button {
+    min-height: 32px;
+    height: 32px;
+}
+
 #tnp-body .tnpf-field select {
     padding-right: 25px;
 }

@@ -88,6 +88,7 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                     </td>
                     <td id="tnpc-subject-icons" style="white-space: nowrap">
                         <a href="#subject-ideas-modal" rel="modal:open"><i class="far fa-lightbulb tnp-suggest-subject"></i></a>
+                        <a href="#" id="tnpc-subject-ai-button"><i class="far fa-smile"></i></a>
                         <?php do_action('newsletter_composer_subject'); ?>
                     </td>
                 </tr>
@@ -213,17 +214,21 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
 </div>
 
 <script type="text/javascript">
-    TNP_PLUGIN_URL = "<?php echo esc_js(Newsletter::plugin_url()) ?>";
-    TNP_HOME_URL = "<?php echo esc_js(home_url('/', is_ssl() ? 'https' : 'http')) ?>";
-    tnp_context_type = "<?php echo esc_js($context_type) ?>";
-    tnp_nonce = '<?php echo esc_js(wp_create_nonce('save')) ?>';
+    var TNP_PLUGIN_URL = '<?php echo esc_js(Newsletter::plugin_url()) ?>';
+    var TNP_HOME_URL = '<?php echo esc_js(home_url('/', is_ssl() ? 'https' : 'http')) ?>';
+    var tnp_context_type = "<?php echo esc_js($context_type) ?>";
+    var tnp_nonce = '<?php echo esc_js(wp_create_nonce('save')) ?>';
+    var tnp_ai_nonce = '<?= esc_js(wp_create_nonce('tnp-ai')) ?>';
 </script>
 
 <?php
+
 wp_enqueue_script('tnp-composer', plugins_url('newsletter') . '/composer/composer.js', ['jquery'], NEWSLETTER_VERSION);
+wp_enqueue_script('tnp-composer-ai', plugins_url('newsletter') . '/composer/composer-ai.js', ['jquery'], NEWSLETTER_VERSION);
 include __DIR__ . '/modals/test.php';
 include __DIR__ . '/modals/attachment.php';
 include __DIR__ . '/modals/subjects.php';
+include __DIR__ . '/modals/subjects-ai.php';
 include __DIR__ . '/modals/placeholders.php';
 include __DIR__ . '/modals/templates.php';
 
