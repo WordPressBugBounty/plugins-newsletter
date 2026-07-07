@@ -179,7 +179,7 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
 
         $report->email_id = $email->id;
 
-        if ($email->status != 'new') {
+        //if ($email->status != 'new') {
             $data = $wpdb->get_row($wpdb->prepare("SELECT COUNT(*) as total,
             count(case when status>0 then 1 else null end) as `errors`,
             count(case when open>0 then 1 else null end) as `opens`,
@@ -189,7 +189,7 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
             $report->total = $data->total;
             $report->open_count = $data->opens;
             $report->click_count = $data->clicks;
-        }
+        //}
 
         $report->update();
 

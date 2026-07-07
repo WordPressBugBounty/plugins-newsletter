@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 7.0
-Stable tag: 9.2.9
+Stable tag: 9.3.0
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -179,6 +179,13 @@ Thank you, The Newsletter Team
 3. The Reports addon
 
 == Changelog ==
+
+= 9.3.0 =
+
+* Added new link tracking method (see the main Settings)
+* Added stats reset button for draft newsletters
+* Removed the obsolete constant NEWSLETTER_ACTION_TYPE
+* Removed the obsolete constant NEWSLETTER_TRACKING_TYPE
 
 = 9.2.9 =
 

@@ -1338,13 +1338,13 @@ function tnp_describe_table($table) {
                                 </td>
                             </tr>
                             <tr>
-                                <td>NEWSLETTER_TRACKING_TYPE</td>
+                                <td>NEWSLETTER_TRACKING_TYPE (obsolete)</td>
                                 <td>
                                     <?php echo esc_html(NEWSLETTER_TRACKING_TYPE) ?>
                                 </td>
                             </tr>
                             <tr>
-                                <td>NEWSLETTER_ACTION_TYPE</td>
+                                <td>NEWSLETTER_ACTION_TYPE (obsolete)</td>
                                 <td>
                                     <?php echo esc_html(NEWSLETTER_ACTION_TYPE) ?>
                                 </td>

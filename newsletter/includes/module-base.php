@@ -879,7 +879,7 @@ class NewsletterModuleBase {
         $posts = new WP_Query($filters);
 
         if ($language) {
-                do_action('wpml_switch_language', Newsletter::$language);
+            do_action('wpml_switch_language', Newsletter::$language);
         }
 
         return $posts;
@@ -956,15 +956,13 @@ class NewsletterModuleBase {
     }
 
     function get_action_base_url() {
-        if (NEWSLETTER_ACTION_TYPE === 'ajax') {
-            return admin_url('admin-ajax.php') . '?action=tnp';
+
+        // TODO: manage the "rest" option when implemented
+        $type = Newsletter::instance()->get_main_option('links');
+        if (empty($type)) {
+            return $this->get_home_url();
         } else {
-            $type = Newsletter::instance()->get_main_option('links');
-            if (empty($type)) {
-                return $this->get_home_url();
-            } else {
-                return admin_url('admin-ajax.php') . '?action=tnp';
-            }
+            return admin_url('admin-ajax.php') . '?action=tnp';
         }
     }
 

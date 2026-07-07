@@ -482,13 +482,24 @@ if (!empty($controls->data['page'])) {
 
                             <tr>
                                 <th>
-                                    <?php $controls->label(__('Tracking and action links', 'newsletter'), '') ?>
+                                    <?php $controls->label(__('Action links', 'newsletter'), '') ?>
                                 </th>
                                 <td>
-                                    <?php $controls->select('links', ['' => 'Standard', 'ajax' => 'Alternative']); ?>
+                                    <?php $controls->select('links', ['' => 'Standard', 'ajax' => 'AJAX']); ?>
                                     <span class="description">
-                                        Select "alternative" if confirmation/unsubscription/tracking links seems to not work. Resend a test nessletter
+                                        Select "AJAX" if confirmation/unsubscription/tracking links seems to not work. Resend a test neswletter
                                         to check the effect, old newsletters are not affacted.
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <?php $controls->label(__('Tracking links', 'newsletter'), '') ?>
+                                </th>
+                                <td>
+                                    <?php $controls->select('tracking_links', ['' => 'Standard', 'rest' => 'WP REST']); ?>
+                                    <span class="description">
+
                                     </span>
                                 </td>
                             </tr>

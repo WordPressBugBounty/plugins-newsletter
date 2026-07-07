@@ -16,10 +16,16 @@ if (!$email) {
     return;
 }
 
+if ($email->status == 'new' && $controls->is_action('reset')) {
+    $this->reset_stats($email);
+    $controls->add_toast_done();
+    $email = $this->get_email($email->id);
+}
+
 $report = $this->get_statistics($email);
 
 if ($email->status == 'new') {
-    $controls->warnings[] = __('Draft newsletter, no data available', 'newsletter');
+    $controls->warnings[] = __('Draft newsletter. The tracking data from tests will be reset when the sending is started.', 'newsletter');
 } elseif ('sending' === $email->status) {
     $controls->warnings[] = __('Newsletter still sending', 'newsletter');
 }
@@ -127,6 +133,13 @@ if (empty($email->track)) {
                 <div class="tnp-card-icon"><div class="tnp-card-icon-remove"></div></div>
             </div>
         </div>
+
+        <?php if ($email->status == 'new') { ?>
+        <form method="post">
+            <?php $controls->init(); ?>
+            <?php $controls->button_reset(); ?>
+        </form>
+        <?php } ?>
 
     </div>
     <?php include NEWSLETTER_ADMIN_FOOTER; ?>
