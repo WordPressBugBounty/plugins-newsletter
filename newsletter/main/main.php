@@ -50,6 +50,10 @@ if (!$controls->is_action()) {
             $send_delay = min(max(0, $send_delay), 5000);
             $controls->data['send_delay'] = $send_delay;
 
+            $autorecovery_delay = intval($controls->data['autorecovery_delay'] ?? 0);
+            $autorecovery_delay = min(max(0, $autorecovery_delay), 60);
+            $controls->data['autorecovery_delay'] = $autorecovery_delay;
+
             if (!$this->is_email($controls->data['reply_to'], true)) {
                 $controls->errors .= __('Reply to email is not correct.', 'newsletter') . '<br>';
             } else {
@@ -367,6 +371,18 @@ if (!empty($controls->data['page'])) {
 
                                     <p class="description">
                                         Out of this time window the newsletter sending is suspended. Does not apply to email series.
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <th>Autorecovery delay</th>
+                                <td>
+                                    <?php $controls->select('autorecovery_delay', ['' => 'Never',
+                                        '5'=>'5',  '10'=>'10', '15'=>'15', '20'=>'20', '30'=>'30',
+                                         '40'=>'40', '50'=>'50', '60'=>'60']); ?> (minutes)
+
+                                    <p class="description">
+                                        Minuto to wait before restarting the sending process when blocked by a fatal error
                                     </p>
                                 </td>
                             </tr>

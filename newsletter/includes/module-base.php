@@ -83,16 +83,21 @@ class NewsletterModuleBase {
     static function get_locale($language) {
         if (function_exists('pll_languages_list')) { // Polylang
             $languages = pll_languages_list(['fields' => '']);
-            foreach ($languages as $data) {
-                if ($data->slug === self::$language) {
-                    return $data->locale;
+            if ($languages && is_array($languages)) {
+                foreach ($languages as $data) {
+                    if ($data->slug === self::$language) {
+                        return $data->locale;
+                    }
                 }
             }
         } else if (class_exists('SitePress')) { // WPML
             $languages = apply_filters('wpml_active_languages', null, ['skip_missing' => 0]);
-            foreach ($languages as $code => $data) {
-                if ($code === self::$language) {
-                    return $data['default_locale'];
+            // A user reported this filter returning a nulla value (!?)
+            if ($languages && is_array($languages)) {
+                foreach ($languages as $code => $data) {
+                    if ($code === self::$language) {
+                        return $data['default_locale'];
+                    }
                 }
             }
         }

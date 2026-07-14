@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 9.3.0
+  Version: 9.3.1
   Author: The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -209,7 +209,8 @@ class Newsletter extends NewsletterModule {
         // Used to load dependant modules
         do_action('newsletter_loaded', NEWSLETTER_VERSION);
 
-        $this->setup_language();
+        // WPML is not ready here
+        //$this->setup_language();
 
         if (function_exists('load_plugin_textdomain')) {
             load_plugin_textdomain('newsletter', false, plugin_basename(__DIR__) . '/languages');

@@ -370,7 +370,11 @@ class NewsletterEngine {
 
         Newsletter::instance()->save_email($edited_email);
 
-        wp_schedule_single_event(time() + HOUR_IN_SECONDS, 'newsletter_send_error_recover', ['id' => (int) $email->id]);
+        $delay = (int)Newsletter::instance()->get_main_option('autorecovery_delay');
+
+        if ($delay && $delay > 0) {
+            wp_schedule_single_event(time() + $delay*60, 'newsletter_send_error_recover', ['id' => (int) $email->id]);
+        }
 
         Newsletter\Logs::add('newsletter-' . $email->id, 'Error: ' . $message);
     }
