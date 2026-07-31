@@ -64,9 +64,13 @@ if (!$controls->is_action()) {
                 $controls->data['contract_key'] = trim($controls->data['contract_key']);
             }
 
-            $controls->data['schedule_start'] = (int)$controls->data['schedule_start'];
-            $controls->data['schedule_end'] = (int)$controls->data['schedule_end'];
-            if ($controls->data['schedule_start'] === $controls->data['schedule_end']) {
+            if (empty($controls->data['schedule_hours'])) {
+                $controls->data['schedule_hours'] = [];
+            } else {
+                $controls->data['schedule_hours'] = array_map('intval', $controls->data['schedule_hours']);
+            }
+
+            if (empty($controls->data['schedule_hours'])) {
                 $controls->data['schedule'] = 0;
             }
 
@@ -342,8 +346,8 @@ if (!empty($controls->data['page'])) {
                                 <td>
                                     <?php if (defined('NEWSLETTER_SEND_DELAY')) { ?>
 
-                                            This value is set by the constant <code>NEWSLETTER_SEND_DELAY</code> in the site <code>wp-config.php</code>
-                                            with value <?php echo esc_html(NEWSLETTER_SEND_DELAY); ?>.
+                                        This value is set by the constant <code>NEWSLETTER_SEND_DELAY</code> in the site <code>wp-config.php</code>
+                                        with value <?php echo esc_html(NEWSLETTER_SEND_DELAY); ?>.
 
                                     <?php } else { ?>
                                         <?php $controls->text('send_delay', 5); ?> milliseconds
@@ -361,50 +365,45 @@ if (!empty($controls->data['page'])) {
                             </tr>
 
                             <tr valign="top">
-                                <th>Sending time window</th>
+                                <th>Limit sending hours</th>
                                 <td>
                                     <?php $controls->enabled('schedule'); ?>
 
-                                    <span data-tnpshow="schedule=1">
-                                        from <?php $controls->hours('schedule_start'); ?> to <?php $controls->hours('schedule_end'); ?>
-                                    </span>
+                                    <div data-tnpshow="schedule=1">
 
-                                    <p class="description">
-                                        Out of this time window the newsletter sending is suspended. Does not apply to email series.
-                                    </p>
+                                        <?php
+                                        for ($i = 0; $i < 24; $i++) {
+                                            echo '<div style="float:left; width: 30px; margin-right: 3px;">';
+                                            echo '<label>';
+                                            echo sprintf('%02d', $i);
+                                            echo '<br>';
+                                            $controls->checkbox_group('schedule_hours', $i);
+                                            echo '</label>';
+                                            echo '</div>';
+                                        }
+                                        ?>
+                                        <p class="description" style="clear: both">
+                                            Limit the sending to specified hours. Does not apply to email series and other transactional emails.
+                                        </p>
+                                    </div>
+
+
                                 </td>
                             </tr>
                             <tr valign="top">
                                 <th>Autorecovery delay</th>
                                 <td>
-                                    <?php $controls->select('autorecovery_delay', ['' => 'Never',
-                                        '5'=>'5',  '10'=>'10', '15'=>'15', '20'=>'20', '30'=>'30',
-                                         '40'=>'40', '50'=>'50', '60'=>'60']); ?> (minutes)
+                                    <?php
+                                    $controls->select('autorecovery_delay', ['' => 'Never',
+                                        '5' => '5', '10' => '10', '15' => '15', '20' => '20', '30' => '30',
+                                        '40' => '40', '50' => '50', '60' => '60']);
+                                    ?> (minutes)
 
                                     <p class="description">
                                         Minuto to wait before restarting the sending process when blocked by a fatal error
                                     </p>
                                 </td>
                             </tr>
-                            <!--
-                            <tr valign="top">
-                                <th>Sending time window</th>
-                                <td>
-                            <?php
-                            /*
-
-        $schedule_end_hours = [];
-        for ($i = 0; $i < 24; $i++) {
-            echo '<div style="float:left; width: 30px; margin-right: 3px;">';
-            echo '<label>';
-            echo sprintf('%02d', $i);
-            echo '<br>';
-            $controls->checkbox_group('schedule_hours', $i);
-            echo '</label>';
-            echo '</div>';
-        } */?></td>
-                            </tr>
--->
                         </table>
 
                         <?php do_action('newsletter_panel_main_speed', $controls) ?>

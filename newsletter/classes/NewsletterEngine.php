@@ -370,10 +370,10 @@ class NewsletterEngine {
 
         Newsletter::instance()->save_email($edited_email);
 
-        $delay = (int)Newsletter::instance()->get_main_option('autorecovery_delay');
+        $delay = (int) Newsletter::instance()->get_main_option('autorecovery_delay');
 
         if ($delay && $delay > 0) {
-            wp_schedule_single_event(time() + $delay*60, 'newsletter_send_error_recover', ['id' => (int) $email->id]);
+            wp_schedule_single_event(time() + $delay * 60, 'newsletter_send_error_recover', ['id' => (int) $email->id]);
         }
 
         Newsletter\Logs::add('newsletter-' . $email->id, 'Error: ' . $message);
@@ -413,23 +413,23 @@ class NewsletterEngine {
         $this->logger->debug('Global schedule: ' . ($schedule ? 'yes' : 'no'));
 
         if ($schedule) {
+            $hours = $this->options['schedule_hours'] ?? [];
+            $this->logger->debug('Hours');
+            $this->logger->debug($hours);
 
-            $hour = gmdate('G') + get_option('gmt_offset');
-            $start = (int) $this->options['schedule_start'];
-            $end = (int) $this->options['schedule_end'];
-            // When the end is seto to 00:00, $end becomes -1 and the current hour is always greater than the end so the
-            // end time does not applies as it must be (send without limits for all the day)
-            $end--; // Stop at the starting of the hour
-
-            $this->logger->debug('Start: ' . $start);
-            $this->logger->debug('End: ' . $end);
-
-            $skip = $hour < $start || $hour > $end;
-            $this->logger->debug('Skip: ' . ($skip ? 'true' : 'false'));
+            if (is_array($hours)) {
+                $hour = gmdate('G') + get_option('gmt_offset');
+                $this->logger->debug('Now: ' . $hour);
+                if (!in_array($hour, $hours)) {
+                    $this->logger->debug('Skipping');
+                    return true;
+                }
+            }
         }
 
-        // Used by the speed control obsolete addon
-        return (bool) apply_filters('newsletter_send_skip', $skip, $email);
+        $this->logger->debug('Not skipping');
+
+        return false;
     }
 
     /**

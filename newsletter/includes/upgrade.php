@@ -35,7 +35,6 @@ class NewsletterUpgrade {
         if ($wpdb->last_error) {
             $this->logger->fatal($wpdb->last_error);
         }
-
     }
 
     function run() {
@@ -547,6 +546,26 @@ class NewsletterUpgrade {
             $max_per_second = intval($main_options['max_per_second']);
             if ($max_per_second) {
                 $main_options['send_delay'] = intval(1000.0 / $max_per_second);
+                update_option('newsletter_main', $main_options);
+            }
+        }
+
+        // Scheduler time window conversion
+        if (!empty($main_options['schedule']) && !isset($main_options['schedule_hours'])) {
+
+            $schedule_hours = [];
+            $start = (int) $main_options['schedule_start'] ?? 0;
+            $end = (int) $main_options['schedule_end'] ?? 0;
+
+            if ($start !== $end) {
+
+                if ($end < $start) {
+                    $end += 24;
+                }
+                for ($i = $start; $i < $end; $i++) {
+                    $schedule_hours[] = $i % 24;
+                }
+                $main_options['schedule_hours'] = $schedule_hours;
                 update_option('newsletter_main', $main_options);
             }
         }

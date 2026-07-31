@@ -35,6 +35,7 @@ class NewsletterDefaults {
                 'do_shortcodes' => 1,
                 'links' => 'ajax',
                 'schedule' => 0,
+                'schedule_hours' => [],
                 'autorecovery_delay' => '20',
                 'tracking_links' => ''
             ];
