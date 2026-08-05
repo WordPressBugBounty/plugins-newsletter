@@ -88,7 +88,7 @@ class NewsletterEngine {
             $email = (object) $email;
         }
 
-        $this->logger->info('Starting newsletter ' . $email->id);
+        $this->logger->info('Starting email ' . $email->id);
 
         $this->send_setup();
 
@@ -100,20 +100,33 @@ class NewsletterEngine {
 
         if (!$supplied_users) {
 
+            // This is no more related to emails, it should be moved to the run method
             if ($this->skip_run($email)) {
-                $this->logger->info('Out of the sending time window');
+                $this->logger->info('Hour not allowed for sending');
                 return true;
+            }
+
+            // No more capacity. It should not happen here but we saw cases where the "newsletter" job is launched
+            // twice in a single process.
+            if ($this->max_emails <= 0) {
+                return false;
             }
 
             $query = $email->query;
             $query .= " and id>" . ((int) $email->last_id) . " order by id limit " . $this->max_emails;
 
+            if (NEWSLETTER_DEBUG) {
+                //$query .= 'sdkjshskdfhjksf';
+            }
+
             $this->logger->debug('Query: ' . $query);
 
+            // Our get_results() manages error conditions nor managed by the original get_results()
             $users = $this->get_results($query);
 
-            if ($users === false) {
-                $this->set_error_state_of_email($email, 'Database error (see logs)');
+            if (!is_array($users)) {
+                // Something bad happened
+                $this->set_error_state_of_email($email, 'Database error: ' . $wpdb->last_error . '. Query: ' . $wpdb->last_query);
                 return true; // Continue with the next newsletter
             }
 
@@ -491,12 +504,23 @@ class NewsletterEngine {
         return $r;
     }
 
+    /**
+     *
+     * @global wpdb $wpdb
+     * @param string $query
+     * @return bool|array flase if an error condition or invalid result type (null, false, ...) is detected
+     */
     function get_results($query) {
         global $wpdb;
+        $wpdb->last_error = '';
+        //$this->logger->debug($query);
         $r = $wpdb->get_results($query);
-        if ($r === false) {
+        //$this->logger->debug($r);
+        // $r can be an empty array, it should always be an array or null on error
+        if ($wpdb->last_error || !is_array($r)) {
             $this->logger->fatal($query);
             $this->logger->fatal($wpdb->last_error);
+            return false;
         }
         return $r;
     }

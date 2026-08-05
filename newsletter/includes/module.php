@@ -1217,20 +1217,6 @@ class NewsletterModule extends NewsletterModuleBase {
         return self::sanitize_ip($ip);
     }
 
-    static function get_signature($text) {
-        $key = NewsletterStatistics::instance()->get_main_option('key');
-        return md5($text . $key);
-    }
-
-    static function check_signature($text, $signature) {
-        $signature = trim($signature);
-        if (!$signature) {
-            return false;
-        }
-        $key = NewsletterStatistics::instance()->get_main_option('key');
-        return md5($text . $key) === $signature;
-    }
-
     static function clean_eol($text) {
         $text = str_replace("\r\n", "\n", $text);
         $text = str_replace("\r", "\n", $text);
