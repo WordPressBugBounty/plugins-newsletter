@@ -309,20 +309,22 @@ class NewsletterModule extends NewsletterModuleBase {
             list($id, $token) = @explode('-', wp_unslash($_COOKIE['newsletter']), 2);
         }
 
-        if (isset($id)) {
-            $user = $this->get_user($id);
-            if ($user) {
-                if ($context === 'preconfirm') {
-                    if ($token !== md5($user->token)) {
-                        $user = null;
-                    }
-                } else {
-                    if ($token !== $user->token) {
-                        $user = null;
-                    }
+        $id = (int) $id;
+        $token = sanitize_key($token);
+
+        $user = $this->get_user($id);
+        if ($user) {
+            if ($context === 'preconfirm') {
+                if ($token !== md5($user->token)) {
+                    $user = null;
+                }
+            } else {
+                if ($token !== $user->token) {
+                    $user = null;
                 }
             }
         }
+
         return apply_filters('newsletter_current_user', $user);
     }
 
@@ -434,16 +436,20 @@ class NewsletterModule extends NewsletterModuleBase {
 
         if (isset($_REQUEST['nk'])) {
             list($id, $token) = explode('-', wp_unslash($_REQUEST['nk']), 2);
-            if (current_user_can('administrator') && $id === '0') {
+            $id = (int) $id;
+            $token = sanitize_key($token);
+            if (current_user_can('administrator') && $id === 0) {
                 $user = $this->get_dummy_user();
                 if (!empty($token)) {
-                    $user->language = sanitize_key($token);
+                    $user->language = $token;
                     $user->token = $token; // This keeps the language for the dummy user
                 }
                 return $user;
             }
         } elseif (isset($_COOKIE['newsletter'])) {
             list ($id, $token) = explode('-', $_COOKIE['newsletter'], 2);
+            $id = (int) $id;
+            $token = sanitize_key($token);
         }
 
         if ($id) {
@@ -1090,7 +1096,7 @@ class NewsletterModule extends NewsletterModuleBase {
             return false;
         }
 
-        $ts = (int)($_POST['ts'] ?? 0);
+        $ts = (int) ($_POST['ts'] ?? 0);
         if (time() - $ts > 60) {
             return false;
         }
