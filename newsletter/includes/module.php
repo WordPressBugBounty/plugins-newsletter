@@ -302,7 +302,9 @@ class NewsletterModule extends NewsletterModuleBase {
         global $wpdb;
 
         $user = null;
-
+        $id = 0;
+        $token = '';
+        
         if (isset($_REQUEST['nk'])) {
             list($id, $token) = @explode('-', wp_unslash($_REQUEST['nk']), 2);
         } elseif (isset($_COOKIE['newsletter'])) {
