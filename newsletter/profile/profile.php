@@ -416,6 +416,17 @@ class NewsletterProfile extends NewsletterModule {
             }
         }
 
+        if ('track' === $name) {
+            $value = $user->track;
+            $label = $attrs['label'] ?? NewsletterSubscription::instance()->get_form_text('track');
+            $buffer .= '<div class="tnp-field tnp-field-track">';
+            $buffer .= '<label>';
+            $buffer .= '<input class="tnp-track" type="checkbox" name="ntr_cb"' . ($value ? ' checked' : '') . '> ';
+            $buffer .= esc_html($label) . '</label>';
+            $buffer .= '<input type="hidden" name="ntr" value="1">';
+            $buffer .= "</div>\n";
+        }
+
         return $buffer;
     }
 
@@ -613,6 +624,16 @@ class NewsletterProfile extends NewsletterModule {
             }
         }
 
+        if (!empty($options['track'])) {
+            $value = $user->track;
+            $buffer .= '<div class="tnp-field tnp-field-track">';
+            $buffer .= '<label>';
+            $buffer .= '<input class="tnp-track" type="checkbox" name="ntr_cb"' . ($value ? ' checked' : '') . '> ';
+            $buffer .= esc_html($subscription->get_form_text('track')) . '</label>';
+            $buffer .= '<input type="hidden" name="ntr" value="1">';
+            $buffer .= "</div>\n";
+        }
+
         // Privacy
         $privacy_url = $subscription->get_privacy_url();
         if (!empty($this->get_text('privacy_label')) && !empty($privacy_url)) {
@@ -740,6 +761,10 @@ class NewsletterProfile extends NewsletterModule {
             }
         }
 
+        if (isset($posted['ntr'])) {
+            $data['track'] = isset($posted['ntr_cb']) ? 1 : 0;
+        }
+
         if ($user->status == TNP_User::STATUS_NOT_CONFIRMED) {
             $data['status'] = TNP_User::STATUS_CONFIRMED;
         }
@@ -749,7 +774,6 @@ class NewsletterProfile extends NewsletterModule {
 
         // Send the activation again only if we use double opt-in, otherwise it has no meaning
         if ($email_changed && $subscription_module->is_double_optin()) {
-            // @phpstan-ignore-next-line
             $user->email = $email;
             $subscription_module->send_activation_email($user);
             return $this->get_text('email_changed');

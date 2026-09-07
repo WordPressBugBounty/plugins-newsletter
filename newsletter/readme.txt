@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
-Tested up to: 7.0
-Stable tag: 9.3.5
+Tested up to: 7.1
+Stable tag: 9.3.6
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -23,6 +23,7 @@ The newsletter plugin is a **real newsletter and email marketing system** for yo
 * **Detailed statistics**
 * **WordPress user registration integration** (with free addon)
 * **Subscription spam check** with domain black list, Akismet, captcha, ...
+* **Tracking consent** management for countries requiring it (France, Italy, ...)
 
 = Creating and sending newsletters =
 
@@ -180,6 +181,14 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 9.3.6 =
+
+* Added tracking consent management on open tracking pixel and click tracking links
+* Added tracking checkbox on subscription
+* Added tracking consent checkbox on profile page
+* Added tracking consent value on user logs
+* Added anonymous tracking
+
 = 9.3.5 =
 
 * Fixed PHP warning
@@ -187,6 +196,7 @@ Thank you, The Newsletter Team
 = 9.3.4 =
 
 * Patched XSS vulnerability (Patchstack)
+* Improved DB query error management
 
 = 9.3.3 =
 

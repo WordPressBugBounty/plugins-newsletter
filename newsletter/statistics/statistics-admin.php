@@ -175,21 +175,40 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
             $email = $this->get_email($email);
         }
 
+        if (!$email) {
+            return null;
+        }
+
         $report = new TNP_Statistics();
 
         $report->email_id = $email->id;
 
-        //if ($email->status != 'new') {
-            $data = $wpdb->get_row($wpdb->prepare("SELECT COUNT(*) as total,
+        $data = $wpdb->get_row($wpdb->prepare("SELECT COUNT(*) as total,
             count(case when status>0 then 1 else null end) as `errors`,
             count(case when open>0 then 1 else null end) as `opens`,
             count(case when open>1 then 1 else null end) as `clicks`
             FROM " . NEWSLETTER_SENT_TABLE . " where email_id=%d", $email->id));
 
-            $report->total = $data->total;
-            $report->open_count = $data->opens;
-            $report->click_count = $data->clicks;
-        //}
+        $report->total = (int)$data->total;
+        $report->open_count = (int)$data->opens;
+        $report->click_count = (int)$data->clicks;
+
+        // Extract the anonymous stats
+        $anon_click_count = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT(message_id)) FROM wp_newsletter_stats
+            WHERE message_id > 0
+            AND email_id = %d
+            AND url <> ''", $email->id));
+
+        $anon_open_count = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT(message_id)) FROM wp_newsletter_stats
+            WHERE message_id > 0
+            AND email_id = %d
+            AND url = ''", $email->id));
+
+        $report->open_count += $anon_open_count;
+        $report->click_count += $anon_click_count;
+
+        $report->anonymous_click_count = $anon_click_count;
+        $report->anonymous_open_count = $anon_open_count;
 
         $report->update();
 
@@ -210,8 +229,10 @@ class TNP_Statistics {
     var $email_id;
     var $total = 0;
     var $open_count = 0;
+    var $anonymous_open_count = 0;
     var $open_rate = 0;
     var $click_count = 0;
+    var $anonymous_click_count = 0;
     var $click_rate = 0;
     var $reactivity = 0;
 

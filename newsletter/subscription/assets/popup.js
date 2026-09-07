@@ -36,7 +36,7 @@ const NewsletterPopup = {
         const data = new FormData(form);
         const response = await fetch(newsletter_popup_data.action, {
             method: "POST",
-            body: data,
+            body: data
         });
         const text = await response.text();
         var modal_body = document.getElementById('tnp-modal-body');

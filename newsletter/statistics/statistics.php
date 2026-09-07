@@ -12,13 +12,18 @@ class NewsletterStatistics extends NewsletterModule {
     const SENT_NONE = 0;
     const SENT_READ = 1;
     const SENT_CLICK = 2;
+    const TRACKING_STANDARD = 1;
+    const TRACKING_ANONYMOUS = 2;
 
-    var $relink_email_id;
-    var $relink_user_id;
-    var $relink_email_token;
+    // Internal variables for the relink callback
+    var $relink_email_id = 0;
+    var $relink_user_id = 0;
+    var $relink_message_id = 0;
     var $relink_key = '';
     var $relink_url = '';
     var $relink_url_type = '';
+    var $relink_type = 0;
+    var $relink_tracking_type = self::TRACKING_STANDARD;
 
     /**
      * @return NewsletterStatistics
@@ -36,38 +41,83 @@ class NewsletterStatistics extends NewsletterModule {
         add_action('rest_api_init', [$this, 'hook_rest_api_init']);
     }
 
+    function hook_wp_loaded() {
+        if (defined('DOING_AJAX') && DOING_AJAX) {
+            add_action('wp_ajax_tnptr', [$this, 'tracking']);
+            add_action('wp_ajax_nopriv_tnptr', [$this, 'tracking']);
+            return; // Important to avoid double tracking by the "tracking" method when ajax is activated
+        }
+
+        $this->tracking();
+    }
+
     function hook_rest_api_init() {
         // Open tracking route
-        register_rest_route('tnp', '/o/(?P<email_id>[\d]+)/(?P<user_id>[\d]+)/(?P<signature>.+).gif', array(
+        register_rest_route('tnp', '/o/(?P<email_id>[\d]+)/(?P<user_id>-?[\d]+)/(?P<signature>.+).gif', array(
             'methods' => WP_REST_Server::READABLE,
             'callback' => function ($request) {
                 $this->logger->debug('REST open tracking');
-                if (!$this->check_signature($request['email_id'] . '/' . $request['user_id'], $request['signature'])) {
+                // The first signature check if for compatibility with the old format, will be removed in a few months
+                if (!$this->check_signature($request['email_id'] . '/' . $request['user_id'], $request['signature']) && !$this->check_signature('o/' . $request['email_id'] . '/' . $request['user_id'], $request['signature'])) {
                     $this->logger->debug('Invalid open signature');
-                    return;
+                    //return new WP_Error('signature', '', ['status' => 400]);
+                    //wp_send_json_error([], 400);
+                    http_response_code(400);
+                    die('Invalid signature');
                 }
 
-                $this->register_open((int) $request['email_id'], (int) $request['user_id']);
+                $email = $this->get_email($request['email_id']);
+                if ($email) {
+                    $user_id = intval($request['user_id']);
+                    if ($user_id < 0) {
+                        $this->register_anonymous_open($email->id, abs($user_id));
+                    } else {
+                        $user = $this->get_user($user_id);
+                        if ($user) {
+                            $this->register_open($email->id, $user->id);
+                        }
+                    }
+                }
+                // Send an image anyway
                 $this->send_tracking_image();
             },
             'permission_callback' => '__return_true',
         ));
 
         // Click tracking route
-        register_rest_route('tnp', '/l/(?P<email_id>[\d]+)/(?P<user_id>[\d]+)/(?P<url>.+)/(?P<signature>.+)', ['methods' => WP_REST_Server::READABLE,
+        register_rest_route('tnp', '/l/(?P<email_id>[\d]+)/(?P<user_id>-?[\d]+)/(?P<url>.+)/(?P<signature>.+)', [
+            'methods' => WP_REST_Server::READABLE,
+            'permission_callback' => '__return_true',
             'callback' => function ($request) {
                 $this->logger->debug('REST link tracking');
-                if (!$this->check_signature($request['email_id'] . '/' . $request['user_id'] . '/' . $request['url'], $request['signature'])) {
+                // Two types of signature for compatibility
+                if (!$this->check_signature('l/' . $request['email_id'] . '/' . $request['user_id'] . '/' . $request['url'], $request['signature']) && !$this->check_signature($request['email_id'] . '/' . $request['user_id'] . '/' . $request['url'], $request['signature'])) {
                     $this->logger->debug('Invalid link signature');
+                    http_response_code(400);
                     die('Invalid signature');
-                    return;
                 }
 
                 $url = $this->base64url_decode($request['url']);
-                $this->logger->debug('URL: ' . $url);
-                $this->register_click((int) $request['email_id'], (int) $request['user_id'], $url);
-            },
-            'permission_callback' => '__return_true',
+
+                $email = $this->get_email($request['email_id']);
+                $user = null;
+                if ($email) {
+                    $user_id = intval($request['user_id']);
+                    if ($user_id < 0) {
+                        $this->register_anonymous_click($email->id, abs($user_id), $url);
+                    } else {
+                        $user = $this->get_user($user_id);
+                        if ($user) {
+                            $this->set_user_cookie($user);
+                            $this->register_click($email, $user, $url);
+                        }
+                    }
+                }
+
+                // We keep the tracking link active even if the subscriber or the email are now missing...
+                // Could be changed in the future
+                $this->send_redirect($url, $email, $user);
+            }
         ]);
     }
 
@@ -75,118 +125,84 @@ class NewsletterStatistics extends NewsletterModule {
      *
      * @param int $email_id
      * @param int $user_id
-     * @param string $url
-     * @return bool
      */
-    function register_click($email_id, $user_id, $url) {
+    function register_open($email_id, $user_id) {
+        $this->add_open($email_id, $user_id);
+        $this->update_open_value(self::SENT_READ, $user_id, $email_id);
+        $this->reset_stats_time($email_id);
+        $this->update_user_last_activity($user_id);
+    }
 
-        $email = $this->get_email($email_id);
-        $user = $this->get_user($user_id);
-
-        if ($email && $user) {
-            $this->logger->debug('Valid user and email');
-            $this->set_user_cookie($user);
-
-            $is_action = $this->is_action_url($url);
-
-            $ip = $this->process_ip($this->get_remote_ip());
-
-            if ($is_action) {
-                // Track a Newsletter action as an email open and not a click
-                $this->update_open_value(self::SENT_READ, $user->id, $email->id, $ip);
-                $this->logger->debug('Click on action link');
-            } else {
-                $url = apply_filters('newsletter_pre_save_url', $url, $email, $user);
-                if ($email) {
-                    $this->add_click($url, $user->id, $email->id, $ip);
-                    $this->update_open_value(self::SENT_CLICK, $user->id, $email->id, $ip);
-                    $this->logger->debug('Click registered');
-                }
-            }
-            $this->update_user_ip($user, $ip);
-            $this->update_user_last_activity($user);
-
-            $this->reset_stats_time($email_id);
-
-            header('Location: ' . sanitize_url(apply_filters('newsletter_redirect_url', $url, $email, $user)));
-            die();
-        } else {
-            // Test email and/or test user, deleted email or user.
-            // We should possibly block the redirect for missing email or user but it will break sent emails.
-            header('Location: ' . sanitize_url($url));
-            die();
-        }
+    function register_anonymous_open($email_id, $message_id) {
+        $this->add_anonymous_open($email_id, $message_id);
+        $this->reset_stats_time($email_id);
     }
 
     /**
      *
-     * @param int $email_id
-     * @param int $user_id
+     * @param int $email
+     * @param int $user
+     * @param string $url
      * @return bool
      */
-    function register_open($email_id, $user_id) {
-
-        $email = $this->get_email($email_id);
+    function register_click($email, $user, $url) {
+        $this->logger->debug(__METHOD__);
         if (!$email) {
-            $this->logger->debug('Invalid email ID: ' . $email_id);
-            return false;
+            $this->logger->debug('Invalid email');
+            return;
         }
-
-        $user = $this->get_user($user_id);
         if (!$user) {
-            $this->logger->debug('Invalid user ID: ' . $user_id);
-            return false;
+            $this->logger->debug('Invalid user');
+            return;
         }
 
-        $this->add_open($user_id, $email_id);
-        $this->update_open_value(self::SENT_READ, $user_id, $email_id);
-        $this->reset_stats_time($email_id);
-
+        $ip = $this->process_ip($this->get_remote_ip());
+        $this->update_user_ip($user, $ip);
         $this->update_user_last_activity($user);
-        return true;
+
+        $is_action = $this->is_action_url($url);
+
+        if ($is_action) {
+            // TODO: register placeholder URLs representing an action
+            // Track a Newsletter action as an email open and not a click
+            $this->update_open_value(self::SENT_READ, $user->id, $email->id, $ip);
+            $this->logger->debug('Click on action link');
+        } else {
+            //$url = apply_filters('newsletter_pre_save_url', $url, $email, $user);
+            if ($email) {
+                $this->add_click($url, $email->id, $user->id, $ip);
+                $this->update_open_value(self::SENT_CLICK, $user->id, $email->id, $ip);
+                $this->logger->debug('Click registered');
+            }
+        }
+
+        $this->reset_stats_time($email->id);
+    }
+
+    function register_anonymous_click($email_id, $message_id, $url) {
+
+        $is_action = $this->is_action_url($url);
+        if ($is_action) {
+            // TODO: register placeholder URLs representing an action
+            $this->add_anonymous_open($email_id, $message_id);
+        } else {
+            $this->add_anonymous_click($url, $email_id, $message_id);
+        }
+
+        $this->reset_stats_time($email_id);
     }
 
     function send_tracking_image() {
+        $this->logger->debug(__METHOD__);
         header('Content-Type: image/gif', true);
         echo base64_decode('_R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
         die();
     }
 
-    function hook_wp_loaded() {
-        if (defined('DOING_AJAX') && DOING_AJAX) {
-            add_action('wp_ajax_tnptr', [$this, 'tracking']);
-            add_action('wp_ajax_nopriv_tnptr', [$this, 'tracking']);
-            return;
-        }
-
-        $this->tracking();
-    }
-
-    function get_key() {
-        if (defined('NEWSLETTER_RELINK_KEY')) {
-            return NEWSLETTER_RELINK_KEY;
-        }
-        return $this->get_main_option('key');
-    }
-
-    function get_signature($text) {
-        return md5($text . $this->get_key());
-    }
-
-    function check_signature($text, $signature) {
-        $signature = trim($signature);
-        if (!$signature) {
-            return false;
-        }
-        return md5($text . $this->get_key()) === $signature;
-    }
-
-    function is_action_url($url) {
-        return strpos($url, '?na=') !== false || strpos($url, '&na=') !== false;
-    }
-
-    function get_ip() {
-        return $this->process_ip($this->get_remote_ip());
+    function send_redirect($url, $email, $user) {
+        $this->logger->debug(__METHOD__);
+        header('Location: ' . sanitize_url(apply_filters('newsletter_redirect_url', $url, $email, $user)));
+        die();
     }
 
     function tracking() {
@@ -206,72 +222,24 @@ class NewsletterStatistics extends NewsletterModule {
             // The remaining elements are the url splitted when it contains ";"
             $url = implode(';', $parts);
 
-            $this->logger->debug('Email: ' . $email_id . ', User: ' . $user_id . ', Signature: ' . $signature . ', Url: ' . $url);
+            $this->logger->debug('Email: ' . $email_id . ', User: ' . $user_id . ', Signature: ' . $signature . ', Url: ' . $url .
+                    ', Anchor: ' . $anchor);
 
-            if (empty($url)) {
-                $this->dienow('Invalid link', 'The tracking link contains invalid data (missing subscriber or original URL)', 404);
+            $verified = $this->check_signature($email_id . ';' . $user_id . ';' . $url . ';' . $anchor, $signature);
+            if (!$verified) {
+                $this->logger->debug('Invalid link signature');
+                http_response_code(400);
+                die('Invalid signature');
             }
 
-            $host = parse_url($url, PHP_URL_HOST);
-            $blog_host = parse_url(home_url(), PHP_URL_HOST);
-
-            $verified = $signature == md5($email_id . ';' . $user_id . ';' . $url . ';' . $anchor . $this->get_key());
-
-            // For matching hosts the redirect is safe even without the signature
-            if ($host !== $blog_host) {
-                // Protection against open-redirect
-                if (!$verified) {
-                    $this->dienow('Invalid link', 'The link signature (which grants a valid redirection and protects from open redirect attacks) is not valid.', 404);
-                }
-            }
-
-            // Test emails, anyway the link was signed
-            if (empty($email_id) || empty($user_id)) {
-                header('Location: ' . esc_url_raw($url));
-                die();
-            }
-
-            if ($user_id) {
-                $user = $this->get_user($user_id);
-                if (!$user) {
-                    $this->dienow(__('Subscriber not found', 'newsletter'), 'This tracking link contains a reference to a subscriber no more present', 404);
-                } else {
-                    if ($verified) {
-                        $this->set_user_cookie($user);
-                    }
-                }
-            }
+            $user = $this->get_user($user_id);
+            $this->set_user_cookie($user);
 
             $email = $this->get_email($email_id);
-            if (!$email) {
-                $this->dienow('Invalid newsletter', 'The link originates from a newsletter not found (it could have been deleted)', 404);
-            }
+            $this->set_email_cookie($email); // Obsolete
 
-            // Check for bots
-
-            setcookie('tnpe', $email->id . '-' . $email->token, time() + 60 * 60 * 24 * 365, '/');
-
-            $is_action = $this->is_action_url($url);
-
-            $ip = $this->get_ip();
-
-            if ($verified) {
-                if (!$is_action) {
-                    $url = apply_filters('newsletter_pre_save_url', $url, $email, $user);
-                    $this->add_click($url, $user_id, $email_id, $ip);
-                    $this->update_open_value(self::SENT_CLICK, $user_id, $email_id, $ip);
-                } else {
-                    // Track a Newsletter action as an email read and not a click
-                    $this->update_open_value(self::SENT_READ, $user_id, $email_id, $ip);
-                }
-                $this->update_user_ip($user, $ip);
-                $this->update_user_last_activity($user);
-            }
-
-            $this->reset_stats_time($email_id);
-
-            header('Location: ' . apply_filters('newsletter_redirect_url', $url, $email, $user));
-            die();
+            $this->register_click($email, $user, $url);
+            $this->send_redirect($url, $email, $user);
         }
 
 
@@ -288,53 +256,117 @@ class NewsletterStatistics extends NewsletterModule {
             $email = $this->get_email($email_id);
             if (!$email) {
                 $this->logger->error('Email not found, stop');
-                die();
+                $this->send_tracking_image();
             }
 
             $user = $this->get_user($user_id);
             if (!$user) {
                 $this->logger->debug('User not found, stop');
-                return false;
+                $this->send_tracking_image();
             }
 
             $verified = false;
 
             // Old signature
             if ($email->token) {
-                $verified = md5($email_id . $user_id . $email->token) === $signature;
+                $verified = md5($email->id . $user->id . $email->token) === $signature;
             }
 
-            $verified |= $this->check_signature($email_id . '/' . $user_id, $signature);
+            // The first signature check if for compatibility, it'll be removed
+            $verified = $verified || $this->check_signature($email->id . '/' . $user->id, $signature) ||
+                    $this->check_signature('o/' . $email->id . '/' . $user->id, $signature);
 
             if (!$verified) {
                 $this->logger->error('Wrong signature, stop');
-                die();
+                $this->send_tracking_image();
             }
 
-            $this->register_open($email_id, $user_id);
+            $this->register_open($email->id, $user->id);
             $this->send_tracking_image();
         }
+    }
+
+    function get_key() {
+        // TODO: Add key caching
+        if (defined('NEWSLETTER_RELINK_KEY')) {
+            return NEWSLETTER_RELINK_KEY;
+        }
+        return $this->get_main_option('key');
+    }
+
+    function get_signature($text) {
+        // TODO: Add key caching
+        return md5($text . $this->get_key());
+    }
+
+    function check_signature($text, $signature) {
+        $signature = trim($signature);
+        if (!$signature) {
+            return false;
+        }
+        return $this->get_signature($text) === $signature;
+    }
+
+    function is_action_url($url) {
+        return strpos($url, '?na=') !== false || strpos($url, '&na=') !== false;
+    }
+
+    function get_ip() {
+        return $this->process_ip($this->get_remote_ip());
     }
 
     /**
      * Reset the timestamp which indicates the specific email stats must be recalculated.
      *
      * @global wpdb $wpdb
-     * @param int $email_id
+     * @param stdClass|int $email
      */
-    function reset_stats_time($email_id) {
+    function reset_stats_time($email) {
         global $wpdb;
-        $wpdb->update(NEWSLETTER_EMAILS_TABLE, ['stats_time' => 0], ['id' => (int) $email_id]);
+        $email_id = $this->to_int_id($email);
+        $wpdb->update(NEWSLETTER_EMAILS_TABLE, ['stats_time' => 0], ['id' => $email_id]);
     }
 
-    function relink($text, $email_id, $user_id, $email_token = '') {
-        $this->relink_email_id = $email_id;
-        $this->relink_user_id = $user_id;
-        $this->relink_email_token = $email_token;
-        $this->relink_url_type = Newsletter::instance()->get_main_option('tracking_links') ?? '';
-        if (!$this->relink_url_type) {
-            $this->relink_url_type = Newsletter::instance()->get_main_option('links') ?? '';
+    /**
+     *
+     * @param string $text
+     * @param mixed $email
+     * @param mixed $user
+     * @param TNP_Mailer_Message $message
+     * @return string
+     */
+    function relink($text, $email, $user, $message) {
+
+        $this->logger->debug(__METHOD__);
+
+        // Should be checked externally
+        if (empty($email->track)) {
+            return $text;
         }
+
+        $this->relink_tracking_type = $email->track; // 1 or 2
+        // If we have no consent for full subscriber tracking we change to anonymous tracking.
+        // The subscriber cannot control to total tracking removal.
+        if (!$user->track) {
+            $this->relink_tracking_type = self::TRACKING_ANONYMOUS;
+        }
+
+        $this->relink_email_id = $this->to_int_id($email);
+        $this->relink_user_id = $this->to_int_id($user);
+        $this->relink_message_id = $message->id;
+
+        // URL format. This will be changed when even the action links can use the REST format
+        // We support only "rest" link rewriting with anonymous tracking
+        if ($this->relink_tracking_type == self::TRACKING_ANONYMOUS) {
+            $this->relink_url_type = 'rest';
+        } else {
+            $this->relink_url_type = Newsletter::instance()->get_main_option('tracking_links') ?? '';
+            if (!$this->relink_url_type) {
+                $this->relink_url_type = Newsletter::instance()->get_main_option('links') ?? '';
+            }
+        }
+
+        $this->logger->debug('URL type: ' . $this->relink_url_type);
 
         if (empty($this->relink_key)) {
             $this->relink_key = $this->get_key();
@@ -349,58 +381,97 @@ class NewsletterStatistics extends NewsletterModule {
         $text = preg_replace_callback('/(<[aA][^>]+href[\s]*=[\s]*["\'])([^>"\']+)(["\'][^>]*>)(.*?)(<\/[Aa]>)/is', [$this, 'relink_callback'], $text);
 
         // Open tracking image
-        $signature = $this->get_signature($email_id . '/' . $user_id);
+        if ($this->relink_tracking_type == self::TRACKING_ANONYMOUS) {
+            $uri = 'o/' . $this->relink_email_id . '/-' . $this->relink_message_id;
+            $signature = $this->get_signature($uri);
+            $src = rest_url('tnp/' . $uri . '/' . $signature . '.gif');
+            $img = '<img width="1" height="1" style="display: none !important; width:1px; height:1px; border:0; outline:none;" alt="" src="' . esc_attr($src) . '">';
 
-        if ($this->relink_url_type === 'ajax') {
-            $url = admin_url('admin-ajax.php?action=tnptr&noti=') . rawurlencode(base64_encode($email_id . ';' . $user_id . ';' . $signature));
-            $img1 = '<img width="1" height="1" style="display: none !important; width:1px; height:1px; border:0; outline:none;" alt="" src="' . esc_attr($url) . '"/>';
+            $text = str_replace('</body>', "\n" . $img . "\n</body>", $text);
         } else {
-            $url = home_url('/') . '?noti=' . rawurlencode(base64_encode($email_id . ';' . $user_id . ';' . $signature));
-            $img1 = '<img width="1" height="1" style="display: none !important; width:1px; height:1px; border:0; outline:none;" alt="" src="' . esc_attr($url) . '"/>';
+
+            $uri = 'o/' . $this->relink_email_id . '/' . $this->relink_user_id;
+            $signature = $this->get_signature($uri);
+
+            $img1 = '';
+            if ($this->relink_url_type === 'ajax') {
+                $url = admin_url('admin-ajax.php?action=tnptr&noti=') . rawurlencode(base64_encode($this->relink_email_id . ';' . $this->relink_user_id . ';' . $signature));
+                $img1 = '<img width="1" height="1" style="display: none !important; width:1px; height:1px; border:0; outline:none;" alt="" src="' . esc_attr($url) . '"/>';
+            } else {
+                $url = home_url('/') . '?noti=' . rawurlencode(base64_encode($this->relink_email_id . ';' . $this->relink_user_id . ';' . $signature));
+                $img1 = '<img width="1" height="1" style="display: none !important; width:1px; height:1px; border:0; outline:none;" alt="" src="' . esc_attr($url) . '"/>';
+            }
+
+            // New REST tracking (always added)
+            $src = rest_url('tnp/' . $uri . '/' . $signature . '.gif');
+            $img3 = '<img width="1" height="1" style="display: none !important; width:1px; height:1px; border:0; outline:none;" alt="" src="' . esc_attr($src) . '">';
+
+            $text = str_replace('</body>', "\n" . $img1 . "\n" . $img3 . "\n</body>", $text);
         }
 
-        // New REST tracking (always added)
-        $src = rest_url('tnp/o/' . $email_id . '/' . $user_id . '/' . $signature . '.gif');
-        $img3 = '<img width="1" height="1" style="display: none !important; width:1px; height:1px; border:0; outline:none;" alt="" src="' . esc_attr($src) . '">';
-
-        $text = str_replace('</body>', "\n" . $img1 . "\n" . $img3 . "\n</body>", $text);
         return $text;
     }
 
-    function relink_callback($matches) {
-        $href = trim(str_replace('&amp;', '&', $matches[2]));
-
-        //$this->logger->debug('Relink ' . $href);
-        // Do not replace URL which are tags (special case for ElasticEmail)
-        if (strpos($href, '{') === 0) {
-            return $matches[0];
+    function can_relink($url) {
+        if (strpos($url, '{') === 0) {
+            return false;
         }
 
         // Do not relink anchors
-        if (substr($href, 0, 1) === '#') {
-            return $matches[0];
+        if (substr($url, 0, 1) === '#') {
+            return false;
         }
         // Do not relink mailto:
-        if (substr($href, 0, 7) === 'mailto:') {
+        if (substr($url, 0, 7) === 'mailto:') {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * $matches[0] contains the full A tag.
+     *
+     * @param array $matches
+     * @return string
+     */
+    function relink_callback($matches) {
+        $this->logger->debug(__METHOD__);
+        $this->logger->debug('URL: ' . $matches[2]);
+
+        $href = trim(str_replace('&amp;', '&', $matches[2]));
+
+        if (!$this->can_relink($href)) {
             return $matches[0];
         }
 
         if ($this->relink_url_type === 'rest') {
             $encoded_href = $this->base64url_encode($href);
-            $uri = $this->relink_email_id . '/' . $this->relink_user_id . '/' . $encoded_href;
+            if ($this->relink_tracking_type == self::TRACKING_STANDARD) {
+                $uri = 'l/' . $this->relink_email_id . '/' . $this->relink_user_id . '/' . $encoded_href;
+            } else {
+                $uri = 'l/' . $this->relink_email_id . '/-' . $this->relink_message_id . '/' . $encoded_href;
+            }
+
             $signature = $this->get_signature($uri);
-            $url = rest_url('/tnp/l/' . $uri . '/' . $signature);
+            $url = rest_url('/tnp/' . $uri . '/' . $signature);
+
+            $this->logger->debug('Relinked URL: ' . $url);
+
             return $matches[1] . $url . $matches[3] . $matches[4] . $matches[5];
         }
 
+        // Anonymous tracking cannot use non-rest URLs
 
         $anchor = ''; // No more used
         $r = $this->relink_email_id . ';' . $this->relink_user_id . ';' . $href . ';' . $anchor;
-        $r = $r . ';' . md5($r . $this->relink_key);
+        $r = $r . ';' . $this->get_signature($r);
         $r = base64_encode($r);
         $r = rawurlencode($r);
 
         $url = $this->relink_url . $r;
+
+        $this->logger->debug('Relinked URL: ' . $url);
 
         return $matches[1] . $url . $matches[3] . $matches[4] . $matches[5];
     }
@@ -434,32 +505,42 @@ class NewsletterStatistics extends NewsletterModule {
                 ], ['id' => $email_id]);
     }
 
-    function add_open($user_id, $email_id, $ip = null) {
-        return $this->add_click('', $user_id, $email_id, $ip);
+    /**
+     *
+     * @param int $user_id
+     * @param int $email_id
+     * @param string $ip
+     */
+    function add_open($email_id, $user_id, $ip = null) {
+        $this->add_click('', $email_id, $user_id, $ip);
     }
 
-    function add_click($url, $user_id, $email_id, $ip = null) {
+    function add_click($url, $email_id, $user_id, $ip = null) {
         global $wpdb;
+        $this->logger->debug(__METHOD__);
         if (is_null($ip)) {
+            $this->logger->debug('IP not provided');
             $ip = $this->get_ip();
         }
 
         if (strlen($url) > 254) {
+            $this->logger->debug('IP longer than 254 characters, trimming');
             $url = substr($url, 0, 254);
         }
 
-        $this->logger->debug(__METHOD__);
+        $url = sanitize_url($url);
+
         $this->logger->debug([
-                    'email_id' => $email_id,
-                    'user_id' => $user_id,
-                    'url' => $url,
-                    'ip' => $ip
-                ]);
+            'email_id' => (int) $email_id,
+            'user_id' => (int) $user_id,
+            'url' => $url,
+            'ip' => $ip
+        ]);
 
         $this->insert(NEWSLETTER_STATS_TABLE,
                 [
-                    'email_id' => $email_id,
-                    'user_id' => $user_id,
+                    'email_id' => (int) $email_id,
+                    'user_id' => (int) $user_id,
                     'url' => $url,
                     'ip' => $ip
                 ]
@@ -470,11 +551,50 @@ class NewsletterStatistics extends NewsletterModule {
      * Update the "open" columns of the sent table.
      *
      * @global wpdb $wpdb
-     * @param type $value
-     * @param type $user_id
-     * @param type $email_id
-     * @param type $ip
+     * @param int $user_id
+     * @param int $email_id
      */
+    function add_anonymous_open($email_id, $message_id) {
+        $this->add_anonymous_click('', $email_id, $message_id);
+    }
+
+    /**
+     *
+     * @global wpdb $wpdb
+     * @param string $url
+     * @param int $email_id
+     * @param int $message_id
+     */
+    function add_anonymous_click($url, $email_id, $message_id) {
+        global $wpdb;
+
+        if (strlen($url) > 254) {
+            $url = substr($url, 0, 254);
+        }
+
+        $url = sanitize_url($url);
+
+        $this->insert(NEWSLETTER_STATS_TABLE, [
+            'email_id' => (int) $email_id,
+            'message_id' => (int) $message_id,
+            'url' => $url
+        ]);
+
+        $this->reset_stats_time($email_id);
+
+//        $count = $wpdb->get_var($wpdb->prepare('select count(*) from ' . $wpdb->prefix . 'newsletter_tracking where email_id=%d and message_id=%d and url=%s',
+//                        $email_id, $message_id, $url));
+//
+//        if (!$count) {
+//            $this->insert($wpdb->prefix . 'newsletter_tracking', [
+//                'email_id' => $email_id,
+//                'message_id' => $message_id,
+//                'url' => $url,
+//                    ]
+//            );
+//        }
+    }
+
     function update_open_value($value, $user_id, $email_id, $ip = null) {
         global $wpdb;
         if (is_null($ip)) {

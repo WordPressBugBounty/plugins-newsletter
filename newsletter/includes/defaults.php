@@ -213,6 +213,7 @@ class NewsletterDefaults {
                 case 'name': return __('First name', 'newsletter');
                 case 'surname': return __('Last name', 'newsletter');
                 case 'sex': return __('I\'m', 'newsletter');
+                case 'track': return __('Consent to record email open and click', 'newsletter');
 
                 case 'privacy': return __('I accept the privacy policy', 'newsletter');
 

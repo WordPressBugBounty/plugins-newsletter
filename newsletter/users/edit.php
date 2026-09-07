@@ -174,6 +174,14 @@ function percentValue($value, $total) {
                             </td>
                         </tr>
                         <tr>
+                            <th><?php esc_html_e('Tracking', 'newsletter'); ?></th>
+                            <td>
+                                <?php $controls->select('track', ['0'=> 'Disabled', '1'=> 'Enabled']); ?>
+
+                                <div class="description">EU specific settings</div>
+                            </td>
+                        </tr>
+                        <tr>
                             <th><?php esc_html_e('Language', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->language('language', __('None', 'newsletter')); ?>

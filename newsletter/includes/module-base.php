@@ -40,8 +40,9 @@ class NewsletterModuleBase {
     }
 
     function is_html_allowed() {
-        if (defined('NEWSLETTER_HTML_ALLOWED') && NEWSLETTER_HTML_ALLOWED)
+        if (defined('NEWSLETTER_HTML_ALLOWED') && NEWSLETTER_HTML_ALLOWED) {
             return true;
+        }
         return current_user_can('unfiltered_html');
     }
 
@@ -230,20 +231,30 @@ class NewsletterModuleBase {
 
     function get_results($query) {
         global $wpdb;
+        $wpdb->last_error = '';
         $r = $wpdb->get_results($query);
-        if ($r === false) {
+        if ($r === false || $r === null || $wpdb->last_error) {
             $this->logger->fatal($query);
             $this->logger->fatal($wpdb->last_error);
+            return false;
         }
         return $r;
     }
 
+    /**
+     * Return a single db row or null if not found or false for errors.
+     * @global wpdb $wpdb
+     * @param type $query
+     * @return bool
+     */
     function get_row($query) {
         global $wpdb;
+        $wpdb->last_error = '';
         $r = $wpdb->get_row($query);
-        if ($r === false) {
+        if ($r === false || $wpdb->last_error) {
             $this->logger->fatal($query);
             $this->logger->fatal($wpdb->last_error);
+            return false;
         }
         return $r;
     }
@@ -599,6 +610,7 @@ class NewsletterModuleBase {
             $data[$field_name] = $user->$field_name;
         }
         $data['status'] = $user->status;
+        $data['track'] = $user->track ?? '-';
         $ip = $this->get_remote_ip();
         $ip = $this->process_ip($ip);
         $this->store->save($wpdb->prefix . 'newsletter_user_logs', array('ip' => $ip, 'user_id' => $user->id, 'source' => $source, 'created' => time(), 'data' => json_encode($data)));

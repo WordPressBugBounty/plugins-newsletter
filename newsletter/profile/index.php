@@ -2,7 +2,6 @@
 /** @var NewsletterProfileAdmin $this */
 /** @var NewsletterControls $controls */
 /** @var string $language */
-
 defined('ABSPATH') || exit;
 
 if ($controls->is_action()) {
@@ -166,6 +165,14 @@ foreach (['text'] as $key) {
 
                                     <td>
                                         <?php $controls->checkbox2('language') ?>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <th><?php esc_html_e('Tracking consent', 'newsletter') ?></th>
+
+                                    <td>
+                                        <?php $controls->checkbox2('track') ?>
                                     </td>
                                     <td></td>
                                 </tr>

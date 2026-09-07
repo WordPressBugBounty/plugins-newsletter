@@ -110,7 +110,6 @@ const NewsletterComposer = {
 
         // Update the encoded message field on container form submit
         jQuery('#tnpb-main').closest('form').on('submit', function () {
-            console.log('Submit intercepted');
             jQuery("#tnpc-block-options-form").html(''); // To avoid the submission of the current block options
             NewsletterComposer.save();
         });
@@ -318,7 +317,6 @@ const NewsletterComposer = {
 //                            if (target.hasClass('tnpc-inline-editable')) {
 //                                return;
 //                            }
-//                            debugger;
 //                            jQuery(this).find(".tnpc-row-edit").click();
 //                        });
                         if (new_row.hasClass('tnpc-row-block')) {

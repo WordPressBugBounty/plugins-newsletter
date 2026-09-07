@@ -3,7 +3,6 @@
 /** @var NewsletterControls $controls */
 /** @var NewsletterLogger $logger */
 /** @var string $language */
-
 defined('ABSPATH') || exit;
 
 if (!$controls->is_action()) {
@@ -19,7 +18,6 @@ if (!$controls->is_action()) {
 }
 
 $rules = [0 => __('Optional', 'newsletter'), 1 => __('Required', 'newsletter')];
-
 ?>
 
 <div class="wrap" id="tnp-wrap">
@@ -123,6 +121,23 @@ $rules = [0 => __('Optional', 'newsletter'), 1 => __('Required', 'newsletter')];
                                 <?php } ?>
                             </td>
                         </tr>
+
+                        <tr>
+                            <th><?php esc_html_e('Tracking consent', 'newsletter') ?></th>
+                            <td>
+                                <?php if (!$language) { ?>
+                                    <?php $controls->checkbox2('track_status', '', ['title' => __('Show', 'newsletter')]); ?>
+                                <?php } ?>
+                            </td>
+                            <td>
+                                <?php $controls->text('track', 20, $this->get_default_text('track', 'form')); ?>
+                            </td>
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+
                         <tr>
                             <th style="vertical-align: top"><?php esc_html_e('Gender', 'newsletter') ?></th>
                             <td style="vertical-align: top">

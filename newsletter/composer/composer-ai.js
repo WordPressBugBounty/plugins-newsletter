@@ -62,7 +62,6 @@ function tnp_ai_generate(button) {
         action: 'newsletter_composer_ai_generate',
         _ajax_nonce: tnp_ai_nonce
     }).done(function (response) {
-        console.log(response);
         if (!response.success) {
             alert(response.data.message);
             $.modal.close();

@@ -587,6 +587,8 @@ class NewsletterSubscription extends NewsletterModule {
      */
     function confirm($user = null, $emails = true) {
 
+        $this->logger->debug(__METHOD__);
+
         if (!$user) {
             $this->dienow('Subscriber not found', '', 404);
         }
@@ -607,8 +609,11 @@ class NewsletterSubscription extends NewsletterModule {
 
         // Confirmation for a repeated subscription
         $subscription = get_transient('newsletter_subscription_' . $user->id);
+        $this->logger->debug('Transient subscription');
+        $this->logger->debug($subscription);
         if (!empty($subscription->data)) {
             delete_transient('newsletter_subscription_' . $user->id);
+            $this->logger->debug('Merging data');
             $subscription->data->merge_in($user);
             $user = $this->save_user($user);
         } else {
@@ -691,6 +696,10 @@ class NewsletterSubscription extends NewsletterModule {
 
         if (isset($posted['nfid'])) {
             $subscription->form_id = sanitize_key($posted['nfid']);
+        }
+
+        if (isset($posted['ntr'])) {
+            $data->track = isset($posted['ntr_cb']) ? '1' : '0';
         }
 
         // From the antibot form
@@ -1573,6 +1582,20 @@ class NewsletterSubscription extends NewsletterModule {
             return $buffer;
         }
 
+        if ($name === 'track') {
+            $label = $attrs['track'] ?? $this->get_form_text('track');
+            $buffer .= '<div class="tnp-field tnp-field-checkbox tnp-field-track">';
+
+            $buffer .= '<input type="checkbox" name="ntr_cb" required class="tnp-track" id="tnp-' . $idx . '"> ';
+            $buffer .= '<label for="tnp-' . $idx . '">';
+            $buffer .= esc_html($label);
+            $buffer .= '</label>';
+            $buffer .= '<input type="hidden" name="ntr" value="1">';
+            $buffer .= '</div>';
+
+            return $buffer;
+        }
+
         if (strpos($name, 'privacy') === 0) {
             $url = $attrs['url'] ?? $this->get_privacy_url();
             $label = $attrs['label'] ?? $this->get_form_text('privacy');
@@ -1739,6 +1762,9 @@ class NewsletterSubscription extends NewsletterModule {
             }
             $fields[] = 'customfields';
             $fields[] = 'lists';
+            if ($this->get_option('track_status', 'form')) {
+                $fields[] = 'track';
+            }
             if ($this->get_option('privacy_status', 'form')) {
                 $fields[] = 'privacy';
             }
@@ -1801,6 +1827,10 @@ class NewsletterSubscription extends NewsletterModule {
                         $buffer .= $this->shortcode_newsletter_field(['name' => 'lists', 'label' => $attrs['lists_field_label']]);
                     }
 
+                    break;
+
+                case 'track':
+                    $buffer .= $this->shortcode_newsletter_field(['name' => 'track']);
                     break;
 
                 case 'privacy':

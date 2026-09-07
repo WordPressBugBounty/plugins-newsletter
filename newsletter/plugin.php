@@ -3,8 +3,8 @@
 /*
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
-  Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 9.3.5
+  Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business.
+  Version: 9.3.6
   Author: The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '9.3.5');
+define('NEWSLETTER_VERSION', '9.3.6');
 
 global $wpdb, $newsletter;
 
@@ -99,7 +99,6 @@ spl_autoload_register(function ($class) {
         if (file_exists($file)) {
 //            if (NEWSLETTER_DEBUG) {
 //                $memory = size_format(memory_get_usage(), 1);
-//                error_log($memory . ' - Loading ' . $class);
 //            }
             require $file;
         }
@@ -466,10 +465,6 @@ class Newsletter extends NewsletterModule {
         $content = do_shortcode($content);
         $content = $this->replace($content, $this->get_current_user(), $this->get_email_from_request(), 'page');
         return $content;
-    }
-
-    function relink($text, $email_id, $user_id, $email_token = '') {
-        return NewsletterStatistics::instance()->relink($text, $email_id, $user_id, $email_token);
     }
 
     /**

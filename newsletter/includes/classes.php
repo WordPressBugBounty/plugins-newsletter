@@ -160,6 +160,7 @@ class TNP_Subscription_Data {
     var $region = null;
     var $city = null;
     var $wp_user_id = 0;
+    var $track = null;
 
     /**
      * Associative array id=>value of lists chosen by the subscriber. A list can be set to
@@ -196,6 +197,9 @@ class TNP_Subscription_Data {
             $subscriber->city = $this->city;
         if (!empty($this->wp_user_id))
             $subscriber->wp_user_id = $this->wp_user_id;
+        if (!is_null($this->track)) {
+            $subscriber->track = empty($this->track) ? '0' : '1';
+        }
 
         foreach ($this->lists as $id => $value) {
             $key = 'list_' . $id;
@@ -268,10 +272,8 @@ class TNP_Subscription {
     var $send_emails = true;
     var $welcome_email_id = 0; // -1 to block the email
     var $welcome_page_id = 0;
-
     var $confirmation_email_id = 0;
     var $confirmation_page_id = 0;
-
     var $autoresponders = []; // Positive/Negative IDs
 
     public function __construct() {
@@ -378,7 +380,7 @@ class TNP_User {
  * @property int $sent Total sent emails by now
  * @property int $open_count Total opened emails
  * @property int $click_count Total clicked emails
- **/
+ * */
 #[\AllowDynamicProperties]
 class TNP_Email {
 
@@ -424,4 +426,9 @@ class TNP_Mailer_Message {
     var $body_text = '';
     var $from = '';
     var $from_name = '';
+    var $id = '';
+
+    public function __construct() {
+        $this->id = random_int(1000000000, 2000000000);
+    }
 }

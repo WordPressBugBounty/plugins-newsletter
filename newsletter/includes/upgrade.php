@@ -80,8 +80,10 @@ class NewsletterUpgrade {
             `options` longtext,
             `private` tinyint(1) NOT NULL DEFAULT '0',
             `click_count` int(10) unsigned NOT NULL DEFAULT '0',
+            `anon_click_count` int(10) unsigned NOT NULL DEFAULT '0',
             `version` varchar(10) NOT NULL DEFAULT '',
             `open_count` int(10) unsigned NOT NULL DEFAULT '0',
+            `anon_open_count` int(10) unsigned NOT NULL DEFAULT '0',
             `unsub_count` int(10) unsigned NOT NULL DEFAULT '0',
             `error_count` int(10) unsigned NOT NULL DEFAULT '0',
             `stats_time` int(10) unsigned NOT NULL DEFAULT '0',
@@ -122,6 +124,7 @@ class NewsletterUpgrade {
             `last_activity` int(11) NOT NULL DEFAULT '0',
             `surname` varchar(100) NOT NULL DEFAULT '',
             `sex` char(1) NOT NULL DEFAULT 'n',
+            `track` int(11) NOT NULL DEFAULT '1',
             `feed_time` bigint(20) NOT NULL DEFAULT '0',
             `feed` tinyint(4) NOT NULL DEFAULT '0',
             `referrer` varchar(50) NOT NULL DEFAULT '',
@@ -185,11 +188,13 @@ class NewsletterUpgrade {
             `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
             `url` varchar(255) NOT NULL DEFAULT '',
             `user_id` int(11) NOT NULL DEFAULT '0',
-            `email_id` varchar(10) NOT NULL DEFAULT '0',
+            `email_id` int(11) NOT NULL DEFAULT '0',
+            `message_id` int(11) NOT NULL DEFAULT '0',
             `ip` varchar(100) NOT NULL DEFAULT '',
             PRIMARY KEY (`id`),
             KEY `email_id` (`email_id`),
-            KEY `user_id` (`user_id`)
+            KEY `user_id` (`user_id`),
+            KEY `message_id` (`message_id`)
             ) $charset_collate;";
 
         $this->db_delta($sql);

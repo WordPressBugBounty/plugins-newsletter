@@ -74,6 +74,14 @@ if (!$controls->is_action()) {
                 $controls->data['schedule'] = 0;
             }
 
+//            $schedule_hours = [];
+//            if ($end < $start) $end += 24;
+//            for ($i=$start; $i<$end; $i++) {
+//                $schedule_hours[] = $i % 24;
+//            }
+//            $controls->data['schedule_hours'] = $schedule_hours;
+
+
             update_option('newsletter_log_level', $controls->data['log_level']);
         }
 

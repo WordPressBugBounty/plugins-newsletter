@@ -151,7 +151,7 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
         }
 
         //$email['subject'] = $controls->data['subject'];
-        $email['track'] = $controls->data['track'];
+        $email['track'] = (int)$controls->data['track'];
         $email['editor'] = $editor_type;
         $email['private'] = $controls->data['private'];
         $email['message_text'] = $controls->data['message_text'];
@@ -692,7 +692,7 @@ $fields = $this->get_customfields();
                         <tr>
                             <th><?php esc_html_e('Track clicks and message opening', 'newsletter') ?></th>
                             <td>
-<?php $controls->yesno('track'); ?>
+                                <?php $controls->select('track', ['0'=> 'Disabled', '1'=> 'Enabled', '2'=> 'Anonymous']); ?>
                             </td>
                         </tr>
                         <tr>

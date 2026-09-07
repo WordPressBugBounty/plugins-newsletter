@@ -64,8 +64,6 @@ class NewsletterComposerAdmin extends NewsletterModuleAdmin {
         $hint = wp_strip_all_tags($post['prompt']);
         $prompt = "You are a copywriter. Write 200 words in $language about: $hint";
 
-        //error_log($prompt);
-
         $builder = wp_ai_client_prompt($prompt);
         $reply = $builder->generate_text();
 

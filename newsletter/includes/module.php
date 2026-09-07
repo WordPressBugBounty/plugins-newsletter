@@ -382,19 +382,15 @@ class NewsletterModule extends NewsletterModuleBase {
         }
         $user = $this->get_user($id);
 
-        if ($user == null) {
+        if (!$user) {
             if ($die_on_fail) {
                 die(esc_html__('No subscriber found.', 'newsletter'));
-            } else {
-                return $this->get_user_from_logged_in_user();
             }
         }
 
         if ($token != $user->token && $token != md5($user->token)) {
             if ($die_on_fail) {
                 die(esc_html__('No subscriber found.', 'newsletter'));
-            } else {
-                return $this->get_user_from_logged_in_user();
             }
         }
         return $user;
@@ -411,9 +407,17 @@ class NewsletterModule extends NewsletterModuleBase {
         setcookie('newsletter', '', time() - YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, is_ssl());
     }
 
+    function set_email_cookie($email) {
+        if (!$email) {
+            return;
+        }
+        setcookie('tnpe', $email->id . '-' . $email->token, time() + YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, is_ssl());
+    }
+
     function is_current_user_dummy() {
-        if (!current_user_can('administrator'))
+        if (!current_user_can('administrator')) {
             return false;
+        }
 
         if (isset($_REQUEST['nk'])) {
             list($id, $token) = explode('-', wp_unslash($_REQUEST['nk']), 2);
@@ -645,24 +649,29 @@ class NewsletterModule extends NewsletterModuleBase {
      * @global wpdb $wpdb
      * @param TNP_User $user
      */
-    function update_user_last_activity($user) {
+    function update_user_last_activity($user_id) {
         global $wpdb;
-        if (!$user) {
+        $user_id = $this->to_int_id($user_id);
+        if (!$user_id) {
             return;
         }
-        $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set last_activity=%d where id=%d limit 1", time(), $user->id));
+        $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set last_activity=%d where id=%d limit 1", time(), $user_id));
     }
 
-    function update_user_ip($user, $ip) {
+    function update_user_ip($user_id, $ip) {
         global $wpdb;
-        if (!$user) {
+        $user_id = $this->to_int_id($user_id);
+        if (!$user_id) {
             return;
         }
+        $ip = self::sanitize_ip($ip);
         if (!$ip) {
             return;
         }
-// Only if changed
-        $r = $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set ip=%s, geo=0 where ip<>%s and id=%d limit 1", $ip, $ip, $user->id));
+
+        // Only if changed
+        $r = $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE
+                        . " set ip=%s, geo=0 where ip<>%s and id=%d limit 1", $ip, $ip, $user_id));
     }
 
     /**
@@ -1177,12 +1186,12 @@ class NewsletterModule extends NewsletterModuleBase {
      */
     static function to_int_id($var) {
         if (is_object($var)) {
-            return (int) $var->id;
+            return (int) ($var->id ?? 0);
         }
         if (is_array($var)) {
-            return (int) $var['id'];
+            return (int) ($var['id'] ?? 0);
         }
-        return (int) $var;
+        return (int) ($var ?? 0);
     }
 
     static function to_array($text) {
