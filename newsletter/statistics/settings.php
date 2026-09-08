@@ -2,11 +2,21 @@
 /** @var NewsletterStatisticsAdmin $this */
 /** @var NewsletterControls $controls */
 /** @var NewsletterLogger $logger */
-
 defined('ABSPATH') || exit;
 
 if ($controls->is_action()) {
     if ($controls->is_action('save')) {
+        $controls->data = $this->get_main_options();
+
+        $controls->add_toast_saved();
+    }
+    if ($controls->is_action('regenerate')) {
+        $options = $this->get_main_options();
+        $options['key'] = wp_generate_password(32, false, false);
+        $this->save_main_options($options);
+        $controls->data = $this->get_main_options();
+
+        $logger->info('Statistics key changed');
 
         $controls->add_toast_saved();
     }
@@ -20,8 +30,10 @@ if ($controls->is_action()) {
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
-        <?php //$controls->title_help('/profile-page')  ?>
-        <h2><?php esc_html_e('Statistics', 'newsletter') ?></h2>
+
+        <?php $controls->title_help('/reports-extension') ?>
+        <?php include __DIR__ . '/index-nav.php' ?>
+
     </div>
 
     <div id="tnp-body">
@@ -29,7 +41,7 @@ if ($controls->is_action()) {
         <?php $controls->show() ?>
 
 
-        <form id="channel" method="post" action="">
+        <form method="post" action="">
             <?php $controls->init(); ?>
 
             <div id="tabs">
@@ -47,6 +59,10 @@ if ($controls->is_action()) {
                             <th>Key</th>
                             <td>
                                 <?php $controls->value('key'); ?>
+                                <?php $controls->btn('regenerate', 'Regenerate', ['confirm' => true]) ?>
+                                <p class="description">
+                                    WARNING! If the key is regenerated the links in already sent newsletters won't work anymore.
+                                </p>
                             </td>
                         </tr>
                     </table>
@@ -60,7 +76,7 @@ if ($controls->is_action()) {
             </div>
 
             <p>
-                <?php //$controls->button_save()  ?>
+                <?php //$controls->button_save()   ?>
             </p>
 
         </form>

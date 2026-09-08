@@ -256,7 +256,7 @@ class NewsletterUpgrade {
 
         $opt = $this->get_option_array('newsletter_statistics');
         if (empty($opt['key'])) {
-            $opt['key'] = md5(__DIR__ . rand(100000, 999999) . time());
+            $opt['key'] = wp_generate_password(32, false, false);
             update_option('newsletter_statistics', $opt, false);
         }
 

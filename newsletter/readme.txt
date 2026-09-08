@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 7.1
-Stable tag: 9.3.6
+Stable tag: 9.3.7
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -180,6 +180,14 @@ Thank you, The Newsletter Team
 3. The Reports addon
 
 == Changelog ==
+
+= 9.3.7 =
+
+* Better signature key for tracking link (reported by Karthik Ramakrishnan)
+* Added panel to change the tracking key if needed (see Settings/Statistics)
+* Fixed open redirect issue (reported by Artus KG)
+* The "confirm_url" custom form parameter or the "ncu" form value can no more be used to redirect to external sites
+* Fixed the required tracking checkbox
 
 = 9.3.6 =
 

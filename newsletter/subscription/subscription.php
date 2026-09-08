@@ -1036,7 +1036,7 @@ class NewsletterSubscription extends NewsletterModule {
         } else {
             if (isset($_REQUEST['ncu'])) {
                 // Custom URL from the form
-                $url = sanitize_url(wp_unslash($_REQUEST['ncu']));
+                $url = wp_validate_redirect(wp_unslash($_REQUEST['ncu']), home_url());
             } else {
                 // Per message custom URL from configuration (language variants could not be supported)
                 $page_id = $this->get_option('confirmed_id');
@@ -1066,7 +1066,7 @@ class NewsletterSubscription extends NewsletterModule {
         } else {
             if (isset($_REQUEST['ncu'])) {
                 // Custom URL from the form
-                $url = sanitize_url($_REQUEST['ncu']);
+                $url = wp_validate_redirect($_REQUEST['ncu'], home_url());
             } else {
                 $page_id = $this->get_option('confirmation_id');
                 if (!empty($page_id)) {
@@ -1586,7 +1586,7 @@ class NewsletterSubscription extends NewsletterModule {
             $label = $attrs['track'] ?? $this->get_form_text('track');
             $buffer .= '<div class="tnp-field tnp-field-checkbox tnp-field-track">';
 
-            $buffer .= '<input type="checkbox" name="ntr_cb" required class="tnp-track" id="tnp-' . $idx . '"> ';
+            $buffer .= '<input type="checkbox" name="ntr_cb" class="tnp-track" id="tnp-' . $idx . '"> ';
             $buffer .= '<label for="tnp-' . $idx . '">';
             $buffer .= esc_html($label);
             $buffer .= '</label>';
