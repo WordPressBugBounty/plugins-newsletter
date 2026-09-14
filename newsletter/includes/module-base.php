@@ -1303,12 +1303,24 @@ class NewsletterModuleBase {
     }
 
     static function dienow($message, $admin_message = null, $http_code = 200) {
+        $message = esc_html($message);
         if ($admin_message && current_user_can('administrator')) {
             $message .= '<br><br><strong>Text below only visibile to administrators</strong><br>';
-            $message .= $admin_message;
+            $message .= esc_html($admin_message);
         }
-        wp_die($message, $http_code);
-        die(); // There are plugins that change the wp_die() behavior without actually die().
+        http_response_code($http_code);
+        ?>
+        <!DOCTYPE html>
+        <html>
+            <head></head>
+            <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+                <div class="box" style="border: 1px solid #ccc; padding: 20px;">
+                    <?= $message ?>
+                </div>
+            </body>
+        </html>
+        <?php
+        die();
     }
 
     static function dump($var) {
