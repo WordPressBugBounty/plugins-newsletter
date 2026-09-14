@@ -964,7 +964,7 @@ class NewsletterControls {
     }
 
     function value($name) {
-        echo esc_html($this->data[$name]);
+        echo esc_html($this->data[$name] ?? '');
     }
 
     function value_date($name, $show_remaining = true) {

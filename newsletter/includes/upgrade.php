@@ -40,7 +40,7 @@ class NewsletterUpgrade {
     function run() {
         global $wpdb, $charset_collate;
 
-        $this->logger->info('Start upgrade from ' . $this->old_version);
+        $this->logger->info('Start upgrade from ' . $this->old_version . ' to ' . NEWSLETTER_VERSION);
 
         require_once NEWSLETTER_DIR . '/admin.php';
         // @phpstan-ignore-next-line
@@ -201,7 +201,7 @@ class NewsletterUpgrade {
 
         $sql = "CREATE TABLE `" . $wpdb->prefix . "newsletter_logs` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
-            `status` int NOT NULL DEFAULT 0,
+            `status` int(11) NOT NULL DEFAULT 0,
             `source` varchar(100) NOT NULL DEFAULT '',
             `description` varchar(255) NOT NULL DEFAULT '',
             `data` longtext,
@@ -257,7 +257,15 @@ class NewsletterUpgrade {
         $opt = $this->get_option_array('newsletter_statistics');
         if (empty($opt['key'])) {
             $opt['key'] = wp_generate_password(32, false, false);
+            $opt['key_time'] = 0;
             update_option('newsletter_statistics', $opt, false);
+        } else {
+            if (!isset($opt['key_time'])) {
+                $opt['old_key'] = $opt['key'];
+                $opt['key_time'] = time();
+                $opt['key'] = wp_generate_password(32, false, false);
+                update_option('newsletter_statistics', $opt, false);
+            }
         }
 
         if ($this->old_version < '8.0.8') {

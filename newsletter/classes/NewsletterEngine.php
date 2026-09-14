@@ -169,7 +169,9 @@ class NewsletterEngine {
 
         foreach ($chunks as $index => $chunk) {
 
-            $this->update_lock();
+            if (!$supplied_users) {
+                $this->update_lock();
+            }
 
             $this->logger->debug('Processing chunk #' . $index);
 
@@ -315,7 +317,7 @@ class NewsletterEngine {
         ];
 
         if (NEWSLETTER_DEBUG) {
-            $message->headers['X-Newsletter-Message-Id'] = (string) $message->message_id;
+            $message->headers['X-Newsletter-Message-Id'] = (string) $message->id;
         }
 
         $message->headers = apply_filters('newsletter_message_headers', $message->headers, $email, $user);
