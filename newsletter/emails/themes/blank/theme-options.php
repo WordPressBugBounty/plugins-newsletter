@@ -1,5 +1,7 @@
 <?php
 if (!defined('ABSPATH')) exit;
+
+/** @var NewsletterControls $controls  */
 ?>
 <table class="form-table">
     <tr>

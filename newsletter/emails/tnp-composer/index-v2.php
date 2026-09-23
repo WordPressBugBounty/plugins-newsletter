@@ -2,9 +2,13 @@
 /**
  * This file is included by NewsletterControls to create the composer.
  */
-/* @var $this NewsletterControls */
 
 defined('ABSPATH') || exit;
+
+/** @var NewsletterControls $this */
+/** @var boolean $tnpc_show_subject */
+/** @var boolean $show_test */
+/** @var string $context_type */
 
 $list = NewsletterEmails::instance()->get_blocks();
 

@@ -1,4 +1,7 @@
 <?php
+
+/** @var array $options */
+
 $size = [600, 0];
 $total_width = $composer['content_width'];
 $column_width = $total_width / 2 - 10;
@@ -124,7 +127,7 @@ global $authordata, $post;
 
     <?php echo TNP_Composer::grid($items, ['columns' => count($items), 'width' => $composer['width'] - $options['block_padding_left'] - $options['block_padding_right']]); ?>
 
-<?php } 
+<?php }
 
 
 

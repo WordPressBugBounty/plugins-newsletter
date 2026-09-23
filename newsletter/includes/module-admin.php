@@ -605,7 +605,9 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
 
     function get_default_language() {
         if (class_exists('SitePress')) {
-            return $current_language = apply_filters('wpml_current_language', '');
+            $current_language = apply_filters('wpml_current_language', '');
+            $parts = explode('-', $current_language);
+            return $parts[0];
         } else if (function_exists('pll_default_language')) {
             return pll_default_language();
         } else if (class_exists('TRP_Translate_Press')) {

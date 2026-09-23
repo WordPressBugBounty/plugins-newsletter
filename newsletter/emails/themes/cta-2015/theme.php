@@ -7,6 +7,8 @@
 
 if (!defined('ABSPATH')) exit;
 
+/** @var array $theme_options */
+
 $color = '#87aa14';
 if (!empty($theme_options['theme_color'])) {
     $color = $theme_options['theme_color'];
@@ -55,7 +57,7 @@ $social_icon_url = plugins_url('newsletter') . '/emails/themes/cta-2015/images';
             <!-- header -->
             <tr>
                 <td align="center" style="font-family: Verdana">
-                    <?php echo $header; ?>   
+                    <?php echo $header; ?>
                 </td>
             </tr>
 

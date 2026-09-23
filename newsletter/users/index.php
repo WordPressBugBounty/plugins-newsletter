@@ -92,6 +92,8 @@ $count = Newsletter::instance()->store->get_count(NEWSLETTER_USERS_TABLE, $where
 
 $last_page = max(1, ceil($count / $items_per_page));
 
+$controls->data['search_page'] ??= 1;
+
 if ($controls->is_action('last')) {
     $controls->data['search_page'] = $last_page;
 }

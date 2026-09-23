@@ -2,6 +2,8 @@
 
 defined('ABSPATH') || exit;
 
+/** @var array $theme_options */
+
 ?>
 <!-- Footer -->
 <div style="text-align: center; font-weight: bold; margin: 40px 0 10px;"><?php echo esc_html($theme_options['main_footer_title']) ?></div>

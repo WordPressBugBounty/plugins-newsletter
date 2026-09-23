@@ -1,4 +1,7 @@
 <?php
+
+/** @var array $options */
+
 $size = array(600, 400, $image_crop);
 $total_width = $composer['content_width'];
 $column_width = $total_width / 2 - 20;

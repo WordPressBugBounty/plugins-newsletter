@@ -151,9 +151,13 @@ class NewsletterUpgrade {
 
 // Leave as last
         $sql .= "`test` tinyint(4) NOT NULL DEFAULT '0',\n";
-        $sql .= "PRIMARY KEY (`id`),\nUNIQUE KEY `email` (`email`),\nKEY `wp_user_id` (`wp_user_id`)\n) $charset_collate;";
+        $sql .= "PRIMARY KEY (`id`),\nKEY `emailidx` (`email`),\nKEY `wp_user_id` (`wp_user_id`)\n) $charset_collate;";
 
         $this->db_delta($sql);
+
+        // Old unique index
+        $this->upgrade_query("DROP INDEX email ON " . NEWSLETTER_USERS_TABLE);
+
 
         $sql = "CREATE TABLE `" . $wpdb->prefix . "newsletter_user_logs` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -252,6 +256,12 @@ class NewsletterUpgrade {
             }
 
             update_option('newsletter_backup_' . $this->old_version, $backup, false);
+        }
+
+        // New user token management
+        $new_token_time = (int)get_option('newsletter_new_token_time', 0);
+        if (!$new_token_time) {
+            update_option('newsletter_new_token_time', time(), false);
         }
 
         $opt = $this->get_option_array('newsletter_statistics');

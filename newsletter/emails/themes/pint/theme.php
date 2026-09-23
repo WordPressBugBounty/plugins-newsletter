@@ -12,6 +12,8 @@ global $newsletter, $post;
 
 if (!defined('ABSPATH')) exit;
 
+/** @var array $theme_options */
+
 $filters = array();
 if (!empty($theme_options['theme_categories'])) {
     $filters['category__in'] = $theme_options['theme_categories'];
@@ -69,10 +71,10 @@ $posts = get_posts($filters);
                             </table>
 
                     <br><br>
-                    
-                            <?php 
-                            if (!isset($theme_options['theme_social_disable'])) { 
-                                include WP_PLUGIN_DIR . '/newsletter/emails/themes/default/social.php';                             
+
+                            <?php
+                            if (!isset($theme_options['theme_social_disable'])) {
+                                include WP_PLUGIN_DIR . '/newsletter/emails/themes/default/social.php';
                             }
                             ?>
 

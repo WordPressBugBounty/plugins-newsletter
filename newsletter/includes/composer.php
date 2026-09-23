@@ -514,13 +514,22 @@ class TNP_Composer {
     static function get_post_url($post) {
         // WPML does not return the correct permalink for a post: on WP frontend it returns the permalink of the
         // translated post for the current language... ok it's complicated!
+        $data = null;
         if (class_exists('SitePress')) {
             $data = apply_filters('wpml_post_language_details', [], $post->ID);
             if (isset($data['language_code'])) {
-                do_action('wpml_switch_language', $data['language_code']);
+                Newsletter::instance()->switch_language($data['language_code']);
+                //do_action('wpml_switch_language', $data['language_code']);
             }
         }
-        return get_permalink($post->ID);
+        $url = get_permalink($post->ID);
+
+        if (isset($data['language_code'])) {
+            Newsletter::instance()->restore_language();
+            //do_action('wpml_switch_language', $data['language_code']);
+        }
+
+        return $url;
 
         // Interesting but WPML redirect to the current language version of the post...
         //return wp_get_shortlink($post->ID);

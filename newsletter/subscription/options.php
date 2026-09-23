@@ -39,7 +39,7 @@ if ($controls->is_action()) {
             foreach ($users as &$user) {
                 $addresses[] = $user->email;
                 $user->language = $language;
-                $res = NewsletterSubscription::instance()->send_message('confirmation', $user);
+                $res = NewsletterSubscription::instance()->send_confirmation_email($user);
                 if (!$res) {
                     $controls->errors = 'The email address ' . $user->email . ' failed.';
                     break;
@@ -62,7 +62,7 @@ if ($controls->is_action()) {
                 $addresses[] = $user->email;
                 // Force the language to send the message coherently with the current panel view
                 $user->language = $language;
-                $res = NewsletterSubscription::instance()->send_message('confirmed', $user);
+                $res = NewsletterSubscription::instance()->send_welcome_email($user);
                 if (!$res) {
                     $controls->errors = 'The email address ' . $user->email . ' failed.';
                     break;

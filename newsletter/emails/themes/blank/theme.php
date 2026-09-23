@@ -7,6 +7,8 @@
 
 defined('ABSPATH') || exit;
 
+/** @var array $theme_options */
+
 ?><html>
     <head>
         <style>
@@ -48,6 +50,6 @@ defined('ABSPATH') || exit;
         <p>
             <?php echo $theme_options['main_footer_legal'] ?>
         </p>
-        
+
     </body>
 </html>

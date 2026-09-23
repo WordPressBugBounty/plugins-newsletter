@@ -31,14 +31,16 @@ class License {
         $license_data_url = 'https://www.thenewsletterplugin.com/wp-content/plugins/file-commerce-pro/get-license-data.php';
 
         $response = wp_remote_post($license_data_url, [
-            'body' => ['k' => $license_key]
+            'body' => ['k' => $license_key],
+            'timeout' => 30
         ]);
 
         // Fall back to http...
         if (is_wp_error($response)) {
             $license_data_url = str_replace('https', 'http', $license_data_url);
             $response = wp_remote_post($license_data_url, array(
-                'body' => array('k' => $license_key)
+                'body' => array('k' => $license_key),
+                'timeout' => 30
             ));
             if (is_wp_error($response)) {
                 set_transient('newsletter_license_data', $response, DAY_IN_SECONDS);
@@ -140,15 +142,17 @@ class License {
 
     static function is_personal() {
         $license_data = self::get_data(false);
-        if (is_wp_error($license_data) || !$license_data)
+        if (is_wp_error($license_data) || !$license_data) {
             return true;
+        }
         return $license_data->type === 'personal';
     }
 
     static function is_reseller() {
         $license_data = self::get_data(false);
-        if (is_wp_error($license_data) || !$license_data)
+        if (is_wp_error($license_data) || !$license_data) {
             return false;
+        }
         return $license_data->type === 'reseller';
     }
 }

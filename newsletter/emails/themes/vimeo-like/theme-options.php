@@ -15,7 +15,8 @@
  * a decent system will be implemented.
  */
 
-/* @var $controls NewsletterControls */
+/** @var NewsletterControls $controls */
+/** @var array $theme_options */
 
 defined('ABSPATH') || exit;
 ?>

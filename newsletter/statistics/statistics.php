@@ -55,49 +55,7 @@ class NewsletterStatistics extends NewsletterModule {
         // Open tracking route
         register_rest_route('tnp', '/o/(?P<email_id>[\d]+)/(?P<user_id>-?[\d]+)/(?P<signature>.+).gif', array(
             'methods' => WP_REST_Server::READABLE,
-            'callback' => function ($request) {
-                $this->logger->debug('REST open tracking');
-
-                $text = $request['email_id'] . '/' . $request['user_id'];
-                // Standard signature
-                $verified = $this->check_signature('o/' . $text, $request['signature']);
-                if (!$verified) {
-                    // Old style signature (to be removed)
-                    $verified = $this->check_signature($text, $request['signature']);
-                }
-
-                // Old key signature
-                if (!$verified && !$this->is_old_key_expired()) {
-                    $verified = $this->check_old_signature('o/' . $text, $request['signature']);
-                    if (!$verified) {
-                        $verified = $this->check_old_signature($text, $request['signature']);
-                    }
-                }
-
-                if (!$verified) {
-                    $this->logger->debug('Invalid open signature');
-                    //return new WP_Error('signature', '', ['status' => 400]);
-                    //wp_send_json_error([], 400);
-                    http_response_code(400);
-                    die('Invalid signature');
-                }
-
-                $email = $this->get_email($request['email_id']);
-                if ($email) {
-                    $user_id = intval($request['user_id']);
-                    if ($user_id < 0) {
-                        $this->register_anonymous_open($email->id, abs($user_id));
-                    } else {
-                        $user = $this->get_user($user_id);
-                        if ($user) {
-                            $this->register_open($email->id, $user->id);
-                        }
-                    }
-                }
-
-                // Send an image anyway
-                $this->send_tracking_image();
-            },
+            'callback' => [$this, 'open_callback'],
             'permission_callback' => '__return_true',
         ));
 
@@ -105,82 +63,130 @@ class NewsletterStatistics extends NewsletterModule {
         register_rest_route('tnp', '/l/(?P<email_id>[\d]+)/(?P<user_id>-?[\d]+)/(?P<url>.+)/(?P<signature>.+)', [
             'methods' => WP_REST_Server::READABLE,
             'permission_callback' => '__return_true',
-            'callback' => function ($request) {
-                $this->logger->debug('REST link tracking');
+            'callback' => [$this, 'link_callback']
+        ]);
+    }
 
-                $url = $this->base64url_decode($request['url']);
-                $email = $this->get_email($request['email_id']);
-                $user_id = intval($request['user_id']);
-                $user = null;
-                if ($user_id > 0) {
-                    $user = $this->get_user($user_id);
+    function open_callback($request) {
+        $this->logger->debug('REST open tracking');
+
+        $text = $request['email_id'] . '/' . $request['user_id'];
+        // Standard signature
+        $verified = $this->check_signature('o/' . $text, $request['signature']);
+        if (!$verified) {
+            // Old style signature (to be removed)
+            $verified = $this->check_signature($text, $request['signature']);
+        }
+
+        // Old key signature
+        if (!$verified && !$this->is_old_key_expired()) {
+            $verified = $this->check_old_signature('o/' . $text, $request['signature']);
+            if (!$verified) {
+                $verified = $this->check_old_signature($text, $request['signature']);
+            }
+        }
+
+        if (!$verified) {
+            $this->logger->debug('Invalid open signature');
+            //return new WP_Error('signature', '', ['status' => 400]);
+            //wp_send_json_error([], 400);
+            http_response_code(400);
+            die('Invalid signature');
+        }
+
+        $email = $this->get_email($request['email_id']);
+        if ($email) {
+            $user_id = intval($request['user_id']);
+            if ($user_id < 0) {
+                $this->register_anonymous_open($email->id, abs($user_id));
+            } else {
+                $user = $this->get_user($user_id);
+                if ($user) {
+                    $this->register_open($email->id, $user->id);
                 }
+            }
+        }
 
-                // Two types of signature for compatibility; can be removed in a year
-                $text = $request['email_id'] . '/' . $request['user_id'] . '/' . $request['url'];
+        // Send an image anyway
+        $this->send_tracking_image();
+    }
 
-                // Standard signature
-                $verified = $this->check_signature('l/' . $text, $request['signature']);
-                if (!$verified) {
-                    // Old style signature (to be removed)
-                    $verified = $this->check_signature($text, $request['signature']);
-                }
+    function link_callback($request) {
+        $this->logger->debug('REST link tracking');
 
-                // Try to verify with the old key
-                if (!$verified) {
+        $url = $this->base64url_decode($request['url']);
+        $email = $this->get_email($request['email_id']);
+        $user_id = intval($request['user_id']);
+        $user = null;
+        if ($user_id > 0) {
+            $user = $this->get_user($user_id);
+        }
 
-                    $verified = $this->check_old_signature('l/' . $text, $request['signature']);
-                    if (!$verified) {
-                        $verified = $this->check_old_signature($text, $request['signature']);
-                    }
+        // Two types of signature for compatibility; can be removed in a year
+        $text = $request['email_id'] . '/' . $request['user_id'] . '/' . $request['url'];
 
-                    // Manage stats and redirect when the old key signature is valid
-                    if ($verified) {
+        // Standard signature
+        $verified = $this->verify_signature('l/' . $text, $request['signature']);
+        if (!$verified) {
+            // Old style signature (to be removed)
+            $verified = $this->verify_signature($text, $request['signature']);
+        }
 
-                        // Here when verified with the old key
+        // Try to verify with the old key
+        if (!$verified) {
 
-                        if ($email) {
+            $verified = $this->check_old_signature('l/' . $text, $request['signature']);
+            if (!$verified) {
+                $verified = $this->check_old_signature($text, $request['signature']);
+            }
 
-                            if ($user_id < 0) {
-                                $this->register_anonymous_click($email->id, abs($user_id), $url);
-                            } else {
-                                // Don't set the cookie
-                                $this->register_click($email, $user, $url);
-                            }
-                        }
+            // Manage stats and redirect when the old key signature is valid
+            if ($verified) {
 
-                        // If the old key grace period is ended, accept only redirects to the site domain
-                        if ($this->is_old_key_expired()) {
-                            $url = wp_validate_redirect($url, home_url());
-                        }
-
-                        $this->send_redirect($url, $email, $user);
-                    }
-                }
-
-                if (!$verified) {
-                    $this->logger->debug('Invalid link signature');
-                    http_response_code(400);
-                    die('Invalid signature');
-                }
-
-                // Here when verified with the current key
+                // Here when verified with the old key
 
                 if ($email) {
 
                     if ($user_id < 0) {
                         $this->register_anonymous_click($email->id, abs($user_id), $url);
                     } else {
-                        $this->set_user_cookie($user);
+                        // Don't set the cookie
                         $this->register_click($email, $user, $url);
                     }
                 }
 
-                // We keep the tracking link active even if the subscriber or the email are now missing...
-                // Could be changed in the future
+                // If the old key grace period is ended, accept only redirects to the site domain
+                if ($this->is_old_key_expired()) {
+                    $url = wp_validate_redirect($url, home_url());
+                }
+
                 $this->send_redirect($url, $email, $user);
             }
-        ]);
+        }
+
+        if (!$verified) {
+            $this->logger->debug('Invalid link signature');
+            http_response_code(400);
+            die('Invalid signature');
+        }
+
+        // Here when verified with the current key
+
+        if ($email) {
+
+            if ($user_id < 0) {
+                $this->register_anonymous_click($email->id, abs($user_id), $url);
+            } else {
+                if ($verified === 1) { // Key not expired
+                    $this->set_user_cookie($user);
+                }
+            }
+            $this->register_click($email, $user, $url);
+        }
+
+        // We keep the tracking link active even if the subscriber or the email are now missing...
+        // Could be changed in the future
+        $this->send_redirect($url, $email, $user);
     }
 
     /**
@@ -202,10 +208,9 @@ class NewsletterStatistics extends NewsletterModule {
 
     /**
      *
-     * @param int $email
-     * @param int $user
+     * @param object $email
+     * @param object $user
      * @param string $url
-     * @return bool
      */
     function register_click($email, $user, $url) {
         $this->logger->debug(__METHOD__);
@@ -270,6 +275,7 @@ class NewsletterStatistics extends NewsletterModule {
      */
     function send_redirect($url, $email, $user) {
         //$this->logger->debug(__METHOD__);
+        header("Referrer-Policy: no-referrer");
         header('Location: ' . sanitize_url(apply_filters('newsletter_redirect_url', $url, $email, $user)));
         die();
     }
@@ -282,9 +288,9 @@ class NewsletterStatistics extends NewsletterModule {
         // Click tracking
         if (isset($_GET['nltr'])) {
 
-            $this->logger->debug('Click tracking');
-            $this->logger->debug('Code: ' . $_GET['nltr']);
-            $this->logger->debug('Decoded: ' . base64_decode($_GET['nltr']));
+            //$this->logger->debug('Click tracking');
+            //$this->logger->debug('Code: ' . $_GET['nltr']);
+            //$this->logger->debug('Decoded: ' . base64_decode($_GET['nltr']));
 
             // Patch for links with ;
             $parts = explode(';', base64_decode($_GET['nltr']));
@@ -299,7 +305,7 @@ class NewsletterStatistics extends NewsletterModule {
             //$this->logger->debug('Email: ' . $email_id . ', User: ' . $user_id . ', Signature: ' . $signature . ', Url: ' . $url .
             //        ', Anchor: ' . $anchor);
 
-            $verified = $this->check_signature($email_id . ';' . $user_id . ';' . $url . ';' . $anchor, $signature);
+            $verified = $this->verify_signature($email_id . ';' . $user_id . ';' . $url . ';' . $anchor, $signature);
 
             // Try the old signature with custom management; all that can be removed in a year (?)
             if (!$verified) {
@@ -332,10 +338,12 @@ class NewsletterStatistics extends NewsletterModule {
             // Here when verified with the current key
 
             $user = $this->get_user($user_id);
-            $this->set_user_cookie($user);
+            if ($verified === 1) {
+                $this->set_user_cookie($user);
+            }
 
             $email = $this->get_email($email_id);
-            $this->set_email_cookie($email); // Obsolete
+            //$this->set_email_cookie($email); // Obsolete
 
             $this->register_click($email, $user, $url);
             $this->send_redirect($url, $email, $user);
@@ -344,13 +352,13 @@ class NewsletterStatistics extends NewsletterModule {
 
         if (isset($_GET['noti'])) {
 
-            $this->logger->debug('Open tracking');
-            $this->logger->debug('Code: ' . $_GET['noti']);
-            $this->logger->debug('Decoded: ' . base64_decode($_GET['noti']));
+            //$this->logger->debug('Open tracking');
+            //$this->logger->debug('Code: ' . $_GET['noti']);
+            //$this->logger->debug('Decoded: ' . base64_decode($_GET['noti']));
 
             list($email_id, $user_id, $signature) = explode(';', base64_decode($_GET['noti']), 3);
 
-            $this->logger->debug('Email: ' . $email_id . ', User: ' . $user_id . ', Signature: ' . $signature);
+            //$this->logger->debug('Email: ' . $email_id . ', User: ' . $user_id . ', Signature: ' . $signature);
 
             $email = $this->get_email($email_id);
             if (!$email) {
@@ -373,8 +381,8 @@ class NewsletterStatistics extends NewsletterModule {
 
             // The first signature check if for compatibility, it'll be removed
             $text = $email->id . '/' . $user->id;
-            $verified = $verified || $this->check_signature($text, $signature) ||
-                    $this->check_signature('o/' . $text, $signature);
+            $verified = $verified || $this->check_signature($text, $signature) !== 0 ||
+                    $this->check_signature('o/' . $text, $signature) !== 0;
 
             // User the old key, if not expired
             if (!$verified && !$this->is_old_key_expired()) {
@@ -386,6 +394,8 @@ class NewsletterStatistics extends NewsletterModule {
                 $this->logger->error('Wrong signature, stop');
                 $this->send_tracking_image();
             }
+
+            // Should be care about expired signature for open tracking? No...
 
             $this->register_open($email->id, $user->id);
             $this->send_tracking_image();
@@ -408,9 +418,10 @@ class NewsletterStatistics extends NewsletterModule {
         return (int) $this->get_main_option('key_time');
     }
 
-    function get_signature($text) {
+    function get_signature($text, $duration = 7 * DAY_IN_SECONDS) {
         // TODO: Add key caching
-        return md5($text . $this->get_key());
+        $time = (string) (time() + $duration);
+        return $time . '.' . md5($text . $time . $this->get_key());
     }
 
     function get_old_signature($text) {
@@ -423,7 +434,37 @@ class NewsletterStatistics extends NewsletterModule {
         if (!$signature) {
             return false;
         }
+
+        $parts = explode('.', $signature, 2);
+
         return $this->get_signature($text) === $signature;
+    }
+
+    /**
+     *
+     * @param type $text
+     * @param type $signature
+     * @return int 0 - invalid; 1 - valid; 2 - valid but expired
+     */
+    function verify_signature($text, $signature) {
+        $signature = trim($signature);
+        if (!$signature) {
+            return 0;
+        }
+
+        $parts = explode('.', $signature, 2);
+        if (count($parts) === 2) {
+            $time = (int) $parts[0];
+
+            $verified = hash_equals(md5($text . $time . $this->get_key()), $parts[1]);
+
+            if (!$verified) {
+                return 0;
+            }
+            return $time >= time() ? 1 : 2;
+        } else {
+            return $this->check_signature($text, $signature) ? 2 : 0;
+        }
     }
 
     function check_old_signature($text, $signature) {
@@ -515,7 +556,7 @@ class NewsletterStatistics extends NewsletterModule {
         // Open tracking image
         if ($this->relink_tracking_type == self::TRACKING_ANONYMOUS) {
             $uri = 'o/' . $this->relink_email_id . '/-' . $this->relink_message_id;
-            $signature = $this->get_signature($uri);
+            $signature = $this->get_signature($uri, 6 * MONTH_IN_SECONDS);
             $src = rest_url('tnp/' . $uri . '/' . $signature . '.gif');
             $img = '<img width="1" height="1" style="display: none !important; width:1px; height:1px; border:0; outline:none;" alt="" src="' . esc_attr($src) . '">';
 
@@ -523,7 +564,7 @@ class NewsletterStatistics extends NewsletterModule {
         } else {
 
             $uri = 'o/' . $this->relink_email_id . '/' . $this->relink_user_id;
-            $signature = $this->get_signature($uri);
+            $signature = $this->get_signature($uri, 6 * MONTH_IN_SECONDS);
 
             $img1 = '';
             if ($this->relink_url_type === 'ajax') {

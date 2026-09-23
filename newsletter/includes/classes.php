@@ -350,6 +350,9 @@ class TNP_User {
             case self::STATUS_COMPLAINED: $label = __('Complained', 'newsletter');
                 $class = 'complained';
                 break;
+            case 'T': $label = __('Temporary', 'newsletter');
+                $class = 'temporary';
+                break;
         }
         if (!$html) {
             return $label;
@@ -365,6 +368,7 @@ class TNP_User {
             case self::STATUS_UNSUBSCRIBED: return true;
             case self::STATUS_BOUNCED: return true;
             case self::STATUS_COMPLAINED: return true;
+            case 'T': return true;
             default: return false;
         }
     }

@@ -1,7 +1,7 @@
 <?php
 /** @var NewsletterSystemAdmin $this */
 /** @var NewsletterControls $controls */
-/** @var wpfb $wpdb */
+/** @var wpdb $wpdb */
 
 defined('ABSPATH') || exit;
 
@@ -13,7 +13,6 @@ $mailer = $newsletter->get_mailer();
 if ($controls->is_action('conversion')) {
     $this->logger->info('Maybe convert to utf8mb4');
 
-    // @phpstan-ignore-next-line
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     if (function_exists('maybe_convert_table_to_utf8mb4')) {
         $r = maybe_convert_table_to_utf8mb4(NEWSLETTER_EMAILS_TABLE);

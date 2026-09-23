@@ -3,7 +3,6 @@ defined('ABSPATH') || exit;
 
 class NewsletterSubscription extends NewsletterModule {
 
-    const MESSAGE_CONFIRMED = 'confirmed';
     const OPTIN_DOUBLE = 0;
     const OPTIN_SINGLE = 1;
 
@@ -135,7 +134,7 @@ class NewsletterSubscription extends NewsletterModule {
                 }
             }
 
-            $url = Newsletter::instance()->build_message_url($url, 'confirmation', $user, $email);
+            $url = $this->build_message_url($url, 'confirmation', $user, $email);
             $this->redirect($url);
         }
 
@@ -225,7 +224,7 @@ class NewsletterSubscription extends NewsletterModule {
 
                 $captcha = !empty($options_antibot['captcha']);
 
-                if (!empty($_GET['_wp_amp_action_xhr_converted']) || !empty($options_antibot['disabled']) || $this->antibot_form_check($captcha)) {
+                if (NEWSLETTER_TEST || !empty($_GET['_wp_amp_action_xhr_converted']) || !empty($options_antibot['disabled']) || $this->antibot_form_check($captcha)) {
 
                     $subscription = $this->build_subscription();
 
@@ -241,10 +240,10 @@ class NewsletterSubscription extends NewsletterModule {
                     $this->set_user_cookie($user);
 
                     // The confirmation can be required by re-subscriptons or other conditions
-                    if ($user->_activation) {
-                        $this->redirect_to_confirmation($user, $email);
-                    } else {
+                    if ($user->status === TNP_User::STATUS_CONFIRMED) {
                         $this->redirect_to_confirmed($user, $email);
+                    } else {
+                        $this->redirect_to_confirmation($user, $email);
                     }
                 } else {
                     $language = $this->sanitize_language($_REQUEST['nlang'] ?? '');
@@ -274,26 +273,25 @@ class NewsletterSubscription extends NewsletterModule {
                     }
                 }
 
-                $this->set_user_cookie($user);
-
                 $this->switch_language($user->language);
-                if ($user->_activation) {
-                    $message = $this->replace($this->get_text('confirmation_text'), $user);
-                } else {
+                $this->set_user_cookie($user);
+                if ($user->status === TNP_User::STATUS_CONFIRMED) {
+
                     $message = $this->replace($this->get_text('confirmed_text'), $user);
                     $message .= $this->get_option('confirmed_tracking');
+                } else {
+                    $message = $this->replace($this->get_text('confirmation_text'), $user);
                 }
 
                 echo $message;
                 die();
 
             case 'c':
-            case 'confirm':
-                if (!$user || !$user->_trusted) {
+                if (!$user) {
                     $this->dienow(__('Subscriber not found.', 'newsletter'), 'Or it is not present or the secret key does not match.', 404);
                 }
 
-                if ($this->antibot_form_check()) {
+                if (NEWSLETTER_TEST || $this->antibot_form_check()) {
                     $user = $this->confirm($user);
                     $this->set_user_cookie($user);
                     $this->redirect_to_confirmed($user, $email);
@@ -353,6 +351,7 @@ class NewsletterSubscription extends NewsletterModule {
 
     /**
      * Builds a default subscription object to be used to collect data and subscription options.
+     * It is initilized following the main configurations of plugin modules (subscription, lists, ...).
      *
      * @return TNP_Subscription
      */
@@ -399,10 +398,68 @@ class NewsletterSubscription extends NewsletterModule {
         // Activation email code
         $subscription->activation_email_id = 0;
 
-//        if ($this->get_option('autoresponder')) {
-//            $subscription->autoresponders = [$this->get_option('autoresponder')];
-//        }
         return $subscription;
+    }
+
+    function save_subscription_attributes($user, TNP_Subscription $subscription) {
+        if (!$subscription) {
+            return;
+        }
+
+        // Conformed custom ids
+
+        if ($subscription->welcome_page_id) {
+            $this->save_user_meta($user->id, 'confirmed_page_id', $subscription->welcome_page_id);
+        } else {
+            $this->delete_user_meta($user->id, 'confirmed_page_id');
+        }
+
+        if ($subscription->welcome_email_id) {
+            $this->save_user_meta($user->id, 'confirmed_email_id', $subscription->welcome_email_id);
+        } else {
+            $this->delete_user_meta($user->id, 'confirmed_email_id');
+        }
+
+        // Confirmation customs ids
+
+        if ($subscription->confirmation_page_id) {
+            $this->save_user_meta($user->id, 'confirmation_page_id', $subscription->confirmation_page_id);
+        } else {
+            $this->delete_user_meta($user->id, 'confirmation_page_id');
+        }
+
+        if ($subscription->confirmation_email_id) {
+            $this->save_user_meta($user->id, 'confirmation_email_id', $subscription->confirmation_email_id);
+        } else {
+            $this->delete_user_meta($user->id, 'confirmation_email_id');
+        }
+
+        // Other
+
+        if (!empty($subscription->autoresponders)) {
+            $this->save_user_meta($user->id, 'autoresponders', implode(',', $subscription->autoresponders));
+        } else {
+            $this->delete_user_meta($user->id, 'autoresponders');
+        }
+    }
+
+    function spam_check($subscription) {
+        if ($subscription->spamcheck) {
+            // TODO: Use autoload
+            require_once NEWSLETTER_INCLUDES_DIR . '/antispam.php';
+            $antispam = NewsletterAntispam::instance();
+            $res = $antispam->is_spam($subscription, true);
+            if (is_wp_error($res)) {
+                Newsletter\Logs::add('antispam', $res->get_error_code() . ' - ' . $res->get_error_message(), 0, $res->get_error_data());
+                return new WP_Error('spam', $res->get_error_message());
+            }
+            return $res;
+        }
+        return true;
+    }
+
+    function subscribe(TNP_Subscription $subscription) {
+        return $this->subscribe2($subscription);
     }
 
     /**
@@ -413,36 +470,18 @@ class NewsletterSubscription extends NewsletterModule {
      */
     function subscribe2(TNP_Subscription $subscription) {
 
-        if ($this->logger->is_debug) {
-            $this->logger->debug($subscription);
-        }
+        $this->logger->debug('Subscription start');
 
         // Fill in optional data
-
+        // The full IP can be used by the antispam, the, if required, it will be anonymized
         if (empty($subscription->data->ip)) {
             $subscription->data->ip = $this->get_remote_ip();
         }
 
         // Spam check before sanitization: we could remove relevant information to evaluate spam
-
-        if ($subscription->spamcheck) {
-            // TODO: Use autoload
-            require_once NEWSLETTER_INCLUDES_DIR . '/antispam.php';
-            $antispam = NewsletterAntispam::instance();
-            $res = $antispam->is_spam($subscription, true);
-            if (is_wp_error($res)) {
-                Newsletter\Logs::add('antispam', $res->get_error_code() . ' - ' . $res->get_error_message(), 0, $res->get_error_data());
-                return new WP_Error('spam', $res->get_error_message());
-            }
-        }
-
-        // Exists?
-        $user = $this->get_user_by_email($subscription->data->email);
-
-        $subscription = apply_filters('newsletter_subscription', $subscription, $user);
-
-        if (!$subscription) {
-            return new WP_Error('filter', 'Subscription blocked by filter');
+        $spam_check = $this->spam_check($subscription);
+        if (is_wp_error($spam_check)) {
+            return $spam_check;
         }
 
         $this->sanitize_subscription_data($subscription->data);
@@ -451,131 +490,164 @@ class NewsletterSubscription extends NewsletterModule {
             return new WP_Error('email', 'Wrong email address');
         }
 
+        // Exists?
+        $existing_user = $this->get_user_by_email($subscription->data->email);
+
+        $subscription = apply_filters('newsletter_subscription', $subscription, $existing_user);
+
+        if (!$subscription) {
+            return new WP_Error('filter', 'Subscription blocked by filter');
+        }
+
+
         // GDPR
         $subscription->data->ip = $this->process_ip($subscription->data->ip);
 
-        if ($user != null && $user->status == TNP_User::STATUS_UNSUBSCRIBED) {
-            $multiple = $this->get_main_option('allow_unsubscribed');
-            if (empty($multiple)) {
-                return new WP_Error('unsubscribed', 'Subscriber blocked since unsubscribed. Contact the site administrator.');
+        // ??? Or clean up anmd reuse?
+        if ($existing_user) {
+            $this->logger->debug('Existing user, first check');
+            if ($existing_user->status === TNP_User::STATUS_NOT_CONFIRMED) {
+                $this->delete_user($existing_user->id);
+                $existing_user = null;
             }
-            $this->logger->info('Subscription for unsubscribed emails allowed');
-            // Act as a new subscription of an unconfirmed subscriber
-            $this->set_user_status($user, TNP_User::STATUS_NOT_CONFIRMED);
-            $user = $this->get_user($user->id);
+
+//            elseif ($existing_user->status === TNP_User::STATUS_UNSUBSCRIBED) {
+//                $multiple = $this->get_main_option('allow_unsubscribed');
+//                if (empty($multiple)) {
+//                    return new WP_Error('unsubscribed', 'Unsubscribed email address. Contact the site administrator.');
+//                }
+//                $subscription->optin = 'double';
+//            }
         }
 
-        // Do we accept repeated subscriptions?
-        if ($user != null && $user->status !== TNP_User::STATUS_NOT_CONFIRMED) {
-            $this->logger->info('Existing subscriber: ' . $user->status);
+        $this->logger->debug($existing_user ? 'Existing subscriber with status ' . $existing_user->status : 'New subscriber');
 
-            if ($user->status == TNP_User::STATUS_BOUNCED) {
-                return new WP_Error('bounced', 'Subscriber blocked since bounced. Contact the site administrator.');
+        // New subscriber
+        if (!$existing_user) {
+
+            $user = new TNP_User();
+            $user->token = $this->get_token();
+            $user->status = TNP_User::STATUS_NOT_CONFIRMED;
+            $subscription->data->merge_in($user);
+
+            $user = apply_filters('newsletter_user_subscribe', $user);
+
+            $user = $this->save_user($user);
+
+            // Save only the useful info contained in the subscription (custom emails, custom pages, ...)
+            $this->save_subscription_attributes($user, $subscription);
+
+            $this->add_user_log($user, 'subscribe'); // Logs should be appended to the existing user but with submitted data
+
+            if ($subscription->optin === 'single') {
+                // With single optin in the confirmation is automatic
+                $user = $this->confirm($user);
+            } else {
+                // It can be false, when the method is used for custom subscription and the welcome email is not required
+                if ($subscription->send_emails) {
+                    $this->send_confirmation_email($user);
+                }
             }
 
-            if ($user->status == TNP_User::STATUS_COMPLAINED) {
-                return new WP_Error('complained', 'Subscriber blocked since complained. Contact the site administrator.');
+            $this->logger->debug('Subscribe completed');
+            return $user;
+        }
+
+        // A subscriber already exists with the provided email... deal with many special cases...
+        // It should never happen.
+        if ($existing_user->status === 'T') {
+            return new WP_Error('temporary', 'Internal error.');
+        }
+
+        if ($existing_user->status == TNP_User::STATUS_BOUNCED) {
+            return new WP_Error('bounced', 'Subscriber blocked since bounced. Contact the site administrator.');
+        }
+
+        if ($existing_user->status == TNP_User::STATUS_COMPLAINED) {
+            return new WP_Error('complained', 'Subscriber blocked since complained. Contact the site administrator.');
+        }
+
+
+        if ($existing_user->status === TNP_User::STATUS_UNSUBSCRIBED) {
+            $multiple = $this->get_main_option('allow_unsubscribed');
+            if (empty($multiple)) {
+                $this->logger->debug('Repeated subscription not allowed when already unsubscribed');
+                return new WP_Error('unsubscribed', 'Unsubscribed email address. Contact the site administrator.');
             }
+            $subscription->optin = 'double';
+            $user = new TNP_User();
+            $subscription->data->merge_in($user);
+            $user->status = 'T'; // Important
+            $user = $this->save_user($user);
+            $this->save_user_subscription($user->id, $subscription);
+            $this->save_subscription_attributes($user, $subscription);
+
+            // Needed for caller to redirect
+            $user->status = TNP_User::STATUS_NOT_CONFIRMED;
+            $this->send_confirmation_email($user);
+            return $user;
+        }
+
+        if ($existing_user->status === TNP_User::STATUS_CONFIRMED) {
 
             if ($subscription->if_exists === TNP_Subscription::EXISTING_ERROR) {
+                $this->logger->debug('Repeated subscriptions not allowed');
                 return new WP_Error('exists', 'Email address already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.');
             }
 
-            if ($user->status == TNP_User::STATUS_CONFIRMED) {
+            // If a current subscriber can be recognized and it is subscribing again (for example on a different form) allow it to
+            // use the single optin, otherwise we cannot trust it and the confirmation is required to avoid it to access the original
+            // subscriber data.
+            $current_user = $this->get_current_user();
+            $is_trusted = $current_user && $current_user->id == $existing_user->id;
+            $this->logger->debug($is_trusted ? 'Trusted user' : 'Untrusted user');
 
+            // If a "current" subscriber is recognized and it matches the new subscription we can use it
+            if ($is_trusted) {
+
+                // Force the single opt-in specific on configuration
                 if ($subscription->if_exists === TNP_Subscription::EXISTING_SINGLE_OPTIN) {
-                    $subscription->data->merge_in($user);
-                    $user->updated = time();
-                    $user = apply_filters('newsletter_user_subscribe', $user);
-                    $user = $this->save_user($user);
-                    do_action('newsletter_user_post_subscribe', $user);
-                    $user->_activation = false;
-                    $user->_trusted = false;
-                    $user->_new = false;
+                    $subscription->optin = 'single';
+                }
+
+                // For a trusted user, we store the subscription details and they'll be merged on confirmation
+                // (immediate or by email)
+                $this->save_user_subscription($existing_user->id, $subscription);
+                $this->save_subscription_attributes($existing_user, $subscription);
+                $this->add_user_log($existing_user, 'subscribe');
+
+                if ($subscription->optin === 'single') {
+                    return $this->confirm($existing_user);
                 } else {
-                    $user = apply_filters('newsletter_user_subscribe', $user);
-                    set_transient('newsletter_subscription_' . $user->id, $subscription, 3600 * 24);
-                    $user->_activation = true;
-                    $user->_trusted = false;
-                    $user->_new = false;
-                }
-            }
-        } else {
 
-            // Unconfirmed subscribers are treated as new
-            if (!$user) {
-                $user = new TNP_User();
+                    // Not saved, used on calling method to proceed with redirects. The subscriber status cannot be changed
+                    // since it is confirmed and this is a second subscription to be merged.
+                    $existing_user->status = TNP_User::STATUS_NOT_CONFIRMED;
+                    $this->send_confirmation_email($existing_user);
+                    return $existing_user;
+                }
             } else {
-                $user->name = '';
-                $user->surname = '';
-                $user->language = '';
-                $user->ip = '';
-                for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
-                    $field = 'profile_' . $i;
-                    $user->$field = '';
-                }
-                for ($i = 1; $i <= NEWSLETTER_LIST_MAX; $i++) {
-                    $field = 'list_' . $i;
-                    $user->$field = 0;
-                }
-            }
 
-            $subscription->data->merge_in($user);
-            $user->token = $this->get_token();
-            $user->status = $subscription->optin == 'single' ? TNP_User::STATUS_CONFIRMED : TNP_User::STATUS_NOT_CONFIRMED;
+                // The current user cannot be trusted (or it could be missing), so we need to force a double opt-in and create
+                // a temporary subscriber. It's like an unconfirmed but on confiration it is merged with the matching subscriber.
+                $subscription->optin = 'double';
+                $user = new TNP_User();
+                $subscription->data->merge_in($user);
+                $user->status = 'T'; // Important
+                $user = $this->save_user($user);
+                $this->save_user_subscription($user->id, $subscription);
+                $this->save_subscription_attributes($user, $subscription);
 
-            $user->updated = time();
-            $user = apply_filters('newsletter_user_subscribe', $user);
-            $user = $this->save_user($user);
-            do_action('newsletter_user_post_subscribe', $user);
-            $user->_new = true;
-            $user->_trusted = true;
-            $user->_activation = $user->status === TNP_User::STATUS_NOT_CONFIRMED;
-        }
-
-        $this->add_user_log($user, 'subscribe');
-
-        $this->logger->debug($user);
-
-        if ($subscription->welcome_email_id) {
-            $this->save_user_meta($user->id, 'welcome_email_id', $subscription->welcome_email_id);
-        } else {
-            $this->delete_user_meta($user->id, 'welcome_email_id');
-        }
-
-        if ($subscription->activation_email_id) {
-            $this->save_user_meta($user->id, 'activation_email_id', $subscription->activation_email_id);
-        } else {
-            $this->delete_user_meta($user->id, 'activation_email_id');
-        }
-
-        if ($subscription->welcome_page_id) {
-            $this->save_user_meta($user->id, 'welcome_page_id', $subscription->welcome_page_id);
-        } else {
-            $this->delete_user_meta($user->id, 'welcome_page_id');
-        }
-
-        if (!empty($subscription->autoresponders)) {
-            $this->save_user_meta($user->id, 'autoresponders', implode(',', $subscription->autoresponders));
-        } else {
-            $this->delete_user_meta($user->id, 'autoresponders');
-        }
-
-        // Is the activation required (by double opt-in or modification of a confirmed subscriber)
-        if ($user->_activation) {
-            if ($subscription->send_emails) {
-                $this->send_activation_email($user);
-            }
-        } else {
-            do_action('newsletter_user_confirmed', $user);
-            $this->notify_admin_on_subscription($user);
-            setcookie('newsletter', $this->get_user_key($user), time() + 60 * 60 * 24 * 365, '/');
-            if ($subscription->send_emails) {
-                $this->send_welcome_email($user);
+                // Needed for caller to redirect
+                $user->status = TNP_User::STATUS_NOT_CONFIRMED;
+                $this->send_confirmation_email($user);
+                return $user;
             }
         }
 
-        return $user;
+        $this->logger->debug('Subscritpion not processed');
+
+        return null;
     }
 
     /**
@@ -587,14 +659,13 @@ class NewsletterSubscription extends NewsletterModule {
      */
     function confirm($user = null, $emails = true) {
 
-        $this->logger->debug(__METHOD__);
+        $this->error_log('Confirmation start');
+
+        // We get here only when a confirmation link is followed from an email, it is not expired, it identifies a
+        // valid subscriber and, usually, there is a subscription dataset to confirm.
 
         if (!$user) {
-            $this->dienow('Subscriber not found', '', 404);
-        }
-
-        if ($user->status !== TNP_User::STATUS_NOT_CONFIRMED && $user->status !== TNP_User::STATUS_CONFIRMED) {
-            $this->dienow('Subscriber not found', 'This subscriber is bounced, complained or unsubscribed, cannot be confirmed', 404);
+            $this->dienow('Subscriber not found [c01]', 'The confirm procedure has been activated without a valid subscriber', 404);
         }
 
         // Email change? (to be moved to the profile module with a custom action and message)
@@ -607,48 +678,86 @@ class NewsletterSubscription extends NewsletterModule {
             return $user;
         }
 
-        // Confirmation for a repeated subscription
-        $subscription = get_transient('newsletter_subscription_' . $user->id);
-        $this->logger->debug('Transient subscription');
-        $this->logger->debug($subscription);
-        if (!empty($subscription->data)) {
-            delete_transient('newsletter_subscription_' . $user->id);
-            $this->logger->debug('Merging data');
-            $subscription->data->merge_in($user);
-            $user = $this->save_user($user);
-        } else {
-            // No confirmation for new data and already confirmed, it's a double call, and we don't send the welcome email
-            // once again. Should be managed at the top.
-            if ($user->status == TNP_User::STATUS_CONFIRMED) {
-                $emails = false;
-            }
+        if ($user->status !== TNP_User::STATUS_NOT_CONFIRMED && $user->status !== TNP_User::STATUS_CONFIRMED && $user->status !== 'T' && $user->status !== TNP_User::STATUS_UNSUBSCRIBED) {
+            $this->dienow('Subscriber not found [c02]', 'This subscriber is bounced, complained or unsubscribed, cannot be confirmed', 404);
         }
 
-        $user = $this->set_user_status($user, TNP_User::STATUS_CONFIRMED);
+        // A temporary user?
+        if ($user->status === 'T') {
+            // Switch to the correct subscriber
+            $matching_user = $this->get_user_by_email($user->email);
+            if (!$matching_user) {
+                $this->delete_user($user->id);
+                $this->dienow('Matching subscriber not found', '', 404);
+            }
+            $subscription = $this->get_user_subscription($user->id);
+            if (!$subscription) {
+                $this->delete_user($user->id);
+                $this->dienow('Subscription data not found', '', 404);
+            }
+            $subscription->data->merge_in($matching_user);
+            // The original user could be unsubscribed, for example...
+            $matching_user->status = TNP_User::STATUS_CONFIRMED;
+            $matching_user = $this->save_user($matching_user);
+
+            $this->save_subscription_attributes($matching_user, $subscription);
+
+            $this->add_user_log($matching_user, 'activate');
+
+            $this->delete_user($user->id);
+
+            do_action('newsletter_user_confirmed', $matching_user);
+
+            $this->send_welcome_email($matching_user);
+
+            $this->notify_admin_on_subscription($matching_user);
+
+            return $matching_user;
+        }
+
+
+        // Regular confirmation
+
+        $subscription = $this->get_user_subscription($user->id);
+
+        // When the subscription is available it means a trusted subscriber subscribed a second time and the data is awaiting
+        // to be merged in.
+        if ($subscription) {
+            $subscription->data->merge_in($user);
+            $this->delete_user_subscription($user->id);
+        } else {
+
+            // This could be a double click, we do not send the welcome email once again
+            if ($user->status === TNP_User::STATUS_CONFIRMED) {
+                // It a second confirmation
+                $this->update_user_last_activity($user);
+                // This is useful when checking for email scanners
+                $this->add_user_log($user, 'activate');
+                // No emails to be sent
+                return $user;
+            } //else {
+            //  $this->dienow('Subscription data not found', 'The subscriber exists, but the subscription data is missing', 404);
+            //}
+        }
+
+        // If the subscriber has subscription data, it's a double opt-in second subscription,
+        // we need to merge the data and then process it as a regular confirm.
+        // Merge the subscription data into the subscriber, it could be a confirmation for a second subscription of the
+        // same email.
+
+
+        $user->status = TNP_User::STATUS_CONFIRMED;
+        $user->last_activity = time();
+        $user = $this->save_user($user);
 
         $this->add_user_log($user, 'activate');
-        $this->update_user_last_activity($user);
-        setcookie('newsletter', $user->id . '-' . $user->token, time() + 60 * 60 * 24 * 365, '/');
 
         do_action('newsletter_user_confirmed', $user);
 
-        if ($emails) {
-            $this->send_welcome_email($user);
-        }
+        $this->send_welcome_email($user);
         $this->notify_admin_on_subscription($user);
 
         return $user;
-    }
-
-    function save_subscription_meta($subscription, $user) {
-
-    }
-
-    /**
-     * @deprecated since version 6.9.0
-     */
-    function subscribe($status = null, $emails = true) {
-        return false;
     }
 
     function add_microdata($message) {
@@ -822,19 +931,6 @@ class NewsletterSubscription extends NewsletterModule {
         return Newsletter::instance()->mail($user->email, $subject, $message, $headers);
     }
 
-    /**
-     * @todo Move texts in the _get_default_text() method
-     */
-    function get_text_message($type) {
-        switch ($type) {
-            case 'confirmation':
-                return __('To confirm your subscription follow the link below.', 'newsletter') . "\n\n{subscription_confirm_url}";
-            case 'confirmed':
-                return __('Your subscription has been confirmed.', 'newsletter');
-        }
-        return '';
-    }
-
     function is_double_optin() {
         return $this->get_main_option('noconfirmation') == 0;
     }
@@ -875,8 +971,8 @@ class NewsletterSubscription extends NewsletterModule {
         return $email_id;
     }
 
-    function send_confirmation_email($user, $force = false) {
-        return $this->send_activation_email($user, $force);
+    function send_activation_email($user, $force = false) {
+        return $this->send_confirmation_email($user, $force);
     }
 
     /**
@@ -886,38 +982,47 @@ class NewsletterSubscription extends NewsletterModule {
      * @param stdClass $user
      * @return bool
      */
-    function send_activation_email($user, $force = false) {
+    function send_confirmation_email($user, $force = false) {
 
-        $email_id = $this->get_user_meta_int($user->id, 'confirmation_email_id');
-        if (is_null($email_id)) {
-            $email_id = $this->get_default_activation_email_id($user->language);
+        $email_id = 0;
+
+        $subscription = $this->get_user_subscription($user->id);
+        if ($subscription) {
+            $email_id = (int) $subscription->confirmation_email_id;
         }
 
+        if (!$email_id) {
+            $email_id = $this->get_default_confirmation_email_id($user->language);
+        }
+
+        // The confirmation email should never be disabled, at moment there is no way
+        // to set that value by configuration
         if ($email_id === -1) {
-            return false;
+            return true;
         }
 
+        // Required to correctly load the default texts
         $this->switch_language($user->language);
 
-        if ($email_id === 0) {
-            $message = [];
-            $message['html'] = do_shortcode($this->get_text('confirmation_message'));
-            $message['text'] = $this->get_text_message('confirmation');
-            $subject = $this->get_text('confirmation_subject');
-
-            $r = $this->mail($user, $subject, $message);
-        } else {
-
+        if ($email_id) {
             $email = $this->get_email($email_id);
             if ($email) {
                 NewsletterComposer::instance()->regenerate($email);
-                $r = Newsletter::instance()->send($email, [$user]);
-            } else {
-                $r = false;
+                Newsletter::instance()->send($email, [$user]);
+                $this->restore_language();
+                return true;
             }
         }
+
+        $message = [];
+        $message['html'] = do_shortcode($this->get_text('confirmation_message'));
+        $message['text'] = $this->get_text('confirmation_message_plain_text');
+        $subject = $this->get_text('confirmation_subject');
+
+        $this->mail($user, $subject, $message);
+
         $this->restore_language();
-        return $r;
+        return true;
     }
 
     function get_default_welcome_email_id($language = null) {
@@ -942,9 +1047,16 @@ class NewsletterSubscription extends NewsletterModule {
 
     function send_welcome_email($user) {
 
-        $email_id = $this->get_user_meta_int($user->id, 'welcome_email_id');
+        // Custom welcome email tipically by third party form integration, woocommerce and other
+        // registration sources
+        $email_id = (int) $this->get_user_meta($user->id, 'confirmed_email_id');
 
-        if (is_null($email_id)) {
+        // if -1, do not send, if 0, use defaults
+        if ($email_id === -1) {
+            return false;
+        }
+
+        if (!$email_id) {
             $email_id = $this->get_default_welcome_email_id($user->language);
         }
 
@@ -956,7 +1068,7 @@ class NewsletterSubscription extends NewsletterModule {
         if ($email_id === 0) {
             $message = [];
             $message['html'] = do_shortcode($this->get_text('confirmed_message'));
-            $message['text'] = $this->get_text_message('confirmed');
+            $message['text'] = $this->get_text('confirmed_message_plain_text');
             $subject = $this->get_text('confirmed_subject');
 
             $r = $this->mail($user, $subject, $message);
@@ -973,64 +1085,13 @@ class NewsletterSubscription extends NewsletterModule {
         return $r;
     }
 
-    /**
-     * Sends a message (activation, welcome, cancellation, ...) with the correct template
-     * and checking if the message itself is disabled
-     *
-     * @param string $type
-     * @param TNP_User $user
-     */
-    function send_message($type, $user, $force = false) {
-
-        $this->logger->debug('Send message: ' . $type);
-
-        if ($type === 'confirmed') {
-
-            $email_id = $this->get_user_meta($user->id, 'welcome_email_id');
-            $this->logger->debug('Email ID: ' . $email_id);
-            if ($email_id) {
-                if ($email_id == '-1') {
-                    return;
-                }
-                $email = $this->get_email($email_id);
-                if ($email) {
-                    $r = Newsletter::instance()->send($email, [$user]);
-                    return;
-                } else {
-                    $this->logger->debug('Email not found');
-                }
-            }
-            if (!$force && $this->options['welcome_email'] == '2') {
-                return true;
-            }
-        }
-
-        if ($type === 'confirmation') {
-            if (!$force && !empty($this->options[$type . '_disabled'])) {
-                return true;
-            }
-        }
-
-        $this->switch_language($user->language);
-
-        $message = [];
-        $message['html'] = do_shortcode($this->get_text($type . '_message'));
-        $message['text'] = $this->get_text_message($type);
-//        if ($user->status == TNP_User::STATUS_NOT_CONFIRMED) {
-//            $message['html'] = $this->add_microdata($message['html']);
-//        }
-        $subject = $this->get_text($type . '_subject');
-
-        return $this->mail($user, $subject, $message);
-    }
-
     function redirect_to_confirmed($user, $email = null) {
         if (!$user) {
             die('Subscriber not found.');
         }
         $this->switch_language($user->language);
         $url = '';
-        $welcome_page_id = $this->get_user_meta($user->id, 'welcome_page_id');
+        $welcome_page_id = $this->get_user_meta($user->id, 'confirmed_page_id');
         if ($welcome_page_id) {
             $url = get_permalink($welcome_page_id);
         } else {
@@ -1050,7 +1111,9 @@ class NewsletterSubscription extends NewsletterModule {
             }
         }
         $url = apply_filters('newsletter_welcome_url', $url, $user);
-        $url = Newsletter::instance()->build_message_url($url, 'confirmed', $user, $email);
+        //$url = Newsletter::instance()->build_message_url($url, 'confirmed', $user, $email);
+        // Assume there is a cookie
+        $url = $this->build_message_url($url, 'confirmed', null, null);
         $this->redirect($url);
     }
 
@@ -1060,7 +1123,8 @@ class NewsletterSubscription extends NewsletterModule {
         }
         $this->switch_language($user->language);
         $url = '';
-        $page_id = $this->get_user_meta($user->id, 'activation_page_id');
+        // TODO: get it from the subscription
+        $page_id = $this->get_user_meta($user->id, 'confirmation_page_id');
         if ($page_id) {
             $url = get_permalink($page_id);
         } else {
@@ -1079,7 +1143,10 @@ class NewsletterSubscription extends NewsletterModule {
             }
         }
         $url = apply_filters('newsletter_confirmation_url', $url, $user);
-        $url = $this->build_message_url($url, 'confirmation', $user, $email);
+
+        //$url = $this->build_message_url($url, 'confirmation', $user, $email);
+        // Assume there is a cookie
+        $url = $this->build_message_url($url, 'confirmation', null, null);
         $this->redirect($url);
     }
 

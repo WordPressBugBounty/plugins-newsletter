@@ -1,5 +1,7 @@
 <?php
 if (!defined('ABSPATH')) exit;
+
+/** @var NewsletterControls $controls  */
 ?>
 <h3>Social icons</h3>
 <table class="form-table">

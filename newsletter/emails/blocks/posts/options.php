@@ -1,7 +1,11 @@
 <?php
+
+defined('ABSPATH') || exit;
+
 /** @var array $options */
 /** @var NewsletterControls $controls  */
 /** @var NewsletterFields $fields */
+/** @var array $context */
 
 $extensions_url = '?page=newsletter_main_extension';
 if (class_exists('NewsletterExtensions')) {

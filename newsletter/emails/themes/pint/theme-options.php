@@ -1,6 +1,8 @@
 <?php
 if (!defined('ABSPATH'))
     exit;
+
+/** @var NewsletterControls $controls  */
 ?>
 <p>
     This theme requires posts with at least one image and a number of posts like

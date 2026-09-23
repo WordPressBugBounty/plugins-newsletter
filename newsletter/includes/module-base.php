@@ -59,6 +59,42 @@ class NewsletterModuleBase {
     }
 
     /**
+     * Returns an array of languages with key the language code and value the language name.
+     * An empty array is returned if no language is available.
+     */
+    static function get_languages() {
+
+        if (defined('NEWSLETTER_MULTILANGUAGE') && !NEWSLETTER_MULTILANGUAGE) {
+            return [];
+        }
+
+        $language_options = [];
+
+        // WPML
+        if (class_exists('SitePress')) {
+            $languages = apply_filters('wpml_active_languages', null, ['skip_missing' => 0]);
+            foreach ($languages as $language) {
+                $language_options[$language['language_code']] = $language['translated_name'];
+            }
+
+            return $language_options;
+        }
+
+        // Polylang
+        if (function_exists('pll_languages_list')) {
+            $languages = pll_languages_list(['fields' => '']);
+            foreach ($languages as $data) {
+                $language_options[$data->slug] = $data->name;
+            }
+
+            return $language_options;
+        }
+
+        // Addons
+        return apply_filters('newsletter_languages', $language_options);
+    }
+
+    /**
      * Returns the current language code set by multiplanguage plugins or empty in single language installations.
      * Note: the language code is not the WordPress "locale" code.
      *
@@ -93,7 +129,8 @@ class NewsletterModuleBase {
             }
         } else if (class_exists('SitePress')) { // WPML
             $languages = apply_filters('wpml_active_languages', null, ['skip_missing' => 0]);
-            // A user reported this filter returning a nulla value (!?)
+
+            // A user reported this filter returning a null value (!?)
             if ($languages && is_array($languages)) {
                 foreach ($languages as $code => $data) {
                     if ($code === self::$language) {
@@ -109,38 +146,36 @@ class NewsletterModuleBase {
      * Switch the internal language and locale variables, then used to get language
      * specific URLs, translations, ...
      *
-     * @param mixed $language
+     * @param mixed $language It can be an object ocntaining the "language" attribute
      */
     function switch_language($language) {
-        if (!self::$is_multilanguage) {
+        $language = $language->language ?? $language ?? ''; // When receiving a subscriber...
+        if (!self::$is_multilanguage || !$language) {
             return;
         }
 
-        $language = $language->language ?? $language ?? '';
-
-//        if (NEWSLETTER_DEBUG) {
-//            error_log('Switch language: ' . $language);
-//        }
         array_push(self::$switched_languages, self::$language);
         array_push(self::$switched_locales, self::$locale);
         self::$language = $language;
         self::$locale = $this->get_locale($language);
+
+        // Works with Polylang as well
+        // It should swith the WP locale
         do_action('wpml_switch_language', $language);
     }
 
+    /**
+     * Restore ther internal previous language and locale after a switch.
+     */
     function restore_language() {
         if (!self::$switched_languages) {
-//            if (NEWSLETTER_DEBUG) {
-//                error_log('Newsletter: unpaird call to restore_language()');
-//            }
             return;
         }
         self::$language = array_pop(self::$switched_languages);
         self::$locale = array_pop(self::$switched_locales);
-        do_action('wpml_switch_language', self::$language);
-//        if (NEWSLETTER_DEBUG) {
-//            error_log('Restore language: ' . self::$language);
-//        }
+
+        $has_stack = defined('ICL_SITEPRESS_VERSION') && version_compare(ICL_SITEPRESS_VERSION, '5.0', '>=');
+        do_action('wpml_switch_language', $has_stack ? null : self::$language );
     }
 
     /** Returns a prefix to be used for option names and other things which need to be uniquely named. The parameter
@@ -187,7 +222,7 @@ class NewsletterModuleBase {
     }
 
     /**
-     * To be implemented by derived classes.
+     * Frontend and admin modules provide different implementations.
      *
      * @param string $key
      * @param string $sub
@@ -213,6 +248,7 @@ class NewsletterModuleBase {
     }
 
     /**
+     * Runs a query and returns "false" on error (logged).
      *
      * @global wpdb $wpdb
      * @param string $query
@@ -221,18 +257,21 @@ class NewsletterModuleBase {
         global $wpdb;
 
         $this->logger->debug($query);
+        $wpdb->last_error = '';
         $r = $wpdb->query($query);
-        if ($r === false) {
+        if ($r === false || $wpdb->last_error) {
             $this->logger->fatal($query);
             $this->logger->fatal($wpdb->last_error);
+            return false;
         }
         return $r;
     }
 
-    function get_results($query) {
+    function get_results($query, $format = OBJECT) {
         global $wpdb;
         $wpdb->last_error = '';
-        $r = $wpdb->get_results($query);
+        $r = $wpdb->get_results($query, $format);
+        // Error check for the fancy way the ressukts are returned
         if ($r === false || $r === null || $wpdb->last_error) {
             $this->logger->fatal($query);
             $this->logger->fatal($wpdb->last_error);
@@ -247,10 +286,10 @@ class NewsletterModuleBase {
      * @param type $query
      * @return bool
      */
-    function get_row($query) {
+    function get_row($query, $format = OBJECT) {
         global $wpdb;
         $wpdb->last_error = '';
-        $r = $wpdb->get_row($query);
+        $r = $wpdb->get_row($query, $format);
         if ($r === false || $wpdb->last_error) {
             $this->logger->fatal($query);
             $this->logger->fatal($wpdb->last_error);
@@ -275,42 +314,6 @@ class NewsletterModuleBase {
     }
 
     /**
-     * Returns an array of languages with key the language code and value the language name.
-     * An empty array is returned if no language is available.
-     */
-    static function get_languages() {
-
-        if (defined('NEWSLETTER_MULTILANGUAGE') && !NEWSLETTER_MULTILANGUAGE) {
-            return [];
-        }
-
-        $language_options = [];
-
-        // WPML
-        if (class_exists('SitePress')) {
-            $languages = apply_filters('wpml_active_languages', null, ['skip_missing' => 0]);
-            foreach ($languages as $language) {
-                $language_options[$language['language_code']] = $language['translated_name'];
-            }
-
-            return $language_options;
-        }
-
-        // Polylang
-        if (function_exists('pll_languages_list')) {
-            $languages = pll_languages_list(['fields' => '']);
-            foreach ($languages as $data) {
-                $language_options[$data->slug] = $data->name;
-            }
-
-            return $language_options;
-        }
-
-        // Addons
-        return apply_filters('newsletter_languages', $language_options);
-    }
-
-    /**
      * Returns a list of users marked as "test user".
      * @return TNP_User[]
      */
@@ -329,8 +332,9 @@ class NewsletterModuleBase {
     function get_user($id_or_email, $format = OBJECT) {
         global $wpdb;
 
-        if (empty($id_or_email))
+        if (empty($id_or_email)) {
             return null;
+        }
 
 // To simplify the reaload of a user passing the user it self.
         if (is_object($id_or_email)) {
@@ -342,27 +346,24 @@ class NewsletterModuleBase {
         $id_or_email = strtolower(trim($id_or_email));
 
         if (is_numeric($id_or_email)) {
-            $r = $wpdb->get_row($wpdb->prepare("select * from " . NEWSLETTER_USERS_TABLE . " where id=%d limit 1", $id_or_email), $format);
+            $r = $this->get_row($wpdb->prepare("select * from " . NEWSLETTER_USERS_TABLE . " where id=%d limit 1", $id_or_email), $format);
         } else {
-            $r = $wpdb->get_row($wpdb->prepare("select * from " . NEWSLETTER_USERS_TABLE . " where email=%s limit 1", $id_or_email), $format);
+            $r = $this->get_row($wpdb->prepare("select * from " . NEWSLETTER_USERS_TABLE . " where status <> 'T' and email=%s limit 1", $id_or_email), $format);
         }
 
-        if ($wpdb->last_error) {
-            $this->logger->error($wpdb->last_error);
-            return null;
-        }
         return $r;
     }
 
-    function get_dummy_user() {
+    function get_dummy_user($token = '0') {
+        $token = sanitize_key($token);
         $dummy_user = new TNP_User();
         $dummy_user->id = 0;
-        $dummy_user->token = 0;
+        $dummy_user->token = $token;
         $dummy_user->email = 'john.doe@example.org';
         $dummy_user->name = 'John';
         $dummy_user->surname = 'Doe';
         $dummy_user->sex = 'n';
-        $dummy_user->language = '';
+        $dummy_user->language = $token !== '0' ? $token : '';
         $dummy_user->status = TNP_User::STATUS_CONFIRMED;
         $dummy_user->_trusted = true;
         $dummy_user->_dummy = true;
@@ -392,70 +393,97 @@ class NewsletterModuleBase {
 
     function get_user_meta($user_id, $key) {
         global $wpdb;
-
-        $r = $wpdb->get_row($wpdb->prepare("select * from " . NEWSLETTER_USERS_META_TABLE . " where user_id=%d and meta_key=%s limit 1", $user_id, $key));
-        if (!$r) {
-            return null;
-        }
-
-        if ($wpdb->last_error) {
-            $this->logger->error($wpdb->last_error);
-            return null;
-        }
-
-        return $r->value;
+        $r = $this->get_row($wpdb->prepare("select * from " . NEWSLETTER_USERS_META_TABLE . " where user_id=%d and meta_key=%s limit 1", $user_id, $key));
+        return $r ? $r->value : null;
     }
 
     /**
      *
      * @global wpdb $wpdb
      * @param string $email
-     * @return TNP_User
+     * @return mixed
      */
     function get_user_by_email($email) {
         global $wpdb;
-
-        $r = $wpdb->get_row($wpdb->prepare("select * from " . NEWSLETTER_USERS_TABLE . " where email=%s limit 1", $email));
-
-        if ($wpdb->last_error) {
-            $this->logger->error($wpdb->last_error);
-            return null;
-        }
-        return $r;
+        return $this->get_row($wpdb->prepare("select * from " . NEWSLETTER_USERS_TABLE . " where status <> 'T' and email=%s limit 1", $email));
     }
 
     /**
-     * Returns the user unique key
+     * Loads a user identify by a key, checking if the key is expired and if it matches the action.
+     */
+    function get_user_by_key($key, $action = '') {
+        if (empty($key)) {
+            return null;
+        }
+
+        // Old key
+        if (strpos($key, '.') === false) {
+            return null;
+        }
+
+        list ($id, $token) = explode('-', $key, 2);
+        $user = $this->get_user($id);
+        if (!$user) {
+            return null;
+        }
+        list($timestamp, $signature) = explode('.', $token, 2);
+        if ($timestamp < time()) {
+            return null;
+        }
+        $computed = md5($user->id . $user->token . $timestamp . $action);
+        if (!hash_equals($computed, $signature)) {
+            return null;
+        }
+        return $user;
+    }
+
+    /**
+     * @todo Possibly add a constant to control the grace period
+     * @param string $key
+     * @return null|TNP_User
+     */
+    function get_user_by_old_key($key) {
+        if (empty($key)) {
+            return null;
+        }
+        $time = (int) get_option('newsletter_new_token_time');
+        if ($time < time() - MONTH_IN_SECONDS) {
+            //$this->error_log("Old keys grace period expired");
+            return null;
+        }
+
+        list ($id, $token) = explode('-', $key, 2);
+        $user = $this->get_user($id);
+        if (!$user) {
+            return null;
+        }
+        $user_token = $this->get_user_meta($user->id, 'old_token');
+        if (hash_equals($user_token, $token)) {
+            return $user;
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns a generic subscriber key that expires in 7 days.
      *
      * @param TNP_User $user
      * @return string
      */
-    function get_user_key($user, $context = '') {
-        if (empty($user->token)) {
+    function get_user_key($user, $action = '', $duration = 7 * DAY_IN_SECONDS) {
+        if (strlen($user->token) < 16) {
             $this->refresh_user_token($user);
         }
 
-        if ($context === 'preconfirm' || isset($user->_trusted) && !$user->_trusted) {
-            return $user->id . '-' . md5($user->token);
-        }
-        return $user->id . '-' . $user->token;
+        $duration = (int) $duration;
+        $timestamp = $duration + time();
+
+        return $user->id . '-' . $timestamp . '.' . md5($user->id . $user->token . $timestamp . $action);
     }
 
-    /**
-     * Returns the user token, processed by status
-     * @param TNP_User $user
-     * @return string
-     */
-    function get_user_token($user) {
-        // Just in case...
-        if (empty($user->token)) {
-            $this->refresh_user_token($user);
-        }
-        if ($user->status === TNP_User::STATUS_NOT_CONFIRMED || isset($user->_trusted) && !$user->_trusted) {
-            return md5($user->token);
-        } else {
-            return $user->token;
-        }
+    function get_user_key_field($user, $action) {
+        return '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user, $action, HOUR_IN_SECONDS)) . '">';
     }
 
     /**
@@ -474,7 +502,8 @@ class NewsletterModuleBase {
         if (empty($user['id'])) {
             $existing = $this->get_user($user['email']);
             if ($existing != null) {
-                return false;
+                $user['status'] = 'T';
+                //return false;
             }
             if (empty($user['token'])) {
                 $user['token'] = $this->get_token();
@@ -509,6 +538,26 @@ class NewsletterModuleBase {
             $this->query($wpdb->prepare("insert into " . NEWSLETTER_USERS_META_TABLE . " (user_id, meta_key, value) values (%d, %s, %s)",
                             $user_id, $key, $value));
         }
+    }
+
+    function save_user_subscription($user_id, $subscription) {
+        $this->save_user_meta($user_id, 'subscription', serialize($subscription));
+    }
+
+    /**
+     * @return TNP_Subscription
+     */
+    function get_user_subscription($user_id) {
+        $value = $this->get_user_meta($user_id, 'subscription');
+        if ($value) {
+            return unserialize($value);
+        }
+
+        return null;
+    }
+
+    function delete_user_subscription($user_id) {
+        $this->delete_user_meta($user_id, 'subscription');
     }
 
     function delete_user_meta($user_id, $key) {
@@ -547,7 +596,9 @@ class NewsletterModuleBase {
             return;
         }
 
-        $token = $this->get_token();
+        $token = $this->get_token(16);
+
+        $this->save_user_meta($user->id, 'old_token', $user->token);
 
         $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set token=%s where id=%d limit 1", $token, $user->id));
         $user->token = $token;
@@ -555,9 +606,6 @@ class NewsletterModuleBase {
 
     function set_email_status($email, $status) {
         global $wpdb;
-
-        $this->logger->debug('Status change to ' . $status . ' of email ' . $email->id . ' from ' . $_SERVER['REQUEST_URI']);
-
         $this->query($wpdb->prepare("update " . NEWSLETTER_EMAILS_TABLE . " set status=%s where id=%d limit 1", $status, $email->id));
     }
 
@@ -771,7 +819,7 @@ class NewsletterModuleBase {
 
     function get_emails_blocked_count() {
         global $wpdb;
-        $count = $wpdb->get_var($wpdb->prepare("select count(*) from " . NEWSLETTER_EMAILS_TABLE . " where status=%s order by id desc", TNP_Email::STATUS_ERROR));
+        $count = (int) $wpdb->get_var($wpdb->prepare("select count(*) from " . NEWSLETTER_EMAILS_TABLE . " where status=%s order by id desc", TNP_Email::STATUS_ERROR));
         return $count;
     }
 
@@ -862,7 +910,8 @@ class NewsletterModuleBase {
     function get_posts($filters = [], $language = '') {
 
         if ($language) {
-            do_action('wpml_switch_language', $language);
+            $this->switch_language($language);
+            //do_action('wpml_switch_language', $language);
             $filters['suppress_filters'] = false;
             $filters = apply_filters('newsletter_get_posts_filters', $filters, $language);
         }
@@ -876,15 +925,17 @@ class NewsletterModuleBase {
         $posts = get_posts($filters);
 
         if ($language) {
-            do_action('wpml_switch_language', Newsletter::$language);
+            $this->restore_language();
+            //do_action('wpml_switch_language', Newsletter::$language);
         }
         return $posts;
     }
 
     function get_wp_query($filters, $language = '') {
         if ($language) {
+            $this->switch_language($language);
             if (class_exists('SitePress')) {
-                do_action('wpml_switch_language', $language);
+                //do_action('wpml_switch_language', $language);
                 $filters['suppress_filters'] = false;
             } else if (class_exists('Polylang')) {
                 $filters['lang'] = $language;
@@ -896,7 +947,8 @@ class NewsletterModuleBase {
         $posts = new WP_Query($filters);
 
         if ($language) {
-            do_action('wpml_switch_language', Newsletter::$language);
+            $this->restore_language($language);
+            //do_action('wpml_switch_language', Newsletter::$language);
         }
 
         return $posts;
@@ -991,16 +1043,16 @@ class NewsletterModuleBase {
      * @param TNP_Email $email
      * @return string
      */
-    function build_action_url($action, $user = null, $email = null) {
+    function build_action_url($action, $user = null, $email = null, $duration = HOUR_IN_SECONDS) {
         $url = $this->get_action_base_url();
 
-        $url = $this->add_qs($url, 'na=' . urlencode($action));
+        $url = $this->add_qs($url, 'na=' . rawurlencode($action));
 
         if ($user) {
-            $url .= '&nk=' . urlencode($this->get_user_key($user));
+            $url .= '&nk=' . rawurlencode($this->get_user_key($user, $action, $duration));
         }
         if ($email) {
-            $url .= '&nek=' . urlencode($this->get_email_key($email));
+            $url .= '&nek=' . rawurlencode($this->get_email_key($email));
         }
         return $url;
     }
@@ -1008,7 +1060,7 @@ class NewsletterModuleBase {
     function build_dummy_action_url($action) {
         $url = $this->get_action_base_url();
 
-        $url = $this->add_qs($url, 'na=' . urlencode($action));
+        $url = $this->add_qs($url, 'na=' . rawurlencode($action));
         $language = $this->language();
         if (empty($language)) {
             $language = '0';
@@ -1018,27 +1070,39 @@ class NewsletterModuleBase {
     }
 
     function build_action_url_ajax($action, $user = null, $email = null) {
-        $url = admin_url('admin-ajax.php') . '?action=tnp&na=' . urlencode($action);
+        $url = admin_url('admin-ajax.php') . '?action=tnp&na=' . rawurlencode($action);
 
         if ($user) {
-            $url .= '&nk=' . urlencode($this->get_user_key($user));
+            $url .= '&nk=' . rawurlencode($this->get_user_key($user, $action, $duration));
         }
         if ($email) {
-            $url .= '&nek=' . urlencode($this->get_email_key($email));
+            $url .= '&nek=' . rawurlencode($this->get_email_key($email));
         }
         return $url;
     }
 
+    static function deep_replace($search, $subject) {
+        $count = 1;
+        while ($count) {
+            $subject = str_replace($search, '', $subject, $count);
+        }
+
+        return $subject;
+    }
+
     static function sanitize_user_field($value, $max = 250) {
-        if (!$value)
+        if (!$value) {
             return '';
+        }
         $value = html_entity_decode($value, ENT_QUOTES);
         $value = wp_strip_all_tags($value, true);
         $value = str_replace(['{', '}', '[', ']', '>', '<'], '', $value); // Tags cannot be used on user's fields
+        $value = self::deep_replace(['%7B', '%7D'], $value);
         $value = str_replace(';', ' ', $value);
         if (mb_strlen($value) > $max) {
             $value = mb_substr($value, 0, $max);
         }
+
         return $value;
     }
 
@@ -1115,6 +1179,10 @@ class NewsletterModuleBase {
             $data->region = self::sanitize_user_field($data->region, 50);
         }
 
+        if (isset($data->source)) {
+            $data->source = self::sanitize_user_field($data->source, 50);
+        }
+
         if (isset($data->http_referer)) {
             $data->http_referer = self::sanitize_user_field($data->http_referer, 200);
         }
@@ -1131,6 +1199,13 @@ class NewsletterModuleBase {
         }
     }
 
+    /**
+     * @todo Optimize.
+     *
+     * @param string $email
+     * @param bool $empty_ok
+     * @return bool
+     */
     static function is_email($email, $empty_ok = false) {
 
         if (!is_string($email)) {
@@ -1143,9 +1218,21 @@ class NewsletterModuleBase {
             return $empty_ok;
         }
 
+        // WP function
         if (!is_email($email)) {
             return false;
         }
+
+        $set = "{}<>%";
+
+        if (strpbrk($email, $set) !== false) {
+            return false;
+        }
+
+        if (self::sanitize_user_field($email) !== $email) {
+            return false;
+        }
+        // Extra checks
 
         if (mb_strlen($email) > 100) {
             return false;
@@ -1169,7 +1256,7 @@ class NewsletterModuleBase {
     static function normalize_email($email) {
 
         $email = strtolower(trim($email));
-        if (!is_email($email)) {
+        if (!self::is_email($email)) {
             return false;
         }
 
@@ -1205,8 +1292,8 @@ class NewsletterModuleBase {
      * @param int $size
      * @return string
      */
-    static function get_token($size = 10) {
-        return substr(md5(rand()), 0, $size);
+    static function get_token($size = 16) {
+        return wp_generate_password($size, false, false);
     }
 
     /**
@@ -1313,7 +1400,7 @@ class NewsletterModuleBase {
         <!DOCTYPE html>
         <html>
             <head></head>
-            <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+            <body style="font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
                 <div class="box" style="border: 1px solid #ccc; padding: 20px;">
                     <?= $message ?>
                 </div>
@@ -1517,5 +1604,21 @@ class NewsletterModuleBase {
         global $wpdb;
         $wpdb->query($wpdb->prepare("update $wpdb->options set option_value=%s where option_name=%s limit 1", '0', 'newsletter_lock_' . $name));
         $wpdb->flush();
+    }
+
+    /**
+     * To be used only when debugging, then all calls should be removed.
+     *
+     * @param mixed $text
+     */
+    function error_log($text) {
+        if (!NEWSLETTER_DEBUG) {
+            return;
+        }
+        if (!is_scalar($text)) {
+            error_log(print_r($text, true));
+        } else {
+            error_log($text);
+        }
     }
 }

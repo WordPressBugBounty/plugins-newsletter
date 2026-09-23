@@ -31,20 +31,37 @@ class NewsletterProfile extends NewsletterModule {
         }
     }
 
+    /**
+     * URL to the subscriber profile edit action. This URL MUST NEVER be changed by
+     * 3rd party plugins. Plugins can change the final URL after the action has been executed using the
+     * <code>newsletter_profile_url</code> filter.
+     *
+     * @param stdClass $user
+     * @return string
+     */
+    function get_profile_url($user) {
+        return $this->build_action_url('p', $user, null, 7 * DAY_IN_SECONDS);
+    }
+
+    /**
+     * Button to start the data export.
+     *
+     * @param array $attrs
+     * @param string $content Ignored
+     * @return string
+     */
     function shortcode_newsletter_export_button($attrs, $content = '') {
         $user = $this->get_current_user();
 
-        if (!$user || !$user->_trusted) {
-            if (NEWSLETTER_DEBUG) {
-                echo 'Not trusted';
-            }
+        if (!$user || $user->status !== TNP_User::STATUS_CONFIRMED) {
             return '';
         }
 
         $label = empty($attrs['label']) ? __('Export your data', 'newsletter') : $attrs['label'];
 
         $b = '<form action="' . esc_attr($this->build_action_url('px')) . '" method="post" class="tnp-button-form tnp-export" target="_blank">';
-        $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
+        $b .= $this->get_user_key_field($user, 'px');
+        $b .= wp_nonce_field('newsletter-export', '_wpnonce', true, false);
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
         $b .= '</form>';
         return $b;
@@ -53,13 +70,14 @@ class NewsletterProfile extends NewsletterModule {
     function shortcode_newsletter_profile_button($attrs, $content = '') {
         $user = $this->get_current_user();
 
-        if (!$user || !$user->_trusted) {
+        if (!$user || $user->status !== TNP_User::STATUS_CONFIRMED) {
             return '';
         }
 
         $label = empty($attrs['label']) ? __('Profile edit', 'newsletter') : $attrs['label'];
-        $b = '<form action="' . esc_attr($this->build_action_url('profile')) . '" method="post" class="tnp-button-form tnp-profile">';
-        $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
+        $b = '<form action="' . esc_attr($this->build_action_url('p')) . '" method="post" class="tnp-button-form tnp-profile">';
+        $b .= $this->get_user_key_field($user, 'p');
+        $b .= wp_nonce_field('newsletter-profile', '_wpnonce', true, false);
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
         $b .= '</form>';
         return $b;
@@ -76,22 +94,24 @@ class NewsletterProfile extends NewsletterModule {
                 $url = get_permalink((int) $page_id);
             }
         }
-        $url = parent::build_message_url($url, 'profile', $user, null, $alert);
+        //$url = parent::build_message_url($url, 'profile', $user, null, $alert);
+
+        // Assume there is a cookie, no need to transfer the subscriber data
+        $url = parent::build_message_url($url, 'profile', null, null, $alert);
+
         $this->restore_language();
         return $url;
     }
 
     function hook_newsletter_action_dummy($action, $user, $email) {
-        if (!in_array($action, ['p', 'profile', 'profile-save', 'ps', 'px'])) {
+        if (!in_array($action, ['p', 'ps', 'px'])) {
             return;
         }
 
         switch ($action) {
-            case 'profile':
             case 'p':
                 $this->redirect($this->get_profile_page_url($user));
 
-            case 'profile-save':
             case 'ps':
                 $this->redirect($this->get_profile_page_url($user, $this->get_text('saved')));
         }
@@ -99,18 +119,17 @@ class NewsletterProfile extends NewsletterModule {
 
     function hook_newsletter_action($action, $user, $email) {
 
-        if (!in_array($action, ['p', 'profile', 'profile-save', 'ps', 'px'])) {
+        if (!in_array($action, ['p', 'ps', 'px'])) {
             return;
         }
 
-        if (!$user || $user->status != TNP_User::STATUS_CONFIRMED || !$user->_trusted) {
+        if (!$user || $user->status !== TNP_User::STATUS_CONFIRMED) {
             $this->dienow(__('Subscriber not found or not confirmed or started from a test newsletter.', 'newsletter'), 'From a test newsletter or subscriber key not valid or subscriber not confirmed', 404);
         }
 
         $this->set_user_cookie($user);
 
         switch ($action) {
-            case 'profile':
             case 'p':
 
                 $profile_url = $this->get_profile_page_url($user);
@@ -118,14 +137,21 @@ class NewsletterProfile extends NewsletterModule {
 
                 $this->redirect($profile_url);
 
-            case 'profile-save':
             case 'ps':
+                $verified = wp_verify_nonce($_REQUEST['_wpnonce'], 'newsletter-profile');
+                if (!$verified) {
+                    die('Unverfied request');
+                }
                 $res = $this->save_profile($user);
                 $alert = is_wp_error($res) ? $res->get_error_message() : $this->get_text('saved');
 
                 $this->redirect($this->get_profile_page_url($user, $alert));
 
             case 'px':
+                $verified = wp_verify_nonce($_REQUEST['_wpnonce'], 'newsletter-export');
+                if (!$verified) {
+                    die('Unverfied request');
+                }
                 header('Content-Type: application/json;charset=UTF-8');
                 echo $this->build_export_json($user);
                 die();
@@ -166,17 +192,6 @@ class NewsletterProfile extends NewsletterModule {
         return wp_json_encode($data, JSON_PRETTY_PRINT);
     }
 
-    /**
-     * URL to the subscriber profile edit action. This URL MUST NEVER be changed by
-     * 3rd party plugins. Plugins can change the final URL after the action has been executed using the
-     * <code>newsletter_profile_url</code> filter.
-     *
-     * @param stdClass $user
-     */
-    function get_profile_url($user, $email = null) {
-        return $this->build_action_url('p', $user, $email);
-    }
-
     function hook_newsletter_replace($text, $user, $email, $html = true) {
         if (!$user) {
             $text = $this->replace_url($text, 'profile_url', $this->build_action_url('nul'));
@@ -184,7 +199,7 @@ class NewsletterProfile extends NewsletterModule {
         }
 
         // Profile edit page URL and link
-        $url = $this->get_profile_url($user, $email);
+        $url = $this->get_profile_url($user);
         $text = $this->replace_url($text, 'profile_url', $url);
 
         if (strpos($text, '{profile_form}') !== false) {
@@ -438,6 +453,7 @@ class NewsletterProfile extends NewsletterModule {
     }
 
     function shortcode_newsletter_profile($attrs, $content = '') {
+
         $user = $this->get_current_user();
 
         if (!$user) {
@@ -460,7 +476,8 @@ class NewsletterProfile extends NewsletterModule {
             $buffer = '';
             $buffer .= '<div class="tnp tnp-form tnp-profile">';
             $buffer .= '<form action="' . esc_attr($this->build_action_url('ps')) . '" method="post">';
-            $buffer .= '<input type="hidden" name="nk" value="' . esc_attr($user->id . '-' . $user->token) . '">';
+            $buffer .= wp_nonce_field('newsletter-profile', '_wpnonce', true, false);
+            $buffer .= $this->get_user_key_field($user, 'ps');
             $buffer .= do_shortcode($content);
             $buffer .= '<div class="tnp-field tnp-field-button">';
             $buffer .= '<input class="tnp-submit" type="submit" value="' . esc_attr($this->get_text('save_label')) . '">';
@@ -503,7 +520,8 @@ class NewsletterProfile extends NewsletterModule {
 
         $buffer .= '<div class="tnp tnp-form tnp-profile">';
         $buffer .= '<form action="' . esc_attr($this->build_action_url('ps')) . '" method="post">';
-        $buffer .= '<input type="hidden" name="nk" value="' . esc_attr($user->id . '-' . $user->token) . '">';
+        $buffer .= $this->get_user_key_field($user, 'ps');
+        $buffer .= wp_nonce_field('newsletter-profile', '_wpnonce', true, false);
 
         if (!empty($options['email'])) {
             $buffer .= '<div class="tnp-field tnp-field-email">';

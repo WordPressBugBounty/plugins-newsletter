@@ -1,4 +1,7 @@
 <?php
+
+/** @var array $options */
+
 $size = [$composer['width'], 0];
 $content_width = $composer['content_width'];
 $title_style = TNP_Composer::get_title_style($options, 'title', $composer);

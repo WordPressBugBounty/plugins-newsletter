@@ -9,7 +9,7 @@ $controls = new NewsletterControls();
 
 if ($controls->is_action('save')) {
 
-    if (!is_email($controls->data['email'])) {
+    if (!Newsletter::is_email($controls->data['email'])) {
         $controls->errors = __('Wrong email address.', 'newsletter');
     }
 

@@ -1000,6 +1000,11 @@ span.tnp-user-status {
     color: var(--tnp-status-orange);
 }
 
+.tnp-user-status--temporary {
+    background-color: #444;
+    color: #fff;
+}
+
 .tnp-user-status--unknown {
     background-color: #000;
     color: #fff;

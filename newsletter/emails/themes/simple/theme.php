@@ -13,6 +13,7 @@ global $newsletter, $post;
 if (!defined('ABSPATH'))
     exit;
 
+/** @var array $theme_options */
 
 if (empty($theme_options['theme_color']))
     $color = '#0088cc';
@@ -71,7 +72,7 @@ if (isset($theme_options['theme_posts'])) {
 <?php echo get_option('blogname') ?>
                                     </td>
                                 </tr>
-                                <!-- main content here --> 
+                                <!-- main content here -->
                                 <tr>
                                     <td>
                                         <table border="0" cellspacing="0" cellpadding="0" width="100%">
@@ -109,7 +110,7 @@ if (isset($theme_options['theme_posts'])) {
                                         </table>
                                     </td>
                                 </tr>
-                                <!-- end main content --> 
+                                <!-- end main content -->
                                 <tr>
                                     <td>
                                         <table border="0" cellspacing="0" cellpadding="0" width="100%">

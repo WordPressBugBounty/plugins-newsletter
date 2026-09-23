@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business.
-  Version: 9.3.9
+  Version: 9.4.0
   Author: The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '9.3.9');
+define('NEWSLETTER_VERSION', '9.4.0');
 
 global $wpdb, $newsletter;
 
@@ -89,6 +89,9 @@ if (!defined('NEWSLETTER_PROFILE_MAX'))
 
 if (!defined('NEWSLETTER_FORMS_MAX'))
     define('NEWSLETTER_FORMS_MAX', 10);
+
+if (!defined('NEWSLETTER_TEST'))
+    define('NEWSLETTER_TEST', false);
 
 spl_autoload_register(function ($class) {
     static $dir = __DIR__ . '/classes/';
@@ -305,19 +308,32 @@ class Newsletter extends NewsletterModule {
             $this->dienow('This link is not active on newsletter preview', 'You can send a test message to test subscriber to have the real working link.');
         }
 
-        $user = $this->get_current_user();
+        // Check for dummy subscriber, used to let the administrator test the messages, actions and the like.
+        // Use only the key in the request
+        if (current_user_can('administrator') && isset($_REQUEST['nk'])) {
+            list($id, $token) = explode('-', $_REQUEST['nk']);
+            if ($id === '0') {
+                $user = $this->get_dummy_user($token);
+                $this->switch_language($user);
+                do_action('newsletter_action_dummy', $this->action, $user, null);
+                return;
+            }
+        }
+
+        // Get the subscriber from the signed and timed key in the request, if valid.
+        // This way, each action link has a life timespan.
+        $user = $this->get_user_by_key($_REQUEST['nk'] ?? '', $this->action);
+
+        // Old token temporary management
+        if (!$user) {
+            $user = $this->get_user_by_old_key($_REQUEST['nk'] ?? '');
+        }
+
         $email = $this->get_email_from_request();
 
-        if ($user && isset($user->_dummy) && $user->_dummy) {
-            $this->switch_language($user->language);
-            do_action('newsletter_action_dummy', $this->action, $user, $email);
-            return;
-        }
+        $this->switch_language($user);
 
-        if ($user && !empty($user->language)) {
-            $this->switch_language($user->language);
-        }
-
+        // An action may not require a subscriber (for example the subscription)
         do_action('newsletter_action', $this->action, $user, $email);
     }
 
@@ -421,7 +437,6 @@ class Newsletter extends NewsletterModule {
 
     /**
      * The main shortcode to be used in the reserved page.
-     * @todo This shortcode is not related only to subscription, move it away
      * @todo Separate below the code for the shortcode and the one for the "subscription" content
      *
      * @global wpdb $wpdb
@@ -616,8 +631,6 @@ class Newsletter extends NewsletterModule {
                 $mailer_message->body = $this->clean_eol($message['html']);
             }
         }
-
-        $this->logger->debug($mailer_message);
 
         $mailer = $this->get_mailer();
 

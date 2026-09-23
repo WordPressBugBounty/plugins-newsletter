@@ -14,6 +14,9 @@ global $newsletter, $post;
 
 defined('ABSPATH') || exit;
 
+/** @var array $theme_options */
+/** @var NewsletterModule $this */
+
 include NEWSLETTER_INCLUDES_DIR . '/helper.php';
 
 $color = $theme_options['theme_color'];
