@@ -12,6 +12,7 @@ if ($controls->is_action()) {
 
         $controls->add_toast_saved();
     }
+    
     if ($controls->is_action('regenerate')) {
         $options = $this->get_main_options();
         $options['key'] = wp_generate_password(32, false, false);

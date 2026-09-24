@@ -76,7 +76,7 @@ class NewsletterUpgrade {
             `message_text` longtext,
             `preferences` longtext,
             `send_on` int(11) NOT NULL DEFAULT '0',
-            `token` varchar(10) NOT NULL DEFAULT '',
+            `token` varchar(32) NOT NULL DEFAULT '',
             `options` longtext,
             `private` tinyint(1) NOT NULL DEFAULT '0',
             `click_count` int(10) unsigned NOT NULL DEFAULT '0',

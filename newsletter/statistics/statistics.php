@@ -309,6 +309,7 @@ class NewsletterStatistics extends NewsletterModule {
 
             // Try the old signature with custom management; all that can be removed in a year (?)
             if (!$verified) {
+                $this->logger->debug('Not verified by current key');
                 $verified = $this->check_old_signature($email_id . ';' . $user_id . ';' . $url . ';' . $anchor, $signature);
 
                 if ($verified) {
@@ -327,6 +328,7 @@ class NewsletterStatistics extends NewsletterModule {
 
                     $this->send_redirect($url, $email, $user);
                 }
+                $this->logger->debug('Not verified by the old key');
             }
 
             if (!$verified) {
