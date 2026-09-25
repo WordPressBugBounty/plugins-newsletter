@@ -291,7 +291,6 @@ class NewsletterStatistics extends NewsletterModule {
             //$this->logger->debug('Click tracking');
             //$this->logger->debug('Code: ' . $_GET['nltr']);
             //$this->logger->debug('Decoded: ' . base64_decode($_GET['nltr']));
-
             // Patch for links with ;
             $parts = explode(';', base64_decode($_GET['nltr']));
             // Shifts and pops since the URL can contains ";"...
@@ -327,8 +326,11 @@ class NewsletterStatistics extends NewsletterModule {
                     }
 
                     $this->send_redirect($url, $email, $user);
+                } else {
+                    $this->logger->debug('Not verified by the old key');
+                    $url = wp_validate_redirect($url, home_url());
+                    $this->send_redirect($url, $email, $user);
                 }
-                $this->logger->debug('Not verified by the old key');
             }
 
             if (!$verified) {
@@ -405,7 +407,6 @@ class NewsletterStatistics extends NewsletterModule {
     }
 
     function get_key() {
-        // TODO: Add key caching
         if (defined('NEWSLETTER_RELINK_KEY')) {
             return NEWSLETTER_RELINK_KEY;
         }
@@ -413,6 +414,9 @@ class NewsletterStatistics extends NewsletterModule {
     }
 
     function get_old_key() {
+        if (defined('NEWSLETTER_RELINK_KEY')) {
+            return NEWSLETTER_RELINK_KEY;
+        }
         return $this->get_main_option('old_key');
     }
 
@@ -436,8 +440,6 @@ class NewsletterStatistics extends NewsletterModule {
         if (!$signature) {
             return false;
         }
-
-        $parts = explode('.', $signature, 2);
 
         return $this->get_signature($text) === $signature;
     }
@@ -465,7 +467,8 @@ class NewsletterStatistics extends NewsletterModule {
             }
             return $time >= time() ? 1 : 2;
         } else {
-            return $this->check_signature($text, $signature) ? 2 : 0;
+            return (md5($text . $this->get_key()) === $signature) ? 2 : 0;
+            //return $this->check_signature($text, $signature) ? 2 : 0;
         }
     }
 
