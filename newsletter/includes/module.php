@@ -12,6 +12,9 @@ require_once __DIR__ . '/themes.php';
  */
 class NewsletterModule extends NewsletterModuleBase {
 
+    // Style for the notices shown to the administrator on subscription, profile, ..., pages
+    const NOTICE_STYLE = 'background-color: #efe; color: #000; padding: 1rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 1em; font-size: .9em;';
+
     static $cache = [];
 
     function __construct($module) {
@@ -426,6 +429,15 @@ class NewsletterModule extends NewsletterModuleBase {
     }
 
     /**
+     * @todo Get it from the configuration
+     *
+     * @return int
+     */
+    function get_user_cookie_lifespan() {
+        return MONTH_IN_SECONDS;
+    }
+
+    /**
      * Sets the subscriber cookie, accepts a null value.
      *
      * @param type $user
@@ -435,7 +447,7 @@ class NewsletterModule extends NewsletterModuleBase {
             return;
         }
 
-        setcookie($this->get_user_cookie_name(), $this->get_user_cookie_value($user), time() + MONTH_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, is_ssl());
+        setcookie($this->get_user_cookie_name(), $this->get_user_cookie_value($user), time() + $this->get_user_cookie_lifespan(), COOKIEPATH, COOKIE_DOMAIN, is_ssl());
     }
 
     function delete_user_cookie() {
@@ -477,7 +489,7 @@ class NewsletterModule extends NewsletterModuleBase {
      */
     function get_current_user() {
 
-        $user = $this->get_user_by_key($_REQUEST['nk'] ?? '');
+        $user = $this->get_user_by_key($_REQUEST['nk'] ?? ''); // Compatibility
         if (!$user) {
             $user = $this->get_user_by_key($_COOKIE[$this->get_user_cookie_name()] ?? '', 'cookie');
         }
@@ -874,7 +886,7 @@ class NewsletterModule extends NewsletterModuleBase {
             $text = str_replace('{email_subject}', $email->subject, $text);
             // Deprecated
             $text = str_replace('{subject}', $email->subject, $text);
-            $text = $this->replace_url($text, 'email_url', $this->build_action_url('v', $user) . '&id=' . $email->id);
+            $text = $this->replace_url($text, 'email_url', $this->build_action_url('v', $user) . '&id=' . $email->id, 2*YEAR_IN_SECONDS);
         } else {
             $text = $this->replace_url($text, 'email_url', '#');
         }

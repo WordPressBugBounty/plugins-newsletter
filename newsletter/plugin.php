@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business.
-  Version: 9.4.3
+  Version: 9.4.4
   Author: The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '9.4.3');
+define('NEWSLETTER_VERSION', '9.4.4');
 
 global $wpdb, $newsletter;
 
@@ -308,21 +308,15 @@ class Newsletter extends NewsletterModule {
             $this->dienow('This link is not active on newsletter preview', 'You can send a test message to test subscriber to have the real working link.');
         }
 
-        // Check for dummy subscriber, used to let the administrator test the messages, actions and the like.
-        // Use only the key in the request
-        if (current_user_can('administrator') && isset($_REQUEST['nk'])) {
-            list($id, $token) = explode('-', $_REQUEST['nk']);
-            if ($id === '0') {
-                $user = $this->get_dummy_user($token);
-                $this->switch_language($user);
-                do_action('newsletter_action_dummy', $this->action, $user, null);
-                return;
-            }
-        }
-
         // Get the subscriber from the signed and timed key in the request, if valid.
         // This way, each action link has a life timespan.
         $user = $this->get_user_by_key($_REQUEST['nk'] ?? '', $this->action);
+
+        if ($user && $user->id === 0 && current_user_can('administrator')) {
+            $this->switch_language($user);
+            do_action('newsletter_action_dummy', $this->action, $user, null);
+            return;
+        }
 
         // Old token temporary management
         if (!$user) {
@@ -435,6 +429,16 @@ class Newsletter extends NewsletterModule {
         }
     }
 
+    function get_current_dummy_user() {
+        if (isset($_REQUEST['nk'])) {
+            list($id, $token) = explode('-', $_REQUEST['nk']);
+            if ($id === '0') {
+                return $this->get_dummy_user($token);
+            }
+        }
+        return null;
+    }
+
     /**
      * The main shortcode to be used in the reserved page.
      * @todo Separate below the code for the shortcode and the one for the "subscription" content
@@ -454,31 +458,33 @@ class Newsletter extends NewsletterModule {
 
         $executing = true;
 
-        $message_key = $this->get_message_key_from_request();
+        $message_key = sanitize_key($_GET['nm'] ?? 'subscription');
 
         $user = $this->get_current_user();
-
-        // When the key is "subscription", the subscription form is shown and we do not use the language
-        // of the current subscriber (maybe identify by the logged in administrator).
-        if ($message_key !== 'subscription' && $user && $user->language) {
-            $this->switch_language($user->language);
+        $this->switch_language($user);
+        if ($user && $user->id === 0) {
+            ob_start();
+            do_action('newsletter_shortcode_dummy', $message_key, $user);
+            $message = ob_get_clean();
+            // Do not replace here so the tags are visible, useful when previewing.
+            $message = do_shortcode($message);
+            $executing = false;
+            return $message;
         }
 
-        // Lets modules to provie its own text
-        $message = apply_filters('newsletter_page_text', '', $message_key, $user);
+        ob_start();
+        do_action('newsletter_shortcode', $message_key, $user);
+        $message = ob_get_clean();
+        $message = $this->replace($message, $user, null, 'page');
         $message = do_shortcode($message);
 
-        $email = $this->get_email_from_request();
-        $message = $this->replace($message, $user, $email, 'page');
-
         $executing = false;
-
         return $message;
     }
 
     function shortcode_newsletter_replace($attrs, $content) {
         $content = do_shortcode($content);
-        $content = $this->replace($content, $this->get_current_user(), $this->get_email_from_request(), 'page');
+        $content = $this->replace($content, $this->get_current_user(), null, 'page');
         return $content;
     }
 

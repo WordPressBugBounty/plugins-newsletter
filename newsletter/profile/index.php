@@ -27,6 +27,8 @@ foreach (['text'] as $key) {
         $controls->data[$key . '_custom'] = '1';
     }
 }
+
+update_option('newsletter_dummy_user_language', $language, false);
 ?>
 
 <div class="wrap tnp-profile tnp-profile-index" id="tnp-wrap">

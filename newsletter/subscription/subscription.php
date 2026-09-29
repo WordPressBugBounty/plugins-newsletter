@@ -33,7 +33,9 @@ class NewsletterSubscription extends NewsletterModule {
 
         add_action('newsletter_action', [$this, 'hook_newsletter_action'], 10, 3);
         add_action('newsletter_action_dummy', [$this, 'hook_newsletter_action_dummy'], 11, 3);
-        add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
+
+        add_action('newsletter_shortcode', [$this, 'hook_newsletter_shortcode'], 10, 2);
+        add_action('newsletter_shortcode_dummy', [$this, 'hook_newsletter_shortcode_dummy'], 10, 2);
 
         // The form is sometimes retrieved via AJAX
         if (!is_admin() || defined('DOING_AJAX') && DOING_AJAX) {
@@ -116,25 +118,46 @@ class NewsletterSubscription extends NewsletterModule {
                 . '</div>';
     }
 
+    /**
+     * Compute the configured page url to show the confirmation request message.
+     * Can return an empty
+     * @return type
+     */
+    function get_confirmation_page_url() {
+        // Per message custom URL from configuration (language variants could not be supported)
+        $page_id = $this->get_option('confirmation_id');
+        $url = '';
+        if (!empty($page_id)) {
+            if ($page_id === 'url') {
+                $url = sanitize_url($this->get_option('confirmation_url'));
+            } else {
+                $url = get_permalink((int) $page_id);
+            }
+        }
+
+        return $url;
+    }
+
+    function get_confirmed_page_url() {
+        $page_id = $this->get_option('confirmed_id');
+        $url = '';
+        if (!empty($page_id)) {
+            if ($page_id === 'url') {
+                $url = sanitize_url($this->get_option('confirmed_url'));
+            } else {
+                $url = get_permalink((int) $page_id);
+            }
+        }
+        return $url;
+    }
+
     function hook_newsletter_action_dummy($action, $user, $email) {
         if ('s' === $action) {
             if (!$user) {
                 die('Subscriber not found.');
             }
             $this->switch_language($user->language);
-
-            // Per message custom URL from configuration (language variants could not be supported)
-            $page_id = $this->get_option('confirmation_id');
-            $url = '';
-            if (!empty($page_id)) {
-                if ($page_id === 'url') {
-                    $url = sanitize_url($this->get_option('confirmation_url'));
-                } else {
-                    $url = get_permalink((int) $page_id);
-                }
-            }
-
-            $url = $this->build_message_url($url, 'confirmation', $user, $email);
+            $url = $this->build_message_url($this->get_confirmation_page_url(), 'confirmation', $user, $email);
             $this->redirect($url);
         }
 
@@ -143,21 +166,7 @@ class NewsletterSubscription extends NewsletterModule {
                 die('Subscriber not found.');
             }
             $this->switch_language($user->language);
-
-            // Per message custom URL from configuration (language variants could not be supported)
-            $page_id = $this->get_option('confirmed_id');
-            $url = '';
-            if (!empty($page_id)) {
-                if ($page_id === 'url') {
-                    $url = sanitize_url($this->get_option('confirmed_url'));
-                } else {
-                    $url = get_permalink((int) $page_id);
-                }
-            }
-
-
-            //$url = apply_filters('newsletter_welcome_url', $url, $user);
-            $url = Newsletter::instance()->build_message_url($url, 'confirmed', $user, $email);
+            $url = Newsletter::instance()->build_message_url($this->get_confirmed_page_url(), 'confirmed', $user, $email);
             $this->redirect($url);
         }
     }
@@ -169,48 +178,6 @@ class NewsletterSubscription extends NewsletterModule {
      */
     function hook_newsletter_action($action, $user, $email) {
         switch ($action) {
-            case 'profile-change':
-                if ($this->antibot_form_check()) {
-
-                    if (!$user || $user->status != TNP_User::STATUS_CONFIRMED || !$user->_trusted) {
-                        $this->dienow('Subscriber not found or not confirmed.', 'Even the wrong subscriber token can lead to this error.', 404);
-                    }
-
-                    if (!$email) {
-                        $this->dienow('Newsletter not found', 'The newsletter containing the link has been deleted.', 404);
-                    }
-
-                    if (isset($_REQUEST['list'])) {
-                        $list_id = (int) $_REQUEST['list'];
-
-                        // Check if the list is public
-                        $list = $this->get_list($list_id);
-                        if (!$list || $list->status == TNP_List::STATUS_PRIVATE) {
-                            $this->dienow('List change not allowed.', 'Please check if the list is marked as "private".', 400);
-                        }
-
-                        if (empty($_REQUEST['redirect'])) {
-                            $url = home_url();
-                        } else {
-                            $url = esc_url_raw($_REQUEST['redirect']);
-                        }
-                        $this->set_user_list($user, $list_id, (int) $_REQUEST['value']);
-
-                        if (strpos($url, home_url()) !== 0) {
-                            $this->dienow('Invalid redirect.', 'Please check the redirect URL set on the newsletter, it should match your site URL.', 400);
-                        }
-
-                        $user = $this->get_user($user->id);
-                        $this->add_user_log($user, 'cta');
-                        NewsletterStatistics::instance()->add_click($url, $user->id, $email->id);
-                        wp_redirect($url);
-                        die();
-                    }
-                } else {
-                    $this->request_to_antibot_form('Continue');
-                }
-
-                die();
 
             // normal subscription
             case 's':
@@ -2060,57 +2027,63 @@ class NewsletterSubscription extends NewsletterModule {
         return $this->get_subscription_form(null, null, $attrs);
     }
 
-    function hook_newsletter_page_text($text, $key, $user) {
-
-        if (!in_array($key, ['subscription', 'confirmed', 'confirmation', 'error'])) {
-            return $text;
+    function hook_newsletter_shortcode($message, $user) {
+        if (!in_array($message, ['subscription', 'confirmed', 'confirmation', 'error'], true)) {
+            return;
         }
 
-        $text = $this->get_text($key . '_text');
-
-        // Fixing of the old tags
-        $text = str_replace('{profile_form}', '[newsletter_profile]', $text); // can be used on welcome text
-        $text = str_replace('{subscription_form}', '[newsletter_form]', $text);
-        for ($i = 1; $i <= 10; $i++) {
-            if (strpos($text, "{subscription_form_$i}") !== false) {
-                $text = str_replace("{subscription_form_$i}", '[newsletter_form form="' . $i . '"]', $text);
-            }
-        }
-
-        if ($key === 'confirmed') {
-            $text .= $this->get_option($key . '_tracking');
-        }
-
-        if ($key === 'error' && current_user_can('administrator')) {
-            $text .= '<div style="padding: 1rem; background-color: #eee"><strong>Message only visibile to administrators</strong><br>';
-            $text .= 'Email address probably already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.';
-            $text .= '</div>';
-        }
-
-        $admin_notice = '';
+        // Service messages to help configuring and debugging (they greatly reduced the support requests)
         if (current_user_can('administrator')) {
-            switch ($key) {
-                case 'confirmation':
-                    $url = admin_url('admin.php?page=newsletter_subscription_confirmation');
-                    break;
-                case 'confirmed':
-                    $url = admin_url('admin.php?page=newsletter_subscription_welcome');
-                    break;
-                default:
-                    $url = admin_url('admin.php?page=newsletter_subscription_options');
+            echo '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 1em; font-size: .9em;">';
+            echo '<strong>Visible only to administrators</strong>. <a href="' . esc_attr($this->get_admin_edit_url($message)) . '" target="_blank">Edit this content</a>.';
+            echo '</p>';
+            if ($message === 'error') {
+                echo '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 1em; font-size: .9em;">';
+                echo '<strong>Message only visibile to administrators</strong><br>';
+                echo 'Email address probably already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.';
+                echo '</p>';
             }
-
-            if ($this->is_multilanguage()) {
-                $language = $this->language();
-                if (empty($language)) {
-                    $language = 'all';
-                }
-                $url .= '&lang=' . urlencode($language);
-            }
-            $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. <a href="' . esc_attr($url) . '" target="_blank">Edit this content</a>.</p>';
         }
 
-        return $admin_notice . $text;
+        echo $this->get_text($message . '_text');
+
+        if ($message === 'confirmed') {
+            echo $this->get_option($key . '_tracking');
+        }
+    }
+
+    function hook_newsletter_shortcode_dummy($message, $user) {
+        if (!in_array($message, ['subscription', 'confirmed', 'confirmation', 'error'], true)) {
+            return;
+        }
+
+        echo '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 1em; font-size: .9em;">';
+        echo 'Preview of the content with a dummy subscriber.';
+        echo '</p>';
+
+        echo $this->get_text($message . '_text');
+    }
+
+    function get_admin_edit_url($message) {
+        switch ($message) {
+            case 'confirmation':
+                $url = admin_url('admin.php?page=newsletter_subscription_confirmation');
+                break;
+            case 'confirmed':
+                $url = admin_url('admin.php?page=newsletter_subscription_welcome');
+                break;
+            default:
+                $url = admin_url('admin.php?page=newsletter_subscription_options');
+        }
+
+        if ($this->is_multilanguage()) {
+            $language = $this->language();
+            if (empty($language)) {
+                $language = 'all';
+            }
+            $url .= '&lang=' . urlencode($language);
+        }
+        return $url;
     }
 }
 

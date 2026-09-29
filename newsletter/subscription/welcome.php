@@ -91,6 +91,8 @@ foreach (['confirmed_message', 'confirmed_text'] as $key) {
         $controls->data[$key . '_custom'] = '1';
     }
 }
+
+update_option('newsletter_dummy_user_language', $language, false);
 ?>
 
 <div class="wrap" id="tnp-wrap">

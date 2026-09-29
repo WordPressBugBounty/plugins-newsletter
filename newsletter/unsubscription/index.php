@@ -40,6 +40,8 @@ foreach (['unsubscribe_text', 'error_text', 'unsubscribed_text', 'unsubscribed_m
     }
 }
 
+update_option('newsletter_dummy_user_language', $language, false);
+
 ?>
 
 <div class="wrap" id="tnp-wrap">

@@ -94,6 +94,8 @@ if (!empty($controls->data['confirmation_email'])) {
         $controls->warnings = 'A button or link with the <code>{confirmation_url}</code> placeholder is missing.';
     }
 }
+
+update_option('newsletter_dummy_user_language', $language, false);
 ?>
 
 <div class="wrap" id="tnp-wrap">

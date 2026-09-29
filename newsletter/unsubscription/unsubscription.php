@@ -20,7 +20,11 @@ class NewsletterUnsubscription extends NewsletterModule {
         parent::__construct('unsubscription');
 
         add_filter('newsletter_replace', [$this, 'hook_newsletter_replace'], 10, 5);
-        add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
+
+        add_action('newsletter_shortcode', [$this, 'hook_newsletter_shortcode'], 10, 2);
+        add_action('newsletter_shortcode_dummy', [$this, 'hook_newsletter_shortcode_dummy'], 10, 2);
+
+        // Add one click unsubscription header
         add_filter('newsletter_message', [$this, 'hook_newsletter_message'], 9, 3);
 
         add_action('newsletter_action', [$this, 'hook_newsletter_action'], 11, 3);
@@ -35,8 +39,8 @@ class NewsletterUnsubscription extends NewsletterModule {
     /**
      * Action URL to the page where to start the unsubscription.
      *
-     * @param type $user
-     * @param type $email
+     * @param object $user
+     * @param object $email
      * @return string
      */
     function get_unsubscribe_url($user, $email = null, $duration = 7 * DAY_IN_SECONDS) {
@@ -46,12 +50,11 @@ class NewsletterUnsubscription extends NewsletterModule {
     /**
      * Action URL to the page where to start the resubscription.
      *
-     * @param type $user
-     * @param type $email
+     * @param object $user
      * @return string
      */
-    function get_resubscribe_url($user, $email = null, $duration = DAY_IN_SECONDS) {
-        return $this->build_action_url('r', $user, $email, $duration);
+    function get_resubscribe_url($user, $duration = DAY_IN_SECONDS) {
+        return $this->build_action_url('r', $user, null, $duration);
     }
 
     /**
@@ -67,7 +70,7 @@ class NewsletterUnsubscription extends NewsletterModule {
     function shortcode_newsletter_unsubscribe_button($attrs, $content = '') {
         $user = $this->get_current_user();
 
-        if (!$user || $user->status !== TNP_User::STATUS_CONFIRMED) {
+        if (!$user || $user->id !== 0 && $user->status !== TNP_User::STATUS_CONFIRMED) {
             return '';
         }
 
@@ -94,7 +97,7 @@ class NewsletterUnsubscription extends NewsletterModule {
     function shortcode_newsletter_resubscribe_button($attrs, $content = '') {
         $user = $this->get_current_user();
 
-        if (!$user || $user->status !== TNP_User::STATUS_UNSUBSCRIBED) {
+        if (!$user || $user->id !== 0 && $user->status !== TNP_User::STATUS_UNSUBSCRIBED) {
             return '';
         }
 
@@ -111,6 +114,8 @@ class NewsletterUnsubscription extends NewsletterModule {
         if (!in_array($action, ['u', 'uc', 'ocu', 'r', 'rc'])) {
             return;
         }
+
+        $this->set_user_cookie($user);
 
         switch ($action) {
             case 'u':
@@ -148,11 +153,11 @@ class NewsletterUnsubscription extends NewsletterModule {
         }
 
         if (!$user) {
-            $this->dienow(__('Subscriber not found [01]', 'newsletter'), 'From a test newsletter or already deleted or using the wrong subscriber key in the URL', 404);
+            $this->dienow(__('Subscriber not found or link expired', 'newsletter'), 'From a test newsletter or already deleted or using the wrong subscriber key in the URL', 404);
         }
 
         if ($user->status !== TNP_User::STATUS_CONFIRMED && $user->status !== TNP_User::STATUS_UNSUBSCRIBED) {
-            $this->dienow(__('Subscriber not found [02]', 'newsletter'), '', 404);
+            $this->dienow(__('Subscriber blocked', 'newsletter'), '', 404);
         }
 
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
@@ -321,33 +326,35 @@ class NewsletterUnsubscription extends NewsletterModule {
         return $text;
     }
 
-    /**
-     * Language and locale are already defined in this hook.
-     *
-     * @param type $text
-     * @param type $key
-     * @param type $user
-     * @return type
-     */
-    function hook_newsletter_page_text($text, $key, $user = null) {
-
-        // For this module?
-        if (!in_array($key, ['unsubscribe', 'reactivate', 'unsubscribed', 'reactivated'])) {
-            return $text;
+    function hook_newsletter_shortcode($message, $user) {
+        if (!in_array($message, ['unsubscribe', 'reactivate', 'unsubscribed', 'reactivated'], true)) {
+            return;
         }
 
         if (!$user) {
-            return $this->get_text('error_text');
+            echo $this->get_text('error_text');
+            return;
         }
 
-        $admin_notice = '';
-        if ($user->_dummy) {
-            $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrator</strong>. Preview of the content with a dummy subscriber. <a href="' . admin_url('admin.php?page=newsletter_unsubscription_index') . '" target="_blank">Edit this content</a>.</p>';
+        if (current_user_can('administrator')) {
+            echo '<p style="', self::NOTICE_STYLE, '">';
+            echo '<strong>Visible only to administrators</strong>. <a href="' . admin_url('admin.php?page=newsletter_unsubscription_index') . '" target="_blank">Edit this content</a>.';
+            echo '</p>';
         }
 
-        $message = $this->get_text($key . '_text');
+        echo $this->get_text($message . '_text');
+    }
 
-        return $admin_notice . $message;
+    function hook_newsletter_shortcode_dummy($message, $user) {
+        if (!in_array($message, ['unsubscribe', 'reactivate', 'unsubscribed', 'reactivated'], true)) {
+            return;
+        }
+
+        echo '<p style="', self::NOTICE_STYLE, '">';
+        echo 'Preview of the content with a dummy subscriber.';
+        echo '</p>';
+
+        echo $this->get_text($message . '_text');
     }
 
     /**

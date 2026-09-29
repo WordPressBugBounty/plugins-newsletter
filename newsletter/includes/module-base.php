@@ -363,10 +363,9 @@ class NewsletterModuleBase {
         $dummy_user->name = 'John';
         $dummy_user->surname = 'Doe';
         $dummy_user->sex = 'n';
-        $dummy_user->language = $token !== '0' ? $token : '';
+        $dummy_user->track = 1;
+        $dummy_user->language = get_option('newsletter_dummy_user_language', '');
         $dummy_user->status = TNP_User::STATUS_CONFIRMED;
-        $dummy_user->_trusted = true;
-        $dummy_user->_dummy = true;
 
         for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
             $profile_key = "profile_$i";
@@ -409,11 +408,17 @@ class NewsletterModuleBase {
     }
 
     /**
-     * Loads a user identify by a key, checking if the key is expired and if it matches the action.
+     * Loads a user identify by a key, checking if the key is expired given the max age and the matching action.
      */
     function get_user_by_key($key, $action = '') {
         if (empty($key)) {
             return null;
+        }
+
+        if (current_user_can('administrator')) {
+            if (str_starts_with($key, '0-')) {
+                return $this->get_dummy_user();
+            }
         }
 
         // Old key
@@ -426,14 +431,18 @@ class NewsletterModuleBase {
         if (!$user) {
             return null;
         }
+
+
         list($timestamp, $signature) = explode('.', $token, 2);
         if ($timestamp < time()) {
             return null;
         }
+
         $computed = md5($user->id . $user->token . $timestamp . $action);
         if (!hash_equals($computed, $signature)) {
             return null;
         }
+
         return $user;
     }
 
@@ -457,9 +466,16 @@ class NewsletterModuleBase {
         if (!$user) {
             return null;
         }
-        $user_token = $this->get_user_meta($user->id, 'old_token');
-        if (hash_equals($user_token, $token)) {
+
+        if (hash_equals($user->token, $token)) {
             return $user;
+        }
+
+        $user_token = $this->get_user_meta($user->id, 'old_token');
+        if ($user_token) {
+            if (hash_equals($user_token, $token)) {
+                return $user;
+            }
         }
 
         return null;
@@ -471,13 +487,17 @@ class NewsletterModuleBase {
      * @param TNP_User $user
      * @return string
      */
-    function get_user_key($user, $action = '', $duration = 7 * DAY_IN_SECONDS) {
+    function get_user_key($user, $action = '', $lifespan = 7 * DAY_IN_SECONDS) {
+        // Dummy user
+        if ((int) $user->id === 0) {
+            return $user->id . '-' . $user->token; // The token is 0 or the language to use while testing
+        }
+
         if (strlen($user->token) < 16) {
             $this->refresh_user_token($user);
         }
 
-        $duration = (int) $duration;
-        $timestamp = $duration + time();
+        $timestamp = time() + (int) $lifespan;
 
         return $user->id . '-' . $timestamp . '.' . md5($user->id . $user->token . $timestamp . $action);
     }
@@ -1043,13 +1063,13 @@ class NewsletterModuleBase {
      * @param TNP_Email $email
      * @return string
      */
-    function build_action_url($action, $user = null, $email = null, $duration = HOUR_IN_SECONDS) {
+    function build_action_url($action, $user = null, $email = null, $lifespan = DAY_IN_SECONDS) {
         $url = $this->get_action_base_url();
 
         $url = $this->add_qs($url, 'na=' . rawurlencode($action));
 
         if ($user) {
-            $url .= '&nk=' . rawurlencode($this->get_user_key($user, $action, $duration));
+            $url .= '&nk=' . rawurlencode($this->get_user_key($user, $action, $lifespan));
         }
         if ($email) {
             $url .= '&nek=' . rawurlencode($this->get_email_key($email));

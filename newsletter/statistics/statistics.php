@@ -448,7 +448,7 @@ class NewsletterStatistics extends NewsletterModule {
      *
      * @param type $text
      * @param type $signature
-     * @return int 0 - invalid; 1 - valid; 2 - valid but expired
+     * @return int 0 - invalid; 1 - valid; 2 - valid but expired or without the timestamp
      */
     function verify_signature($text, $signature) {
         $signature = trim($signature);

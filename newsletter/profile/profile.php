@@ -21,7 +21,12 @@ class NewsletterProfile extends NewsletterModule {
         add_shortcode('newsletter_profile', [$this, 'shortcode_newsletter_profile']);
         add_shortcode('newsletter_profile_field', [$this, 'shortcode_newsletter_profile_field']);
         add_filter('newsletter_replace', [$this, 'hook_newsletter_replace'], 10, 4);
-        add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
+
+        //add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
+
+        add_action('newsletter_shortcode', [$this, 'hook_newsletter_shortcode'], 12, 2);
+        add_action('newsletter_shortcode_dummy', [$this, 'hook_newsletter_shortcode_dummy'], 12, 2);
+
         add_action('newsletter_action', [$this, 'hook_newsletter_action'], 12, 3);
         add_action('newsletter_action_dummy', [$this, 'hook_newsletter_action_dummy'], 12, 3);
 
@@ -84,7 +89,7 @@ class NewsletterProfile extends NewsletterModule {
     }
 
     function get_profile_page_url($user, $alert = null) {
-        $this->switch_language($user->language);
+        $this->switch_language($user);
         $url = '';
         $page_id = $this->get_option('page_id');
         if (!empty($page_id)) {
@@ -94,37 +99,46 @@ class NewsletterProfile extends NewsletterModule {
                 $url = get_permalink((int) $page_id);
             }
         }
-        //$url = parent::build_message_url($url, 'profile', $user, null, $alert);
 
-        // Assume there is a cookie, no need to transfer the subscriber data
-        $url = parent::build_message_url($url, 'profile', null, null, $alert);
+        $url = parent::build_message_url($url, 'p', null, null, $alert);
 
         $this->restore_language();
         return $url;
     }
 
     function hook_newsletter_action_dummy($action, $user, $email) {
-        if (!in_array($action, ['p', 'ps', 'px'])) {
+        if (!in_array($action, ['p', 'ps', 'px'], true)) {
             return;
         }
+
+        $this->set_user_cookie($user);
 
         switch ($action) {
             case 'p':
                 $this->redirect($this->get_profile_page_url($user));
 
             case 'ps':
-                $this->redirect($this->get_profile_page_url($user, $this->get_text('saved')));
+                $this->redirect($this->get_profile_page_url($user, $this->get_text('saved') . ' [dummy]'));
+
+            case 'px':
+                header('Content-Type: application/json;charset=UTF-8');
+                echo $this->build_export_json($user);
+                die();
         }
     }
 
     function hook_newsletter_action($action, $user, $email) {
 
-        if (!in_array($action, ['p', 'ps', 'px'])) {
+        if (!in_array($action, ['p', 'ps', 'px', 'profile-change', 'pc'])) {
             return;
         }
 
-        if (!$user || $user->status !== TNP_User::STATUS_CONFIRMED) {
-            $this->dienow(__('Subscriber not found or not confirmed or started from a test newsletter.', 'newsletter'), 'From a test newsletter or subscriber key not valid or subscriber not confirmed', 404);
+        if (!$user) {
+            $this->dienow(__('Subscriber not found or link expired.', 'newsletter'), '', 404);
+        }
+
+        if ($user->status !== TNP_User::STATUS_CONFIRMED) {
+            $this->dienow(__('Subscriber not confirmed.', 'newsletter'), '', 404);
         }
 
         $this->set_user_cookie($user);
@@ -140,7 +154,7 @@ class NewsletterProfile extends NewsletterModule {
             case 'ps':
                 $verified = wp_verify_nonce($_REQUEST['_wpnonce'], 'newsletter-profile');
                 if (!$verified) {
-                    die('Unverfied request');
+                    die('Unverified request');
                 }
                 $res = $this->save_profile($user);
                 $alert = is_wp_error($res) ? $res->get_error_message() : $this->get_text('saved');
@@ -155,13 +169,90 @@ class NewsletterProfile extends NewsletterModule {
                 header('Content-Type: application/json;charset=UTF-8');
                 echo $this->build_export_json($user);
                 die();
+
+            case 'profile-change':
+            case 'pc':
+                if ($this->antibot_form_check()) {
+
+                    $list_id = (int) ($_REQUEST['list'] ?? 0);
+
+                    // Check if the list is public
+                    $list = $this->get_list($list_id);
+                    if (!$list || $list->status == TNP_List::STATUS_PRIVATE) {
+                        $this->dienow('List change not allowed.', 'Please check if the list is marked as "private".', 400);
+                    }
+
+                    $url = wp_validate_redirect($_REQUEST['redirect'] ?? '', home_url());
+
+                    $this->set_user_list($user, $list_id, (int) $_REQUEST['value']);
+
+                    $user = $this->get_user($user->id);
+                    $this->add_user_log($user, 'cta');
+                    wp_redirect($url);
+                } else {
+                    $this->request_to_antibot_form('Continue');
+                }
+
+                die();
         }
     }
 
-    function build_export_json($user) {
-        global $wpdb;
+    function hook_newsletter_shortcode_dummy($message, $user) {
+        if (!in_array($message, ['p'], true)) {
+            return;
+        }
 
-        $fields = array('name', 'surname', 'sex', 'created', 'ip', 'email');
+        if (!$user) {
+            echo 'Missing dummy user?';
+            return;
+        }
+
+        echo '<p style="', self::NOTICE_STYLE, '">';
+        echo 'Preview of the content with a dummy subscriber.';
+        echo '</p>';
+
+        echo $this->get_text('text');
+    }
+
+    function hook_newsletter_shortcode($message, $user) {
+        if (!in_array($message, ['p'], true)) {
+            return;
+        }
+
+        if (!$user || $user->status !== TNP_User::STATUS_CONFIRMED) {
+            echo __('Subscriber not found.', 'newsletter');
+            return;
+        }
+
+        // To help the administrator configuring the messages and reduce the support requests.
+        if (current_user_can('administrator')) {
+            echo '<p style="', self::NOTICE_STYLE, '">';
+            echo '<strong>Visible only to administrators</strong>. ';
+            echo '<a href="' . esc_attr($this->get_profile_admin_edit_url()) . '" target="_blank">Edit this content</a>.';
+            echo '</p>';
+        }
+
+        echo $this->get_text('text');
+    }
+
+    function get_profile_admin_edit_url() {
+        $edit_url = admin_url('admin.php?page=newsletter_profile_index');
+        if ($this->is_multilanguage()) {
+            $language = $this->language();
+            if (empty($language)) {
+                $language = 'all';
+            }
+            $edit_url .= '&lang=' . urldecode($language);
+        }
+        return $edit_url;
+    }
+
+    function build_export_json($user) {
+
+        if (!$user) {
+            return '{}';
+        }
+
         $data = [
             'email' => $user->email,
             'first_name' => $user->name,
@@ -210,53 +301,6 @@ class NewsletterProfile extends NewsletterModule {
             }
         }
         return $text;
-    }
-
-    /**
-     *
-     * @param string $text
-     * @param string $key
-     * @param TNP_User $user
-     * @return string
-     */
-    function hook_newsletter_page_text($text, $key, $user) {
-        if ($key !== 'profile') {
-            return $text;
-        }
-
-        if (!$user) {
-            return __('Subscriber not found.', 'newsletter');
-        }
-
-        $admin_notice = '';
-        if (!$user->_dummy) {
-            if (!$user->_trusted || $user->status === TNP_User::STATUS_UNSUBSCRIBED || $user->status === TNP_User::STATUS_COMPLAINED) {
-                return __('Subscriber not found.', 'newsletter');
-            }
-        }
-
-        $admin_notice = '';
-        if (current_user_can('administrator')) {
-            $edit_url = admin_url('admin.php?page=newsletter_profile_index');
-
-            if ($this->is_multilanguage()) {
-                $language = $this->language();
-                if (empty($language)) {
-                    $language = 'all';
-                }
-                $edit_url .= '&lang=' . urldecode($language);
-            }
-            $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. ';
-            if ($user->_dummy) {
-                $admin_notice .= 'Preview of the content with a dummy subscriber. ';
-            }
-            $admin_notice .= '<a href="' . esc_attr($edit_url) . '" target="_blank">Edit this content</a>.</p>';
-        }
-
-        $text = $this->get_text('text');
-        $text = str_replace('{profile_form}', '[newsletter_profile]', $text);
-
-        return $admin_notice . $text;
     }
 
     function shortcode_newsletter_profile_field($attrs = [], $content = '') {
@@ -643,7 +687,7 @@ class NewsletterProfile extends NewsletterModule {
         }
 
         if (!empty($options['track'])) {
-            $value = $user->track;
+            $value = $user->track ?? 1;
             $buffer .= '<div class="tnp-field tnp-field-track">';
             $buffer .= '<label>';
             $buffer .= '<input class="tnp-track" type="checkbox" name="ntr_cb"' . ($value ? ' checked' : '') . '> ';
@@ -798,15 +842,6 @@ class NewsletterProfile extends NewsletterModule {
         }
 
         return $this->get_text('saved');
-    }
-
-    // Patch to avoid conflicts with the "newsletter_profile" option of the subscription module
-    // TODO: Fix it
-    public function get_prefix($sub = '', $language = '') {
-        if (empty($sub)) {
-            $sub = 'main';
-        }
-        return parent::get_prefix($sub, $language);
     }
 }
 

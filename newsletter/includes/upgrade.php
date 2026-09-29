@@ -158,7 +158,6 @@ class NewsletterUpgrade {
         // Old unique index
         $this->upgrade_query("DROP INDEX email ON " . NEWSLETTER_USERS_TABLE);
 
-
         $sql = "CREATE TABLE `" . $wpdb->prefix . "newsletter_user_logs` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `user_id` int(11) NOT NULL DEFAULT 0,
@@ -259,7 +258,7 @@ class NewsletterUpgrade {
         }
 
         // New user token management
-        $new_token_time = (int)get_option('newsletter_new_token_time', 0);
+        $new_token_time = (int) get_option('newsletter_new_token_time', 0);
         if (!$new_token_time) {
             update_option('newsletter_new_token_time', time(), false);
         }
@@ -558,6 +557,34 @@ class NewsletterUpgrade {
             delete_option('newsletter_statistics_first_install_time');
             delete_option('newsletter_wp');
         }
+
+
+        /* Old tags replacement with shortcodes */
+        $langs = array_merge([''], array_keys(Newsletter::instance()->get_languages()));
+        foreach ($langs as $lang) {
+            $postfix = $lang ? ('_' . $lang) : '';
+
+            // Profile page configuration
+            $opts = $this->get_option_array('newsletter_profile' . $postfix);
+            $opts['text'] = str_replace('{profile_form}', '[newsletter_profile]', $opts['text'] ?? '');
+            update_option('newsletter_profile' . $postfix, $opts);
+
+            // Subscription configuration
+            $opts = $this->get_option_array('newsletter_subscription' . $postfix);
+
+            foreach (['subscription', 'confirmed', 'confirmation'] as $key) {
+                $opts[$key . '_text'] = str_replace('{profile_form}', '[newsletter_profile]', $opts[$key . '_text'] ?? '');
+                $opts[$key . '_text'] = str_replace('{subscription_form}', '[newsletter_form]', $opts[$key . '_text'] ?? '');
+            }
+
+            for ($i = 1; $i <= 10; $i++) {
+                $opts['subscription_text'] = str_replace("{subscription_form_$i}", '[newsletter_form form="' . $i . '"]', $opts['subscription_text'] ?? '');
+            }
+            //var_dump($opts);
+            //die();
+            update_option('newsletter_subscription' . $postfix, $opts);
+        }
+
 
         delete_transient('newsletter_license_data');
         delete_transient('tnp_extensions_json');
