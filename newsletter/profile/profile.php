@@ -501,18 +501,11 @@ class NewsletterProfile extends NewsletterModule {
         $user = $this->get_current_user();
 
         if (!$user) {
-            //if (empty($content)) {
             return __('Subscriber not found.', 'newsletter');
-            //} else {
-            //    return $content;
-            //}
         }
 
-        if (!$user->_trusted) {
-            if (current_user_can('administrator')) {
-                return '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. The subscriber edit form has been hidden. The current subscriber has been recognized but with a non editable token.</p>';
-            }
-            return '';
+        if (!$user->status === TNP_User::STATUS_CONFIRMED) {
+            return __('Subscriber not confirmed.', 'newsletter');
         }
 
         if ($content) {

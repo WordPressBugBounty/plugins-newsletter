@@ -31,6 +31,8 @@ class NewsletterSubscription extends NewsletterModule {
 
     function hook_init() {
 
+        add_filter('newsletter_replace', [$this, 'hook_newsletter_replace'], 10, 4);
+
         add_action('newsletter_action', [$this, 'hook_newsletter_action'], 10, 3);
         add_action('newsletter_action_dummy', [$this, 'hook_newsletter_action_dummy'], 11, 3);
 
@@ -76,6 +78,26 @@ class NewsletterSubscription extends NewsletterModule {
             </div>
         </div>
         <?php
+    }
+
+    function get_confirm_url($user) {
+        return $this->build_action_url('c', $user, null);
+    }
+
+    function hook_newsletter_replace($text, $user, $email, $html = true) {
+        if (!$user) {
+            return $text;
+        }
+
+        $url = $this->get_confirm_url($user);
+
+        // Overtime, many tags have been used.
+        $text = $this->replace_url($text, 'subscription_confirm_url', $url);
+        $text = $this->replace_url($text, 'activation_url', $url);
+        $text = $this->replace_url($text, 'confirmation_url', $url);
+        $text = $this->replace_url($text, 'confirm_url', $url);
+        
+        return $text;
     }
 
     function hook_wp_enqueue_scripts() {

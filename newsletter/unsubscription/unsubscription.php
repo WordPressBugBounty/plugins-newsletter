@@ -47,6 +47,10 @@ class NewsletterUnsubscription extends NewsletterModule {
         return $this->build_action_url('u', $user, $email, $duration);
     }
 
+    function get_unsubscribe_confirm_url($user, $email = null, $duration = 7 * DAY_IN_SECONDS) {
+        return $this->build_action_url('uc', $user, $email, $duration);
+    }
+
     /**
      * Action URL to the page where to start the resubscription.
      *
@@ -76,7 +80,7 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         $label = empty($attrs['label']) ? __('Unsubscribe', 'newsletter') : $attrs['label'];
 
-        $b = '<form action="' . esc_attr($this->build_action_url('uc')) . '" method="post" class="tnp-button-form tnp-unsubscribe">';
+        $b = '<form action="' . esc_attr($this->get_unsubscribe_confirm_url('uc')) . '" method="post" class="tnp-button-form tnp-unsubscribe">';
         $b .= wp_nonce_field('newsletter-unsubscribe', '_wpnonce', true, false);
         $b .= $this->get_user_key_field($user, 'uc');
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
