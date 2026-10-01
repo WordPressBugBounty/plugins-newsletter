@@ -313,7 +313,7 @@ class NewsletterUnsubscription extends NewsletterModule {
             $text = $this->replace_url($text, 'unsubscription_url', $this->get_unsubscribe_url($user, $email));
             $text = $this->replace_url($text, 'unsubscribe_url', $this->get_unsubscribe_url($user, $email));
 
-            $url = $this->get_resubscribe_url($user, $email);
+            $url = $this->get_resubscribe_url($user);
             if ('page' === $context) {
                 $url = wp_nonce_url($url, 'newsletter-resubscribe');
             }

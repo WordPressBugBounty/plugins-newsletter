@@ -398,9 +398,12 @@ class NewsletterEngine {
 
         if ($delay && $delay > 0) {
             wp_schedule_single_event(time() + $delay * 60, 'newsletter_send_error_recover', ['id' => (int) $email->id]);
+            Newsletter\Logs::add('newsletter-' . $email->id, 'Error: ' . $message . '. Autorecover in ' . $delay . ' minutes');
+        } else {
+            Newsletter\Logs::add('newsletter-' . $email->id, 'Error: ' . $message . '. Autorecover disabled (see Settings/Sending)');
         }
 
-        Newsletter\Logs::add('newsletter-' . $email->id, 'Error: ' . $message);
+
     }
 
     /**

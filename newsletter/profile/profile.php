@@ -214,13 +214,27 @@ class NewsletterProfile extends NewsletterModule {
         echo $this->get_text('text');
     }
 
+    /**
+     * Echoes the content for the [newsletter] shortcode when the message required is
+     * the profile page.
+     *
+     * @param string $message Message key (acts only when matching 'p')
+     * @param object $user Required and confirmed
+     */
     function hook_newsletter_shortcode($message, $user) {
+
+        // Is it for us?
         if (!in_array($message, ['p'], true)) {
             return;
         }
 
-        if (!$user || $user->status !== TNP_User::STATUS_CONFIRMED) {
+        if (!$user) {
             echo __('Subscriber not found.', 'newsletter');
+            return;
+        }
+
+        if ($user->status !== TNP_User::STATUS_CONFIRMED) {
+            echo __('Subscriber not confirmed.', 'newsletter');
             return;
         }
 
@@ -504,7 +518,7 @@ class NewsletterProfile extends NewsletterModule {
             return __('Subscriber not found.', 'newsletter');
         }
 
-        if (!$user->status === TNP_User::STATUS_CONFIRMED) {
+        if ($user->status !== TNP_User::STATUS_CONFIRMED) {
             return __('Subscriber not confirmed.', 'newsletter');
         }
 
