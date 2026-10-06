@@ -223,7 +223,6 @@ class NewsletterEngine {
 //            if (NEWSLETTER_DEBUG) {
 //                $r = new WP_Error(NewsletterMailer::ERROR_FATAL, 'test fatal error');
 //            }
-
             // The batch went in error
             if (is_wp_error($r)) {
                 $this->logger->error($r);
@@ -376,13 +375,9 @@ class NewsletterEngine {
     }
 
     /**
-     * @param TNP_Email $email
+     * @param TNP_Email $email (only for autocompletion)
      */
-    private function set_error_state_of_email($email, $message = '') {
-        // Handle only message type at the moment
-        //if ($email->type !== 'message') {
-        //    return;
-        //}
+    public function set_error_state_of_email($email, $message = '') {
 
         do_action('newsletter_error_on_sending', $email, $message);
 
@@ -396,14 +391,16 @@ class NewsletterEngine {
 
         $delay = (int) Newsletter::instance()->get_main_option('autorecovery_delay');
 
-        if ($delay && $delay > 0) {
-            wp_schedule_single_event(time() + $delay * 60, 'newsletter_send_error_recover', ['id' => (int) $email->id]);
+        if (!NEWSLETTER_TEST) {
+            $delay *= 60;
+        }
+
+        if ($delay > 0) {
+            wp_schedule_single_event(time() + $delay, 'newsletter_send_error_recover', [(int) $email->id]);
             Newsletter\Logs::add('newsletter-' . $email->id, 'Error: ' . $message . '. Autorecover in ' . $delay . ' minutes');
         } else {
             Newsletter\Logs::add('newsletter-' . $email->id, 'Error: ' . $message . '. Autorecover disabled (see Settings/Sending)');
         }
-
-
     }
 
     /**

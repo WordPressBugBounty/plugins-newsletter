@@ -1093,7 +1093,7 @@ class NewsletterModuleBase {
         $url = admin_url('admin-ajax.php') . '?action=tnp&na=' . rawurlencode($action);
 
         if ($user) {
-            $url .= '&nk=' . rawurlencode($this->get_user_key($user, $action, $duration));
+            $url .= '&nk=' . rawurlencode($this->get_user_key($user, $action));
         }
         if ($email) {
             $url .= '&nek=' . rawurlencode($this->get_email_key($email));

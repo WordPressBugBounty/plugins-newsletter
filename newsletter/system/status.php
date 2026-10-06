@@ -2,7 +2,6 @@
 /** @var NewsletterSystemAdmin $this */
 /** @var NewsletterControls $controls */
 /** @var wpdb $wpdb */
-
 defined('ABSPATH') || exit;
 
 wp_enqueue_script('tnp-chart');
@@ -274,7 +273,7 @@ function tnp_describe_table($table) {
                                 list($return_path_local, $return_path_domain) = explode('@', $return_path);
                             }
                             $sender = $newsletter->get_sender_email();
-                                list($sender_local, $sender_domain) = explode('@', $sender);
+                            list($sender_local, $sender_domain) = explode('@', $sender);
                             ?>
                             <tr>
                                 <td>Return path</td>
@@ -1313,6 +1312,8 @@ function tnp_describe_table($table) {
                                 <td>NEWSLETTER_PAGE_WARNING</td>
                                 <td>
                                     <?php echo NEWSLETTER_PAGE_WARNING ? 'true' : 'false' ?>
+
+                                    (disable the warning of missing or misconfigured Newsletter public page)
                                 </td>
                             </tr>
                             <?php
@@ -1334,6 +1335,9 @@ function tnp_describe_table($table) {
                                     <?php } else { ?>
                                         Not set
                                     <?php } ?>
+
+                                    (possibly use the Settings configuration)
+
                                 </td>
                             </tr>
                             <tr>
@@ -1350,7 +1354,7 @@ function tnp_describe_table($table) {
                             </tr>
 
                             <tr>
-                                <td>NEWSLETTER_MAX_EXECUTION_TIME</td>
+                                <td>NEWSLETTER_MAX_EXECUTION_TIME (obsolete)</td>
                                 <td>
                                     <?php
                                     if (defined('NEWSLETTER_MAX_EXECUTION_TIME')) {
@@ -1387,6 +1391,30 @@ function tnp_describe_table($table) {
                                 <td>NEWSLETTER_MULTILANGUAGE</td>
                                 <td>
                                     <?php echo defined('NEWSLETTER_MULTILANGUAGE') ? (NEWSLETTER_MULTILANGUAGE ? 'true' : 'false') : 'false'; ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>NEWSLETTER_TEST</td>
+                                <td>
+                                    <?php echo NEWSLETTER_TEST ? 'true' : 'false' ?>
+                                    (only during unit tests, never set on a production site!)
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>NEWSLETTER_UNTRUSTED_SINGLE_OPTIN</td>
+                                <td>
+                                    <?php echo defined('NEWSLETTER_UNTRUSTED_SINGLE_OPTIN') ? (NEWSLETTER_UNTRUSTED_SINGLE_OPTIN ? 'true' : 'false') : 'not set'; ?>
+                                    (if true it opens to vulnerabilities)
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>NEWSLETTER_DEBUG</td>
+                                <td>
+                                    <?php echo NEWSLETTER_DEBUG ? 'true' : 'false' ?>
+                                    (exclusively for development!)
                                 </td>
                             </tr>
 

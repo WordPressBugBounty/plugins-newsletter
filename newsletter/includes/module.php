@@ -1,5 +1,4 @@
 <?php
-
 defined('ABSPATH') || exit;
 
 require_once __DIR__ . '/logger.php';
@@ -11,9 +10,6 @@ require_once __DIR__ . '/themes.php';
  * @property array $options For compatibility, the main module options (magic method).
  */
 class NewsletterModule extends NewsletterModuleBase {
-
-    // Style for the notices shown to the administrator on subscription, profile, ..., pages
-    const NOTICE_STYLE = 'background-color: #efe; color: #000; padding: 1rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 1em; font-size: .9em;';
 
     static $cache = [];
 
@@ -482,7 +478,6 @@ class NewsletterModule extends NewsletterModuleBase {
         return $id === '0';
     }
 
-
     /**
      *
      * @return TNP_User
@@ -880,7 +875,7 @@ class NewsletterModule extends NewsletterModuleBase {
             $text = str_replace('{email_subject}', $email->subject, $text);
             // Deprecated
             $text = str_replace('{subject}', $email->subject, $text);
-            $text = $this->replace_url($text, 'email_url', $this->build_action_url('v', $user) . '&id=' . $email->id, 2*YEAR_IN_SECONDS);
+            $text = $this->replace_url($text, 'email_url', $this->build_action_url('v', $user) . '&id=' . $email->id, 2 * YEAR_IN_SECONDS);
         } else {
             $text = $this->replace_url($text, 'email_url', '#');
         }
@@ -1288,6 +1283,21 @@ class NewsletterModule extends NewsletterModuleBase {
      */
     function is_admin_page() {
         NewsletterAdmin::instance()->is_admin_page();
+    }
+
+    function show_admin_notice($text) {
+        if (!current_user_can('administrator')) {
+            return;
+        }
+        ?><fieldset style="border: 2px solid #ddd; border-radius: 8px; padding: 16px 20px; max-width: 500px; background-color: #eee; font-family: sans-serif;">
+            <legend style="background-color: #777; color: white; line-height: normal; padding: 3px 10px; font-size: 0.80rem; font-weight: normal; border-radius: 4px; text-transform: uppercase;">
+                Shown only to administrators
+            </legend>
+            <p style="margin: 0; color: #2d3748; font-size: 0.90rem; line-height: normal;">
+                <?= wp_kses_post($text) ?>
+            </p>
+        </fieldset>
+        <?php
     }
 }
 

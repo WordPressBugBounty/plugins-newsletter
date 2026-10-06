@@ -96,7 +96,7 @@ class NewsletterSubscription extends NewsletterModule {
         $text = $this->replace_url($text, 'activation_url', $url);
         $text = $this->replace_url($text, 'confirmation_url', $url);
         $text = $this->replace_url($text, 'confirm_url', $url);
-        
+
         return $text;
     }
 
@@ -451,6 +451,15 @@ class NewsletterSubscription extends NewsletterModule {
         return $this->subscribe2($subscription);
     }
 
+    function is_untrusted_single_optin_allowed() {
+        if (NEWSLETTER_TEST) {
+            return !empty($this->get_main_option('untrusted_single_optin'));
+        }
+
+        return defined('NEWSLETTER_UNTRUSTED_SINGLE_OPTIN') && NEWSLETTER_UNTRUSTED_SINGLE_OPTIN;
+
+    }
+
     /**
      *
      * @param TNP_Subscription $subscription
@@ -548,11 +557,11 @@ class NewsletterSubscription extends NewsletterModule {
             return new WP_Error('temporary', 'Internal error.');
         }
 
-        if ($existing_user->status == TNP_User::STATUS_BOUNCED) {
+        if ($existing_user->status === TNP_User::STATUS_BOUNCED) {
             return new WP_Error('bounced', 'Subscriber blocked since bounced. Contact the site administrator.');
         }
 
-        if ($existing_user->status == TNP_User::STATUS_COMPLAINED) {
+        if ($existing_user->status === TNP_User::STATUS_COMPLAINED) {
             return new WP_Error('complained', 'Subscriber blocked since complained. Contact the site administrator.');
         }
 
@@ -584,12 +593,17 @@ class NewsletterSubscription extends NewsletterModule {
                 return new WP_Error('exists', 'Email address already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.');
             }
 
-            // If a current subscriber can be recognized and it is subscribing again (for example on a different form) allow it to
-            // use the single optin, otherwise we cannot trust it and the confirmation is required to avoid it to access the original
-            // subscriber data.
-            $current_user = $this->get_current_user();
-            $is_trusted = $current_user && $current_user->id == $existing_user->id;
-            $this->logger->debug($is_trusted ? 'Trusted user' : 'Untrusted user');
+            if ($this->is_untrusted_single_optin_allowed()) {
+                $is_trusted = true;
+                $this->logger->debug('Trusted user forced by configuration wp-config.php');
+            } else {
+                // If a current subscriber can be recognized and it is subscribing again (for example on a different form) allow it to
+                // use the single optin, otherwise we cannot trust it and the confirmation is required to avoid it to access the original
+                // subscriber data.
+                $current_user = $this->get_current_user();
+                $is_trusted = $current_user && $current_user->id == $existing_user->id;
+                $this->logger->debug($is_trusted ? 'Trusted user' : 'Untrusted user');
+            }
 
             // If a "current" subscriber is recognized and it matches the new subscription we can use it
             if ($is_trusted) {
@@ -1903,16 +1917,26 @@ class NewsletterSubscription extends NewsletterModule {
         return $buffer;
     }
 
+    /**
+     * Gets a form from the old HTML forms (actually they support shortcodes as well).
+     *
+     * @todo Remove the {lists} replacement and replace it with a shortcode before the do_shortcode().
+     *
+     * @param int $number
+     * @param array $attrs
+     * @return string
+     */
     function get_form($number, $attrs = []) {
         $options = $this->get_options('htmlforms');
 
-        $form = $options['form_' . $number];
+        $form = $options['form_' . $number] ?? '';
 
         $form = do_shortcode($form);
 
         $action = $this->build_action_url('s');
         $form .= $this->get_form_hidden_fields($attrs);
 
+        // The <form> tag should never be added...
         if (stripos($form, '<form') === false) {
             $form = '<form method="post" action="' . esc_attr($action) . '">' . $form . '</form>';
         }
@@ -1920,6 +1944,7 @@ class NewsletterSubscription extends NewsletterModule {
         // For compatibility
         $form = str_replace('{newsletter_url}', $action, $form);
 
+        // [newslette_field name="lists"] should be used instead.
         $form = $this->replace_lists($form);
 
         return $form;
@@ -1928,6 +1953,7 @@ class NewsletterSubscription extends NewsletterModule {
     /** Replaces on passed text the special tag {lists} that can be used to show the preferences as a list of checkbox.
      * They are called lists but on configuration panel they are named preferences!
      *
+     * @deprecated
      * @param string $buffer
      * @return string
      */
@@ -1948,12 +1974,14 @@ class NewsletterSubscription extends NewsletterModule {
             return;
         }
 
-        if (empty($this->get_main_option('notify_email'))) {
+        $email = trim($this->get_main_option('notify_email'));
+
+        if (!$email) {
             return;
         }
 
         $message = $this->generate_admin_notification_message($user);
-        $email = trim($this->get_main_option('notify_email'));
+
         $subject = $this->generate_admin_notification_subject('New subscription');
 
         Newsletter::instance()->mail($email, $subject, ['html' => $message]);
@@ -2019,7 +2047,9 @@ class NewsletterSubscription extends NewsletterModule {
     }
 
     /**
-     * Implementation of the [newsletter_form] shortcode.
+     * Implementation of the [newsletter_form] shortcode. If there is some content,
+     * is must ocntains the field shortcodes [newsletter_field] composing the final
+     * form.
      *
      * @param array $attrs
      * @param string $content
@@ -2049,39 +2079,52 @@ class NewsletterSubscription extends NewsletterModule {
         return $this->get_subscription_form(null, null, $attrs);
     }
 
+    /**
+     * Possible content to show when the [newsletter] shortcode is executed in the
+     * public Newsletter page.
+     *
+     * @param string $message Type of the message to show
+     * @param object $user The current subscriber (may be null)
+     * @return string
+     */
     function hook_newsletter_shortcode($message, $user) {
         if (!in_array($message, ['subscription', 'confirmed', 'confirmation', 'error'], true)) {
             return;
         }
 
-        // Service messages to help configuring and debugging (they greatly reduced the support requests)
+        // Some help for administrators while configuring the plugin... (it saved tons of support requests!)
         if (current_user_can('administrator')) {
-            echo '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 1em; font-size: .9em;">';
-            echo '<strong>Visible only to administrators</strong>. <a href="' . esc_attr($this->get_admin_edit_url($message)) . '" target="_blank">Edit this content</a>.';
-            echo '</p>';
+            $m = '<a href="' . esc_attr($this->get_admin_edit_url($message)) . '" target="_blank">Edit this content</a>.';
             if ($message === 'error') {
-                echo '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 1em; font-size: .9em;">';
-                echo '<strong>Message only visibile to administrators</strong><br>';
-                echo 'Email address probably already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.';
-                echo '</p>';
+                $m .= '<br><br>';
+                $m .= 'Error message shown because the email address already registered and repeated registration not allowed.<br>';
+                $m .= 'That behavior can be changed in the Subscription configuration.';
             }
+            $this->show_admin_notice($m);
         }
 
         echo $this->get_text($message . '_text');
 
         if ($message === 'confirmed') {
-            echo $this->get_option($key . '_tracking');
+            echo $this->get_option($message . '_tracking');
         }
     }
 
+    /**
+     * Possible content to show when the [newsletter] shortcode is executed in the
+     * public Newsletter page and accessed with a dummy subscriber (preview from the admin
+     * pages).
+     *
+     * @param string $message
+     * @param object $user It should be a dummy subscriber ($user->id === 0)
+     * @return string
+     */
     function hook_newsletter_shortcode_dummy($message, $user) {
         if (!in_array($message, ['subscription', 'confirmed', 'confirmation', 'error'], true)) {
             return;
         }
 
-        echo '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0; border: 1px solid #ddd; border-radius: 1em; font-size: .9em;">';
-        echo 'Preview of the content with a dummy subscriber.';
-        echo '</p>';
+        $this->show_admin_notice('Preview of the content with a dummy subscriber.');
 
         echo $this->get_text($message . '_text');
     }

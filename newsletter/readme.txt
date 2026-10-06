@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 7.1
-Stable tag: 9.4.6
+Stable tag: 9.4.7
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -181,9 +181,14 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 9.4.7 =
+
+* Added the NEWSLETTER_UNTRUSTED_SINGLE_OPTIN constant
+* Fixed the open tracking link REST format
+
 = 9.4.6 =
 
-* Foxed resubscribe url replacement
+* Fixed resubscribe url replacement
 * Improved the log for newsletters with fatal errors
 * Improved messages on profile when accessed without a subscriber or an unconfirmed subscriber
 

@@ -71,8 +71,8 @@ class NewsletterStatistics extends NewsletterModule {
         $this->logger->debug('REST open tracking');
 
         $text = $request['email_id'] . '/' . $request['user_id'];
-        // Standard signature
-        $verified = $this->check_signature('o/' . $text, $request['signature']);
+        // Standard signature, can be 1 or 2 if expired, but we do not check the expiration for open links
+        $verified = $this->verify_signature('o/' . $text, $request['signature']);
         if (!$verified) {
             // Old style signature (to be removed)
             $verified = $this->check_signature($text, $request['signature']);
@@ -273,7 +273,7 @@ class NewsletterStatistics extends NewsletterModule {
      * @param object $email
      * @param object $user
      */
-    function send_redirect($url, $email, $user) {
+    function send_redirect($url, $email = null, $user = null) {
         //$this->logger->debug(__METHOD__);
         header("Referrer-Policy: no-referrer");
         header('Location: ' . sanitize_url(apply_filters('newsletter_redirect_url', $url, $email, $user)));
@@ -329,7 +329,7 @@ class NewsletterStatistics extends NewsletterModule {
                 } else {
                     $this->logger->debug('Not verified by the old key');
                     $url = wp_validate_redirect($url, home_url());
-                    $this->send_redirect($url, $email, $user);
+                    $this->send_redirect($url);
                 }
             }
 
@@ -436,12 +436,7 @@ class NewsletterStatistics extends NewsletterModule {
     }
 
     function check_signature($text, $signature) {
-        $signature = trim($signature);
-        if (!$signature) {
-            return false;
-        }
-
-        return $this->get_signature($text) === $signature;
+        return $this->verify_signature($text, $signature) !== 0;
     }
 
     /**
@@ -467,8 +462,8 @@ class NewsletterStatistics extends NewsletterModule {
             }
             return $time >= time() ? 1 : 2;
         } else {
-            return (md5($text . $this->get_key()) === $signature) ? 2 : 0;
-            //return $this->check_signature($text, $signature) ? 2 : 0;
+            // Signature w/o timestamp
+            return hash_equals(md5($text . $this->get_key()), $signature) ? 2 : 0;
         }
     }
 

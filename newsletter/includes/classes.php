@@ -306,6 +306,7 @@ class TNP_User {
     const STATUS_UNSUBSCRIBED = 'U';
     const STATUS_BOUNCED = 'B';
     const STATUS_COMPLAINED = 'P';
+    const STATUS_TEMPORARY = 'T';
 
     var $id = 0;
     var $email = '';

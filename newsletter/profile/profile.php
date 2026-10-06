@@ -1,5 +1,4 @@
 <?php
-
 defined('ABSPATH') || exit;
 
 class NewsletterProfile extends NewsletterModule {
@@ -80,7 +79,7 @@ class NewsletterProfile extends NewsletterModule {
         }
 
         $label = empty($attrs['label']) ? __('Profile edit', 'newsletter') : $attrs['label'];
-        $b = '<form action="' . esc_attr($this->build_action_url('p')) . '" method="post" class="tnp-button-form tnp-profile">';
+        $b = '<form action="' . esc_attr($this->build_action_url('p')) . '" method="post" class="tnp-button-form">';
         $b .= $this->get_user_key_field($user, 'p');
         $b .= wp_nonce_field('newsletter-profile', '_wpnonce', true, false);
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
@@ -207,9 +206,7 @@ class NewsletterProfile extends NewsletterModule {
             return;
         }
 
-        echo '<p style="', self::NOTICE_STYLE, '">';
-        echo 'Preview of the content with a dummy subscriber.';
-        echo '</p>';
+        $this->show_admin_notice('Preview of the content with a dummy subscriber.');
 
         echo $this->get_text('text');
     }
@@ -229,22 +226,19 @@ class NewsletterProfile extends NewsletterModule {
         }
 
         if (!$user) {
+            $this->show_admin_notice('The link is expired or the subscriber does not exist.');
             echo __('Subscriber not found.', 'newsletter');
             return;
         }
 
         if ($user->status !== TNP_User::STATUS_CONFIRMED) {
+            $this->show_admin_notice('If reached from a test newsletter it was sent to a not confirmed address. ');
             echo __('Subscriber not confirmed.', 'newsletter');
             return;
         }
 
         // To help the administrator configuring the messages and reduce the support requests.
-        if (current_user_can('administrator')) {
-            echo '<p style="', self::NOTICE_STYLE, '">';
-            echo '<strong>Visible only to administrators</strong>. ';
-            echo '<a href="' . esc_attr($this->get_profile_admin_edit_url()) . '" target="_blank">Edit this content</a>.';
-            echo '</p>';
-        }
+        $this->show_admin_notice('<a href="' . esc_attr($this->get_profile_admin_edit_url()) . '" target="_blank">Edit this content</a>.');
 
         echo $this->get_text('text');
     }
@@ -510,6 +504,15 @@ class NewsletterProfile extends NewsletterModule {
         return '<p style="background-color: #eee; color: #000; padding: 10px; margin: 10px 0">' . $message . ' <strong>This notice is shown only to administrators to help with configuration.</strong></p>';
     }
 
+    /**
+     * Implementation of the [newsletter_profile] shortcode. Is the shortcode has
+     * content, it's assumed the user added the profile fields in ordine to have a
+     * custom form layout.
+     *
+     * @param array $attrs
+     * @param string $content
+     * @return string
+     */
     function shortcode_newsletter_profile($attrs, $content = '') {
 
         $user = $this->get_current_user();

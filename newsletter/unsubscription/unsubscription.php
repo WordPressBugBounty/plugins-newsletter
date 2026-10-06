@@ -40,25 +40,40 @@ class NewsletterUnsubscription extends NewsletterModule {
      * Action URL to the page where to start the unsubscription.
      *
      * @param object $user
-     * @param object $email
      * @return string
      */
-    function get_unsubscribe_url($user, $email = null, $duration = 7 * DAY_IN_SECONDS) {
-        return $this->build_action_url('u', $user, $email, $duration);
-    }
-
-    function get_unsubscribe_confirm_url($user, $email = null, $duration = 7 * DAY_IN_SECONDS) {
-        return $this->build_action_url('uc', $user, $email, $duration);
+    function get_unsubscribe_url($user) {
+        return $this->build_action_url('u', $user, null, 7 * DAY_IN_SECONDS);
     }
 
     /**
-     * Action URL to the page where to start the resubscription.
+     * Only the form action URL, without the user key whoch is added as hidden
+     * form field.
+     *
+     * @return string
+     */
+    function get_unsubscribe_confirm_url() {
+        return $this->build_action_url('uc', null, null, DAY_IN_SECONDS);
+    }
+
+    /**
+     * Action URL to the page where to start the re-subscription.
      *
      * @param object $user
      * @return string
      */
-    function get_resubscribe_url($user, $duration = DAY_IN_SECONDS) {
-        return $this->build_action_url('r', $user, null, $duration);
+    function get_resubscribe_url($user) {
+        return $this->build_action_url('r', $user, null, 7 * DAY_IN_SECONDS);
+    }
+
+    /**
+     * Only the form action URL, without the user key whoch is added as hidden
+     * form field.
+     *
+     * @return string
+     */
+    function get_resubscribe_confirm_url() {
+        return $this->build_action_url('rc', null, null, DAY_IN_SECONDS);
     }
 
     /**
@@ -74,13 +89,14 @@ class NewsletterUnsubscription extends NewsletterModule {
     function shortcode_newsletter_unsubscribe_button($attrs, $content = '') {
         $user = $this->get_current_user();
 
+        // For dummy user it's ok to show the button
         if (!$user || $user->id !== 0 && $user->status !== TNP_User::STATUS_CONFIRMED) {
             return '';
         }
 
         $label = empty($attrs['label']) ? __('Unsubscribe', 'newsletter') : $attrs['label'];
 
-        $b = '<form action="' . esc_attr($this->get_unsubscribe_confirm_url('uc')) . '" method="post" class="tnp-button-form tnp-unsubscribe">';
+        $b = '<form action="' . esc_attr($this->get_unsubscribe_confirm_url()) . '" method="post" class="tnp-button-form tnp-button-unsubscribe">';
         $b .= wp_nonce_field('newsletter-unsubscribe', '_wpnonce', true, false);
         $b .= $this->get_user_key_field($user, 'uc');
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
@@ -101,12 +117,14 @@ class NewsletterUnsubscription extends NewsletterModule {
     function shortcode_newsletter_resubscribe_button($attrs, $content = '') {
         $user = $this->get_current_user();
 
+        // For dummy user it's ok to show the button
         if (!$user || $user->id !== 0 && $user->status !== TNP_User::STATUS_UNSUBSCRIBED) {
             return '';
         }
 
         $label = empty($attrs['label']) ? __('Resubscribe', 'newsletter') : $attrs['label'];
-        $b = '<form action="' . esc_attr($this->build_action_url('rc')) . '" method="post" class="tnp-button-form tnp-resubscribe">';
+
+        $b = '<form action="' . esc_attr($this->get_resubscribe_confirm_url()) . '" method="post" class="tnp-button-form tnp-button-resubscribe">';
         $b .= wp_nonce_field('newsletter-resubscribe', '_wpnonce', true, false);
         $b .= $this->get_user_key_field($user, 'rc');
         $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
@@ -314,6 +332,7 @@ class NewsletterUnsubscription extends NewsletterModule {
             $text = $this->replace_url($text, 'unsubscribe_url', $this->get_unsubscribe_url($user, $email));
 
             $url = $this->get_resubscribe_url($user);
+            // It should no more used as URL and needs to be removed!
             if ('page' === $context) {
                 $url = wp_nonce_url($url, 'newsletter-resubscribe');
             }
@@ -336,15 +355,14 @@ class NewsletterUnsubscription extends NewsletterModule {
         }
 
         if (!$user) {
+            $this->show_admin_notice('The link is expired or the subscriber does not exist.');
             echo $this->get_text('error_text');
             return;
         }
 
-        if (current_user_can('administrator')) {
-            echo '<p style="', self::NOTICE_STYLE, '">';
-            echo '<strong>Visible only to administrators</strong>. <a href="' . admin_url('admin.php?page=newsletter_unsubscription_index') . '" target="_blank">Edit this content</a>.';
-            echo '</p>';
-        }
+        // User status check?
+
+        $this->show_admin_notice('<a href="' . admin_url('admin.php?page=newsletter_unsubscription_index') . '" target="_blank">Edit this content</a>.');
 
         echo $this->get_text($message . '_text');
     }
@@ -354,9 +372,7 @@ class NewsletterUnsubscription extends NewsletterModule {
             return;
         }
 
-        echo '<p style="', self::NOTICE_STYLE, '">';
-        echo 'Preview of the content with a dummy subscriber.';
-        echo '</p>';
+        $this->show_admin_notice('Preview of the content with a dummy subscriber.');
 
         echo $this->get_text($message . '_text');
     }
