@@ -492,6 +492,32 @@ class NewsletterModule extends NewsletterModuleBase {
         return apply_filters('newsletter_current_user', $user);
     }
 
+    function analyze_current_user_key() {
+        $result = '';
+        if (isset($_REQUEST['nk'])) {
+             $user = $this->get_user_by_key($_REQUEST['nk'] ?? '');
+             if (!$user) {
+                 $result .= 'URL key present, no matching user.';
+             }
+        } else {
+            $result .= 'URL key not present.';
+        }
+
+        $result .= ' ';
+
+        if (isset($_COOKIE[$this->get_user_cookie_name()])) {
+            $user = $this->get_user_by_key($_COOKIE[$this->get_user_cookie_name()] ?? '', 'cookie');
+            if (!$user) {
+                 $result .= 'Cookie present, no matching user.';
+             }
+        } else {
+            $result .= 'Cookie not present.';
+        }
+
+        return $result;
+
+    }
+
     function get_user_count($refresh = false) {
         global $wpdb;
         $user_count = get_transient('newsletter_user_count');
@@ -726,6 +752,10 @@ class NewsletterModule extends NewsletterModuleBase {
      */
     function build_message_url($url = '', $message_key = '', $user = null, $email = null, $alert = '') {
         $params = 'nm=' . rawurlencode($message_key);
+
+        // To avoid caching
+        $params .= '&nrnd=' . rawurldecode(wp_generate_password(8, false, false));
+
         $language = '';
         if ($user) {
             if (!is_object($user)) {
@@ -1102,7 +1132,7 @@ class NewsletterModule extends NewsletterModuleBase {
             return true;
         }
 
-        if ('POST' !== $_SERVER['REQUEST_METHOD'] ?? '') {
+        if ('POST' !== ($_SERVER['REQUEST_METHOD'] ?? '')) {
             return false;
         }
 

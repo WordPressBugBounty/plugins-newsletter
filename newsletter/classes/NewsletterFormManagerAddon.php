@@ -4,6 +4,11 @@ defined('ABSPATH') || exit;
 
 class NewsletterFormManagerAddon extends NewsletterAddon {
 
+    const STATUS_NO_CONSENT = 1;
+    const STATUS_NO_EMAIL = 2;
+    const STATUS_ERROR = 3;
+
+
     var $menu_title = null;
     var $menu_description = null;
     var $menu_slug = null;
@@ -236,7 +241,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
         $user = NewsletterSubscription::instance()->subscribe2($subscription);
 
         if (is_wp_error($user)) {
-            Newsletter\Logs::add($this->name . '-' . $form_id, 'Subcription for ' . $subscription->data->email . ' failed: ' . $user->get_error_message());
+            Newsletter\Logs::add($this->name . '-' . $form_id, 'Subcription for ' . $subscription->data->email . ' failed: ' . $user->get_error_message(), self::STATUS_ERROR);
         } else {
             Newsletter\Logs::add($this->name . '-' . $form_id, 'Subcription for ' . $subscription->data->email);
         }
@@ -250,8 +255,8 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
      * @param string $form_id
      * @param string $text
      */
-    function log($form_id, $text) {
-        Newsletter\Logs::add($this->name . '-' . $form_id, $text);
+    function log($form_id, $text, $status = 0) {
+        Newsletter\Logs::add($this->name . '-' . $form_id, $text, $status);
     }
 
     /**
@@ -296,6 +301,10 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
      */
     public function get_form_options($form_id) {
         return Newsletter::get_option_array('newsletter_' . $this->name . '_' . $form_id);
+    }
+
+    public function get_form_stats($id) {
+        
     }
 }
 

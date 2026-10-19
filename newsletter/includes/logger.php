@@ -52,9 +52,10 @@ class NewsletterLogger {
 
         }
 
+        $this->offset = 3600 * (int)get_option('gmt_offset', 0);
+
         $this->file = NEWSLETTER_LOG_DIR . '/' . $module . '-' . gmdate('Y-m', time() + $this->offset) . '-' . $secret . '.txt';
 
-        $this->offset = 3600 * (int)get_option('gmt_offset', 0);
     }
 
     /**

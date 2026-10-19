@@ -434,6 +434,11 @@ class NewsletterModuleBase {
 
 
         list($timestamp, $signature) = explode('.', $token, 2);
+
+        if (!ctype_digit($timestamp)) {
+            return null;
+        }
+
         if ($timestamp < time()) {
             return null;
         }

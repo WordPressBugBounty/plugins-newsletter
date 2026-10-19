@@ -385,8 +385,8 @@ class NewsletterStatistics extends NewsletterModule {
 
             // The first signature check if for compatibility, it'll be removed
             $text = $email->id . '/' . $user->id;
-            $verified = $verified || $this->check_signature($text, $signature) !== 0 ||
-                    $this->check_signature('o/' . $text, $signature) !== 0;
+            $verified = $verified || $this->verify_signature($text, $signature) !== 0 ||
+                    $this->verify_signature('o/' . $text, $signature) !== 0;
 
             // User the old key, if not expired
             if (!$verified && !$this->is_old_key_expired()) {

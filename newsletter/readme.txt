@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 7.1
-Stable tag: 9.4.7
+Stable tag: 9.4.8
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -180,6 +180,13 @@ Thank you, The Newsletter Team
 3. The Reports addon
 
 == Changelog ==
+
+= 9.4.8 =
+
+* Fixes
+* Added no cache headers when messages are served and on actions
+* Improved admin messages to diagnose "Subscriber not found"
+* Disable the saving of temporary subscribers
 
 = 9.4.7 =
 

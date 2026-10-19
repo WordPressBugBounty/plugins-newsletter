@@ -226,7 +226,7 @@ class NewsletterProfile extends NewsletterModule {
         }
 
         if (!$user) {
-            $this->show_admin_notice('The link is expired or the subscriber does not exist.');
+            $this->show_admin_notice('The link is expired or the subscriber does not exist. ' . $this->analyze_current_user_key());
             echo __('Subscriber not found.', 'newsletter');
             return;
         }

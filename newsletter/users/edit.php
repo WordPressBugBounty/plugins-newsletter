@@ -13,7 +13,7 @@ if (!$user) {
     return;
 }
 
-if ($controls->is_action('save')) {
+if ($controls->is_action('save') && $user->status !== TNP_User::STATUS_TEMPORARY) {
 
     $controls->data = wp_kses_post_deep($controls->data);
 
@@ -83,6 +83,14 @@ if ($controls->is_action('delete')) {
 
 if (!$controls->is_action()) {
     $controls->data = (array) $user;
+}
+
+if ($user->status === TNP_User::STATUS_TEMPORARY) {
+    $real_user = $this->get_user_by_email($user->email);
+    if ($real_user) {
+        $controls->add_message('This is a temporary subscriber storing the data for a second subscription of <a href="?page=newsletter_users_edit?id=' .
+                ((int) $real_user->id) . '" target="_blank">' . esc_html($real_user->email) . ' [#' . ((int) $real_user->id) . ']</a> waiting for double opt-in confirmation. It will be deleted automatically.');
+    }
 }
 
 $options_profile = NewsletterSubscription::instance()->get_options('customfields');
@@ -176,7 +184,7 @@ function percentValue($value, $total) {
                         <tr>
                             <th><?php esc_html_e('Tracking', 'newsletter'); ?></th>
                             <td>
-                                <?php $controls->select('track', ['0'=> 'Disabled', '1'=> 'Enabled']); ?>
+                                <?php $controls->select('track', ['0' => 'Disabled', '1' => 'Enabled']); ?>
 
                                 <div class="description">EU specific settings</div>
                             </td>
@@ -378,7 +386,9 @@ function percentValue($value, $total) {
             </div>
 
             <p>
+                <?php if ($user->status !== TNP_User::STATUS_TEMPORARY) { ?>
                 <?php $controls->button_save(); ?>
+                <?php } ?>
                 <?php $controls->button_delete(); ?>
             </p>
 
