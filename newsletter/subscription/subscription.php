@@ -457,7 +457,6 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         return defined('NEWSLETTER_UNTRUSTED_SINGLE_OPTIN') && NEWSLETTER_UNTRUSTED_SINGLE_OPTIN;
-
     }
 
     /**
@@ -479,12 +478,14 @@ class NewsletterSubscription extends NewsletterModule {
         // Spam check before sanitization: we could remove relevant information to evaluate spam
         $spam_check = $this->spam_check($subscription);
         if (is_wp_error($spam_check)) {
+            $this->logger->debug($spam_check);
             return $spam_check;
         }
 
         $this->sanitize_subscription_data($subscription->data);
 
         if (empty($subscription->data->email)) {
+            $this->logger->debug('Empty email after sanitization');
             return new WP_Error('email', 'Wrong email address');
         }
 
@@ -492,6 +493,8 @@ class NewsletterSubscription extends NewsletterModule {
         $existing_user = $this->get_user_by_email($subscription->data->email);
 
         $subscription = apply_filters('newsletter_subscription', $subscription, $existing_user);
+        $this->logger->debug('Subscription after filtering');
+        $this->logger->debug($subscription);
 
         if (!$subscription) {
             return new WP_Error('filter', 'Subscription blocked by filter');
@@ -528,7 +531,7 @@ class NewsletterSubscription extends NewsletterModule {
             $user->status = TNP_User::STATUS_NOT_CONFIRMED;
             $subscription->data->merge_in($user);
 
-            $user = apply_filters('newsletter_user_subscribe', $user);
+            //$user = apply_filters('newsletter_user_subscribe', $user);
 
             $user = $this->save_user($user);
 
@@ -540,6 +543,8 @@ class NewsletterSubscription extends NewsletterModule {
             if ($subscription->optin === 'single') {
                 // With single optin in the confirmation is automatic
                 $user = $this->confirm($user);
+                $this->logger->debug('User after confirmation');
+                $this->logger->debug($user);
             } else {
                 // It can be false, when the method is used for custom subscription and the welcome email is not required
                 if ($subscription->send_emails) {

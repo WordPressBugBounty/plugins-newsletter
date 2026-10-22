@@ -448,6 +448,13 @@ function tnp_describe_table($table) {
                                 </td>
                             </tr>
                             <tr>
+                                <td><code>newsletter_user_subscribe</code></td>
+                                <td>
+                                    <?php echo has_filter('newsletter_user_subscribe') ? '' : '-' ?>
+                                    <?php $this->echo_hook_functions('newsletter_user_subscribe') ?>
+                                </td>
+                            </tr>
+                            <tr>
                                 <td><code>newsletter_message</code></td>
                                 <td>
                                     <?php echo has_filter('newsletter_message') ? '' : '-' ?>
