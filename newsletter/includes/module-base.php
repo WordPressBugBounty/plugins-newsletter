@@ -674,7 +674,7 @@ class NewsletterModuleBase {
      * @param TNP_User $user
      * @param string $source
      */
-    function add_user_log($user, $source = '') {
+    function add_user_log($user, $source = '', $extra = []) {
         global $wpdb;
 
         $lists = $this->get_lists_public();
@@ -684,6 +684,7 @@ class NewsletterModuleBase {
         }
         $data['status'] = $user->status;
         $data['track'] = $user->track ?? '-';
+        $data = array_merge($extra, $data);
         $ip = $this->get_remote_ip();
         $ip = $this->process_ip($ip);
         $this->store->save($wpdb->prefix . 'newsletter_user_logs', array('ip' => $ip, 'user_id' => $user->id, 'source' => $source, 'created' => time(), 'data' => json_encode($data)));

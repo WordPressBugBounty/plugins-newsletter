@@ -538,18 +538,21 @@ class NewsletterSubscription extends NewsletterModule {
             // Save only the useful info contained in the subscription (custom emails, custom pages, ...)
             $this->save_subscription_attributes($user, $subscription);
 
-            $this->add_user_log($user, 'subscribe'); // Logs should be appended to the existing user but with submitted data
+            $this->add_user_log($user, 'subscribed'); // Logs should be appended to the existing user but with submitted data
+
+
 
             if ($subscription->optin === 'single') {
+                do_action('newsletter_user_subscribed', $user); // Before the confirmation
                 // With single optin in the confirmation is automatic
                 $user = $this->confirm($user);
-                $this->logger->debug('User after confirmation');
-                $this->logger->debug($user);
             } else {
                 // It can be false, when the method is used for custom subscription and the welcome email is not required
                 if ($subscription->send_emails) {
                     $this->send_confirmation_email($user);
                 }
+
+                do_action('newsletter_user_subscribed', $user); // After our actions!
             }
 
             $this->logger->debug('Subscribe completed');
@@ -585,9 +588,12 @@ class NewsletterSubscription extends NewsletterModule {
             $this->save_user_subscription($user->id, $subscription);
             $this->save_subscription_attributes($user, $subscription);
 
+            $this->add_user_log($user, 'subscribed'); // Logs should be appended to the existing user but with submitted data
+
             // Needed for caller to redirect
             $user->status = TNP_User::STATUS_NOT_CONFIRMED;
             $this->send_confirmation_email($user);
+            do_action('newsletter_user_subscribed', $user);
             return $user;
         }
 
@@ -622,9 +628,10 @@ class NewsletterSubscription extends NewsletterModule {
                 // (immediate or by email)
                 $this->save_user_subscription($existing_user->id, $subscription);
                 $this->save_subscription_attributes($existing_user, $subscription);
-                $this->add_user_log($existing_user, 'subscribe');
+                $this->add_user_log($existing_user, 'subscribed');
 
                 if ($subscription->optin === 'single') {
+                    do_action('newsletter_user_subscribed', $user);
                     return $this->confirm($existing_user);
                 } else {
 
@@ -632,6 +639,7 @@ class NewsletterSubscription extends NewsletterModule {
                     // since it is confirmed and this is a second subscription to be merged.
                     $existing_user->status = TNP_User::STATUS_NOT_CONFIRMED;
                     $this->send_confirmation_email($existing_user);
+                    do_action('newsletter_user_subscribed', $user);
                     return $existing_user;
                 }
             } else {
@@ -649,6 +657,7 @@ class NewsletterSubscription extends NewsletterModule {
                 // Needed for caller to redirect
                 $user->status = TNP_User::STATUS_NOT_CONFIRMED;
                 $this->send_confirmation_email($user);
+                do_action('newsletter_user_subscribed', $user); // This is the temporary user, the original one remains untouched
                 return $user;
             }
         }
@@ -691,7 +700,7 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         // A temporary user?
-        if ($user->status === 'T') {
+        if ($user->status === TNP_User::STATUS_TEMPORARY) {
             // Switch to the correct subscriber
             $matching_user = $this->get_user_by_email($user->email);
             if (!$matching_user) {
@@ -710,15 +719,15 @@ class NewsletterSubscription extends NewsletterModule {
 
             $this->save_subscription_attributes($matching_user, $subscription);
 
-            $this->add_user_log($matching_user, 'activate');
+            $this->add_user_log($matching_user, 'confirmed');
 
             $this->delete_user($user->id);
-
-            do_action('newsletter_user_confirmed', $matching_user);
 
             $this->send_welcome_email($matching_user);
 
             $this->notify_admin_on_subscription($matching_user);
+
+            do_action('newsletter_user_confirmed', $matching_user);
 
             return $matching_user;
         }
@@ -740,7 +749,7 @@ class NewsletterSubscription extends NewsletterModule {
                 // It a second confirmation
                 $this->update_user_last_activity($user);
                 // This is useful when checking for email scanners
-                $this->add_user_log($user, 'activate');
+                $this->add_user_log($user, 'confirmed');
                 // No emails to be sent
                 return $user;
             } //else {
@@ -758,12 +767,12 @@ class NewsletterSubscription extends NewsletterModule {
         $user->last_activity = time();
         $user = $this->save_user($user);
 
-        $this->add_user_log($user, 'activate');
-
-        do_action('newsletter_user_confirmed', $user);
+        $this->add_user_log($user, 'confirmed');
 
         $this->send_welcome_email($user);
         $this->notify_admin_on_subscription($user);
+
+        do_action('newsletter_user_confirmed', $user);
 
         return $user;
     }

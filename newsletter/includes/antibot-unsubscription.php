@@ -15,8 +15,9 @@ header('Cache-Control: no-cache,no-store,private');
 
             <?php
             foreach ($_REQUEST as $name => $value) {
-                if ($name == 'submit')
+                if ($name === 'submit')
                     continue;
+                $value ??= '';
                 if (is_array($value)) {
                     foreach ($value as $k => $v) {
                         echo '<input type="hidden" name="';

@@ -192,7 +192,7 @@ $lists_options['-1'] = __('Without list', 'newsletter');
                         <th><?php esc_html_e('Email', 'newsletter') ?></th>
                         <th><?php esc_html_e('Name', 'newsletter') ?></th>
                         <th><?php esc_html_e('Status', 'newsletter') ?></th>
-                        <th><?php esc_html_e('Date') ?></th>
+                        <th><?php esc_html_e('Created', 'newsletter') ?></th>
                         <?php if ($is_multilanguage) { ?>
                             <th><i class="fa fa-globe" aria-hidden="true"></i></th>
                         <?php } ?>
@@ -245,6 +245,7 @@ $lists_options['-1'] = __('Without list', 'newsletter');
                             <?php } ?>
 
                             <?php $controls->button_icon_delete($s->id); ?>
+                            <?php $controls->btn_link('?page=newsletter_users_logs&id=' . rawurlencode($s->id), '', ['icon' => 'fa-list', 'title'=>'Logs']) ?>
 
                         </td>
                     </tr>

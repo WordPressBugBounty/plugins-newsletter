@@ -266,7 +266,11 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         $this->set_user_status($user, TNP_User::STATUS_UNSUBSCRIBED);
 
-        $this->add_user_log($user, $type);
+        if ($type === 'unsubscribe-rfc8058') {
+            $this->add_user_log($user, 'unsubscribed-rfc8058');
+        } else {
+            $this->add_user_log($user, 'unsubscribed');
+        }
 
         if ($email) {
             $wpdb->update(NEWSLETTER_USERS_TABLE, ['unsub_email_id' => (int) $email->id, 'unsub_time' => time()], ['id' => (int) $user->id]);
@@ -274,9 +278,8 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         $this->send_unsubscribed_email($user);
 
-        do_action('newsletter_user_unsubscribed', $user);
-
         $this->notify_admin($user);
+        do_action('newsletter_user_unsubscribed', $user);
     }
 
     function send_unsubscribed_email($user) {

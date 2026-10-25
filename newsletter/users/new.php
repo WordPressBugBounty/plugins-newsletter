@@ -1,24 +1,19 @@
 <?php
-/** @var NewsletterUsersAdmin $this /
+/** @var NewsletterUsersAdmin $this */
 /** @var NewsletterControls $controls */
-
 defined('ABSPATH') || exit;
 
 require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
 $controls = new NewsletterControls();
 
 if ($controls->is_action('save')) {
+    $email = Newsletter::sanitize_email($controls->data['email']);
 
-    if (!Newsletter::is_email($controls->data['email'])) {
+    if (!$email) {
         $controls->errors = __('Wrong email address.', 'newsletter');
-    }
-
-    if (empty($controls->errors)) {
-        $controls->data['status'] = 'C';
-        $controls->data['sex'] = 'n';
-
-        $user = $this->save_user($controls->data);
-        if ($user === false) {
+    } else {
+        $u = $this->get_user_by_email($email);
+        if ($u) {
             $controls->errors = __('This subscriber already exists.', 'newsletter');
         } else {
             $controls->js_redirect('?page=newsletter_users_edit&id=' . ((int) $user->id));

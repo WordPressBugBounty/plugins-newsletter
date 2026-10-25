@@ -186,7 +186,7 @@ class NewsletterProfile extends NewsletterModule {
                     $this->set_user_list($user, $list_id, (int) $_REQUEST['value']);
 
                     $user = $this->get_user($user->id);
-                    $this->add_user_log($user, 'cta');
+                    $this->add_user_log($user, 'updated-cta');
                     wp_redirect($url);
                 } else {
                     $this->request_to_antibot_form('Continue');
@@ -842,7 +842,7 @@ class NewsletterProfile extends NewsletterModule {
         }
 
         $user = $this->save_user($data);
-        $this->add_user_log($user, 'profile');
+        $this->add_user_log($user, 'updated');
 
         // Send the activation again only if we use double opt-in, otherwise it has no meaning
         if ($email_changed && $subscription_module->is_double_optin()) {
