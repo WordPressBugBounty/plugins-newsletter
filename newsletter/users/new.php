@@ -16,6 +16,13 @@ if ($controls->is_action('save')) {
         if ($u) {
             $controls->errors = __('This subscriber already exists.', 'newsletter');
         } else {
+            $data = [];
+            $data['email'] = $email;
+            $data['status'] = 'C';
+            $data['sex'] = 'n';
+
+            $user = $this->save_user($data);
+
             $controls->js_redirect('?page=newsletter_users_edit&id=' . ((int) $user->id));
         }
     }
