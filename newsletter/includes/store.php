@@ -97,8 +97,11 @@ class NewsletterStore {
 
     function sanitize($data) {
         global $wpdb;
-        if (strpos($wpdb->charset, 'utf8mb4') === 0)
+
+        // TODO: this charset can be utf8mb4 but the table or a single column could be only utf8...
+        if (strpos($wpdb->charset, 'utf8mb4') === 0) {
             return $data;
+        }
         foreach ($data as $key => $value) {
             $data[$key] = preg_replace('%(?:\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2})%xs', '', $value);
         }
@@ -123,8 +126,16 @@ class NewsletterStore {
 
         // Remove transient fields
         foreach (array_keys($data) as $key) {
-            if (substr($key, 0, 1) == '_')
+            if (substr($key, 0, 1) == '_') {
                 unset($data[$key]);
+            }
+            // Drop invalid column names
+            if (sanitize_key($key) !== $key) {
+                if (NEWSLETTER_DEBUG) {
+                    error_log('Data with a wrong column name: ' . $key);
+                }
+                unset($data[$key]);
+            }
         }
 
         if (!empty($data['id'])) {
