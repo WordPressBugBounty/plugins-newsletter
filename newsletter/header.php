@@ -436,6 +436,15 @@ if (strpos($temp['unsubscribe_text'] ?? '', '{unsubscription_confirm') !== false
 ?>
 
 <?php
+$temp = get_option('newsletter_upgrade_error');
+if ($temp) {
+    echo '<div class="tnp-notice tnp-notice-error">';
+    echo 'There was an error during the upgrade. Please check the Help/Logs/Upgrade for details and ask the support for help.';
+    echo '</div>';
+}
+?>
+
+<?php
 $hook_paused = get_option('wp_crontrol_paused');
 if (isset($_GET['debug']) || isset($hook_paused['newsletter']) && $hook_paused['newsletter']) {
     echo '<div class="tnp-notice tnp-notice-error">The delivery engine has been paused using WP Crontrol. Please <a href="tools.php?page=crontrol_admin_manage_page">reactivate the <code>newsletter</code> hook</a>.</div>';

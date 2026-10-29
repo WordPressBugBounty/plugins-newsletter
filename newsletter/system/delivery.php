@@ -1,7 +1,7 @@
 <?php
 /** @var NewsletterSystemAdmin $this */
 /** @var NewsletterControls $controls */
-/** @var wpfb $wpdb */
+/** @var wpdb $wpdb */
 defined('ABSPATH') || exit;
 
 wp_enqueue_script('tnp-chart');
@@ -75,8 +75,6 @@ if ($controls->is_action('test')) {
                     $controls->errors .= 'SMTP plugin: ' . $smtp_plugin . '<br><br>';
                 }
             }
-
-
 
             if (stripos($options['mail_error'], 'gmail.googleapis.com')) {
                 $controls->errors .= '<strong>This error is from Gmail/Google</strong>. Plesse check the SMTP plugin you\'re using ti connect the site to Gmail<br><br>';

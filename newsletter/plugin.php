@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business.
-  Version: 9.5.2
+  Version: 9.5.3
   Author: The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,11 +30,10 @@
 
  */
 
-define('NEWSLETTER_VERSION', '9.5.2');
+define('NEWSLETTER_VERSION', '9.5.3');
 
 global $wpdb, $newsletter;
 
-// For acceptance tests, DO NOT CHANGE
 if (!defined('NEWSLETTER_DEBUG'))
     define('NEWSLETTER_DEBUG', false);
 
@@ -59,22 +58,11 @@ if (!defined('NEWSLETTER_SENT_TABLE'))
 if (!defined('NEWSLETTER_LOGS_TABLE'))
     define('NEWSLETTER_LOGS_TABLE', $wpdb->prefix . 'newsletter_logs');
 
-//if (!defined('NEWSLETTER_SEND_DELAY'))
-//    define('NEWSLETTER_SEND_DELAY', 0);
-
 if (!defined('NEWSLETTER_USE_POST_GALLERY'))
     define('NEWSLETTER_USE_POST_GALLERY', false);
 
-// Empty or "ajax"
-if (!defined('NEWSLETTER_TRACKING_TYPE'))
-    define('NEWSLETTER_TRACKING_TYPE', '');
-
 if (!defined('NEWSLETTER_PAGE_WARNING'))
     define('NEWSLETTER_PAGE_WARNING', true);
-
-// Empty or "ajax"
-if (!defined('NEWSLETTER_ACTION_TYPE'))
-    define('NEWSLETTER_ACTION_TYPE', '');
 
 define('NEWSLETTER_SLUG', 'newsletter');
 

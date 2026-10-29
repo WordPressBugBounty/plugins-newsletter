@@ -2,7 +2,6 @@
 /** @var NewsletterSystemAdmin $this */
 /** @var NewsletterControls $controls */
 /** @var wpfb $wpdb */
-
 defined('ABSPATH') || exit;
 
 if ($controls->is_action('delete_logs')) {
@@ -14,6 +13,10 @@ if ($controls->is_action('delete_logs')) {
     $secret = NewsletterModule::get_token(8);
     update_option('newsletter_logger_secret', $secret);
     $controls->messages = 'Logs deleted';
+}
+
+if ($controls->is_action('reset_upgrade_error')) {
+    update_option('newsletter_upgrade_error', '', false);
 }
 ?>
 
@@ -42,6 +45,7 @@ if ($controls->is_action('delete_logs')) {
                 <ul>
                     <li><a href="#tabs-logs"><?php _e('Logs', 'newsletter') ?></a></li>
                     <li><a href="#tabs-cron"><?php _e('Scheduler', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-upgrade"><?php _e('Upgrade', 'newsletter') ?></a></li>
                 </ul>
 
                 <div id="tabs-logs">
@@ -55,16 +59,26 @@ if ($controls->is_action('delete_logs')) {
                         }
                         ?>
                     </ul>
+
+                    <div class="tnp-buttons">
+                        <?php $controls->button('delete_logs', 'Delete all'); ?>
+                    </div>
                 </div>
 
                 <div id="tabs-cron">
                     <?php $controls->logs('cron'); ?>
                 </div>
+
+                <div id="tabs-upgrade">
+                    <?php $controls->logs('upgrade'); ?>
+
+                    <div class="tnp-buttons">
+                        <?php $controls->button('reset_upgrade_error', 'Reset warning'); ?>
+                    </div>
+                </div>
             </div>
 
-            <div class="tnp-buttons">
-                <?php $controls->button('delete_logs', 'Delete all'); ?>
-            </div>
+
 
         </form>
     </div>

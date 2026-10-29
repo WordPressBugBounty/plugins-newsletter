@@ -1335,32 +1335,6 @@ function tnp_describe_table($table) {
                             </tr>
 
                             <tr>
-                                <td>NEWSLETTER_SEND_DELAY</td>
-                                <td>
-                                    <?php if (defined('NEWSLETTER_SEND_DELAY')) { ?>
-                                        <?php echo esc_html(NEWSLETTER_SEND_DELAY) ?> milliseconds
-                                    <?php } else { ?>
-                                        Not set
-                                    <?php } ?>
-
-                                    (possibly use the Settings configuration)
-
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>NEWSLETTER_TRACKING_TYPE (obsolete)</td>
-                                <td>
-                                    <?php echo esc_html(NEWSLETTER_TRACKING_TYPE) ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>NEWSLETTER_ACTION_TYPE (obsolete)</td>
-                                <td>
-                                    <?php echo esc_html(NEWSLETTER_ACTION_TYPE) ?>
-                                </td>
-                            </tr>
-
-                            <tr>
                                 <td>NEWSLETTER_MAX_EXECUTION_TIME (obsolete)</td>
                                 <td>
                                     <?php

@@ -24,6 +24,7 @@ class NewsletterUpgrade {
         $wpdb->query($query);
         if ($wpdb->last_error) {
             $this->logger->error($wpdb->last_error);
+            Newsletter\Logs::add('upgrade', 'Query error', 0, ['query' => $query, 'message' => $wpdb->last_error]);
         }
         $wpdb->suppress_errors($suppress_errors);
     }
@@ -33,7 +34,10 @@ class NewsletterUpgrade {
         $res = dbDelta($sql);
         $this->logger->info($res);
         if ($wpdb->last_error) {
+            // Before everything else, the Logs::add() resets the error
+            update_option('newsletter_upgrade_error', $wpdb->last_error, false);
             $this->logger->fatal($wpdb->last_error);
+            Newsletter\Logs::add('upgrade', 'DB delta error', 0, ['result' => $res, 'message' => $wpdb->last_error]);
         }
     }
 
@@ -41,6 +45,8 @@ class NewsletterUpgrade {
         global $wpdb, $charset_collate;
 
         $this->logger->info('Start upgrade from ' . $this->old_version . ' to ' . NEWSLETTER_VERSION);
+
+        Newsletter\Logs::add('upgrade', $this->old_version . ' to ' . NEWSLETTER_VERSION);
 
         require_once NEWSLETTER_DIR . '/admin.php';
         // @phpstan-ignore-next-line
@@ -155,8 +161,12 @@ class NewsletterUpgrade {
 
         $this->db_delta($sql);
 
-        // Old unique index
-        $this->upgrade_query("DROP INDEX email ON " . NEWSLETTER_USERS_TABLE);
+        $res = $wpdb->get_results("SHOW INDEX FROM " . NEWSLETTER_USERS_TABLE . " WHERE key_name = 'email'");
+
+        if ($res) {
+            // Old unique index
+            $this->upgrade_query("DROP INDEX email ON " . NEWSLETTER_USERS_TABLE);
+        }
 
         $sql = "CREATE TABLE `" . $wpdb->prefix . "newsletter_user_logs` (
             `id` int(11) NOT NULL AUTO_INCREMENT,

@@ -19,7 +19,6 @@ ksort($options);
 
     <div id="tnp-heading">
 
-<!--        <h2><?php _e('System', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
@@ -71,6 +70,5 @@ ksort($options);
         </form>
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

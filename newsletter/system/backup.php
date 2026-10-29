@@ -27,7 +27,6 @@ if ($controls->is_action('delete')) {
 
     <div id="tnp-heading">
 
-<!--        <h2><?php esc_html_e('Settings backup', 'newsletter') ?></h2>-->
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
@@ -62,6 +61,5 @@ if ($controls->is_action('delete')) {
         </form>
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

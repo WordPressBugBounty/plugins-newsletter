@@ -1318,8 +1318,15 @@ class NewsletterModuleBase {
      * @param int $size
      * @return string
      */
-    static function get_token($size = 16) {
-        return wp_generate_password($size, false, false);
+    static function get_token($length = 16) {
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+        $password = '';
+        for ($i = 0; $i < $length; $i++) {
+            $password .= substr($chars, random_int(0, strlen($chars) - 1), 1);
+        }
+
+        return $password;
     }
 
     /**
