@@ -10,7 +10,7 @@ wp_enqueue_script('tnp-chart');
 
 $all_count = $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE);
 
-$referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " group by referrer order by confirmed desc");
+$referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained, SUM(if(status='T', 1, 0)) as temporary from " . NEWSLETTER_USERS_TABLE . " group by referrer order by confirmed desc");
 ?>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -49,7 +49,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
 
             <div id="tabs-overview">
                 <?php
-                $list = $wpdb->get_row("select count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE);
+                $list = $wpdb->get_row("select count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained, SUM(if(status='T', 1, 0)) as temporary from " . NEWSLETTER_USERS_TABLE);
                 ?>
 
                 <div class="row">
@@ -96,6 +96,12 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                                     <td><?php esc_html_e('Complained', 'newsletter') ?></td>
                                     <td>
                                         <?php echo (int)$list->complained; ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><?php esc_html_e('Temporary', 'newsletter') ?></td>
+                                    <td>
+                                        <?php echo (int)$list->temporary; ?>
                                     </td>
                                 </tr>
                             </tbody>
@@ -152,13 +158,14 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                             <th style="text-align: right"><?php $this->echo_user_status_label('U') ?></th>
                             <th style="text-align: right"><?php $this->echo_user_status_label('B') ?></th>
                             <th style="text-align: right"><?php $this->echo_user_status_label('P') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('T') ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php $lists = $this->get_lists(); ?>
                         <?php foreach ($lists as $list) { ?>
                             <?php
-                            $row = $wpdb->get_row("select count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " where list_" . $list->id . "=1");
+                            $row = $wpdb->get_row("select count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained, SUM(if(status='T', 1, 0)) as temporary from " . NEWSLETTER_USERS_TABLE . " where list_" . $list->id . "=1");
                             ?>
                             <tr>
                                 <td><?php echo esc_html($list->id) ?></td>
@@ -170,6 +177,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                                 <td style="text-align: right"><?php echo (int) $row->unsubscribed; ?></td>
                                 <td style="text-align: right"><?php echo (int) $row->bounced; ?></td>
                                 <td style="text-align: right"><?php echo (int) $row->complained; ?></td>
+                                <td style="text-align: right"><?php echo (int) $row->temporary; ?></td>
                             </tr>
 
 
@@ -181,7 +189,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                         for ($i = 1; $i <= NEWSLETTER_LIST_MAX; $i++) {
                             $where .= ' and list_' . $i . '=0';
                         }
-                        $row = $wpdb->get_row("select count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " where " . $where);
+                        $row = $wpdb->get_row("select count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained, SUM(if(status='T', 1, 0)) as temporary from " . NEWSLETTER_USERS_TABLE . " where " . $where);
                         ?>
                         <tr>
                             <td>&nbsp;</td>
@@ -192,6 +200,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                             <td style="text-align: right"><?php echo (int)$row->unsubscribed; ?></td>
                             <td style="text-align: right"><?php echo (int)$row->bounced; ?></td>
                             <td style="text-align: right"><?php echo (int)$row->complained; ?></td>
+                            <td style="text-align: right"><?php echo (int)$row->temporary; ?></td>
                         </tr>
                     </tbody>
                 </table>
@@ -256,6 +265,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                             <th style="text-align: right"><?php $this->echo_user_status_label('U') ?></th>
                             <th style="text-align: right"><?php $this->echo_user_status_label('B') ?></th>
                             <th style="text-align: right"><?php $this->echo_user_status_label('P') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('T') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -268,6 +278,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                                 <td style="text-align: right"><?php echo (int)$row->unsubscribed; ?></td>
                                 <td style="text-align: right"><?php echo (int)$row->bounced; ?></td>
                                 <td style="text-align: right"><?php echo (int)$row->complained; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->temporary; ?></td>
                             </tr>
                         <?php } ?>
                     </tbody>
@@ -279,7 +290,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
             <div id="tabs-sources">
 
                 <?php
-                $list = $wpdb->get_results("select http_referer, count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " group by http_referer order by count(*) desc limit 100");
+                $list = $wpdb->get_results("select http_referer, count(*) as total, SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained, SUM(if(status='T', 1, 0)) as temporary from " . NEWSLETTER_USERS_TABLE . " group by http_referer order by count(*) desc limit 100");
                 ?>
                 <table class="widefat" style="width: auto">
                     <thead>
@@ -291,6 +302,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                             <th style="text-align: right"><?php $this->echo_user_status_label('U') ?></th>
                             <th style="text-align: right"><?php $this->echo_user_status_label('B') ?></th>
                             <th style="text-align: right"><?php $this->echo_user_status_label('P') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('T') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -303,6 +315,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                                 <td style="text-align: right"><?php echo (int)$row->unsubscribed; ?></td>
                                 <td style="text-align: right"><?php echo (int)$row->bounced; ?></td>
                                 <td style="text-align: right"><?php echo (int)$row->complained; ?></td>
+                                <td style="text-align: right"><?php echo (int)$row->temporary; ?></td>
                             </tr>
                         <?php } ?>
                     </tbody>
@@ -315,9 +328,9 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
 
 
                 <?php
-                $male_count = $wpdb->get_row("select SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " where sex='m'");
-                $female_count = $wpdb->get_row("select SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " where sex='f'");
-                $none_count = $wpdb->get_row("select SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " where sex='n'");
+                $male_count = $wpdb->get_row("select SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained, SUM(if(status='T', 1, 0)) as temporary from " . NEWSLETTER_USERS_TABLE . " where sex='m'");
+                $female_count = $wpdb->get_row("select SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained, SUM(if(status='T', 1, 0)) as temporary from " . NEWSLETTER_USERS_TABLE . " where sex='f'");
+                $none_count = $wpdb->get_row("select SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained, SUM(if(status='T', 1, 0)) as temporary from " . NEWSLETTER_USERS_TABLE . " where sex='n'");
                 ?>
 
                 <table class="widefat" style="width: auto">
@@ -329,6 +342,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                             <th style="text-align: right"><?php $this->echo_user_status_label('U') ?></th>
                             <th style="text-align: right"><?php $this->echo_user_status_label('B') ?></th>
                             <th style="text-align: right"><?php $this->echo_user_status_label('P') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('T') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -339,6 +353,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                             <td style="text-align: right"><?php echo (int)$female_count->unsubscribed; ?></td>
                             <td style="text-align: right"><?php echo (int)$female_count->bounced; ?></td>
                             <td style="text-align: right"><?php echo (int)$female_count->complained; ?></td>
+                            <td style="text-align: right"><?php echo (int)$female_count->temporary; ?></td>
                         </tr>
                         <tr>
                             <td><?php esc_html_e('Male', 'newsletter') ?></td>
@@ -347,6 +362,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                             <td style="text-align: right"><?php echo (int)$male_count->unsubscribed; ?></td>
                             <td style="text-align: right"><?php echo (int)$male_count->bounced; ?></td>
                             <td style="text-align: right"><?php echo (int)$male_count->complained; ?></td>
+                            <td style="text-align: right"><?php echo (int)$male_count->temporary; ?></td>
                         </tr>
                         <tr>
                             <td><?php esc_html_e('Not specified', 'newsletter') ?></td>
@@ -355,6 +371,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                             <td style="text-align: right"><?php echo (int)$none_count->unsubscribed; ?></td>
                             <td style="text-align: right"><?php echo (int)$none_count->bounced; ?></td>
                             <td style="text-align: right"><?php echo (int)$none_count->complained; ?></td>
+                            <td style="text-align: right"><?php echo (int)$none_count->temporary; ?></td>
                         </tr>
                     </tbody>
                 </table>

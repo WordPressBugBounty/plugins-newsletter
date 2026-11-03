@@ -189,18 +189,16 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
             count(case when open>1 then 1 else null end) as `clicks`
             FROM " . NEWSLETTER_SENT_TABLE . " where email_id=%d", $email->id));
 
-        $report->total = (int)$data->total;
-        $report->open_count = (int)$data->opens;
-        $report->click_count = (int)$data->clicks;
+        $report->total = (int) $data->total;
+        $report->open_count = (int) $data->opens;
+        $report->click_count = (int) $data->clicks;
 
         // Extract the anonymous stats
-        $anon_click_count = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT(message_id)) FROM wp_newsletter_stats
-            WHERE message_id > 0
+        $anon_click_count = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT(message_id)) FROM " . NEWSLETTER_STATS_TABLE . " WHERE message_id > 0
             AND email_id = %d
             AND url <> ''", $email->id));
 
-        $anon_open_count = (int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT(message_id)) FROM wp_newsletter_stats
-            WHERE message_id > 0
+        $anon_open_count = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT(message_id)) FROM " . NEWSLETTER_STATS_TABLE . " WHERE message_id > 0
             AND email_id = %d
             AND url = ''", $email->id));
 

@@ -358,6 +358,8 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
                 break;
             case TNP_User::STATUS_COMPLAINED: $class = 'complained';
                 break;
+            case TNP_User::STATUS_TEMPORARY: $class = 'temporary';
+                break;
         }
         return '<span class="tnp-status tnp-user-status tnp-user-status--' . esc_attr($class) . '">' . esc_html($label) . '</span>';
     }
