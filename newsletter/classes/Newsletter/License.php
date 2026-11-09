@@ -10,7 +10,9 @@ class License {
         if (defined('NEWSLETTER_LICENSE_KEY')) {
             return NEWSLETTER_LICENSE_KEY;
         }
-        $key = \Newsletter::instance()->get_main_option('contract_key');
+        // To skip the cache
+        $options = get_option('newsletter_main');
+        $key = $options['contract_key'];
         return $key ?: false;
     }
 
@@ -54,7 +56,8 @@ class License {
             $data = new \WP_Error(wp_remote_retrieve_response_code($response),
                     '[' . esc_html(wp_remote_retrieve_response_code($response)) . '] '
                     . esc_html(wp_remote_retrieve_response_message($response))
-                    . '<br>' . $download_message);
+                    . '<br>' . $download_message,
+                    wp_remote_retrieve_body($response));
 
             set_transient('newsletter_license_data', $data, DAY_IN_SECONDS);
             return $data;

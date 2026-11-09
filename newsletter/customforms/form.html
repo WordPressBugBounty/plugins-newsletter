@@ -1,0 +1,77 @@
+<style>
+    .tnp-fields {
+        font-family: sans-serif;
+    }
+
+    .tnp-field
+    {
+        margin-bottom: .7em;
+        border: 0;
+        padding: 0;
+    }
+
+    .tnp-fields label
+    {
+        display: block;
+        color: inherit;
+        font-weight: normal;
+        line-height: normal;
+        padding: 0;
+        margin: 0;
+        margin-bottom: .25em;
+        font-size: .9em;
+    }
+
+    .tnp-field-checkbox label
+    {
+        display: inline-block;
+    }
+
+    .tnp-fields input[type=text],
+    .tnp-fields input[type=email],
+    .tnp-fields input[type=submit],
+    .tnp-fields select,
+    .tnp-fields textarea
+    {
+        width: 100%;
+        padding: .7em;
+        display: block;
+        border: 1px;
+        color: #444;
+        border-color: #ddd;
+        background-color: #f4f4f4;
+        background-image: none;
+        text-shadow: none;
+        font-size: 1em;
+        margin: 0;
+        line-height: normal;
+        box-sizing: border-box;
+    }
+
+    .tnp-fields input[type=checkbox]
+    {
+        /* Fixes some bad themes CSS */
+        max-width: 1em;
+        display: inline-block;
+        margin-right: .5em;
+    }
+
+</style>
+<div class="tnp-form-fields">
+    <div class="tnp-field tnp-field-email">
+        <label for="tnp-1">Email</label>
+        <input class="tnp-email" type="email" name="ne" value="" placeholder="" required>
+    </div>
+
+    <div class="tnp-field tnp-field-firstname">
+        <label for="tnp-2">First name</label>
+        <input class="tnp-name" type="text" name="nn" value="" placeholder=""></div>
+
+    <div class="tnp-field tnp-field-checkbox tnp-field-privacy">
+        <input type="checkbox" name="ny" required class="tnp-privacy"> <label for="tnp-3">I accept the privacy policy</label>
+    </div>
+
+    <div class="tnp-field tnp-field-button" style="text-align: left">
+        <input class="tnp-submit" type="submit" value="Subscribe">
+    </div>
+</div>

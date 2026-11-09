@@ -51,6 +51,14 @@ if (class_exists('NewsletterExtensions')) {
 
                     <tr>
                         <td>Newsletter</td>
+                        <td>Custom forms</td>
+                        <td style="white-space: nowrap">
+                            <?php $controls->button_icon_configure('?page=newsletter_customforms_index') ?>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Newsletter</td>
                         <td>After posts' content</td>
 
                         <td style="white-space: nowrap">

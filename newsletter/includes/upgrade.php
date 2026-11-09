@@ -224,6 +224,26 @@ class NewsletterUpgrade {
 
         $this->db_delta($sql);
 
+        $sql = "CREATE TABLE `" . $wpdb->prefix . "newsletter_customforms` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `name` varchar(100) NOT NULL DEFAULT '',
+            `type` tinyint(1) NOT NULL DEFAULT 0,
+            `editor` tinyint(1) NOT NULL DEFAULT 0,
+            `autoresponders` varchar(255) NOT NULL DEFAULT '',
+            `lists` varchar(255) NOT NULL DEFAULT '',
+            `content` longtext,
+            `welcome_email` int(11) NOT NULL DEFAULT 0,
+            `welcome_email_id` int(11) NOT NULL DEFAULT 0,
+            `welcome_page_id` int(11) NOT NULL DEFAULT 0,
+            `confirmation_email` int(11) NOT NULL DEFAULT 0,
+            `confirmation_email_id` int(11) NOT NULL DEFAULT 0,
+            `confirmation_page_id` int(11) NOT NULL DEFAULT 0,
+            `token` varchar(50) NOT NULL DEFAULT '',
+            `optin` varchar(50) NOT NULL DEFAULT '',
+            PRIMARY KEY (`id`)) $charset_collate;";
+
+        $res = dbDelta($sql);
+
         delete_option('newsletter_system_warnings');
         delete_option('newsletter_promotion');
         delete_option('newsletter_main_status');

@@ -146,6 +146,10 @@ $license_data = License::get_data();
 
 if (is_wp_error($license_data)) {
     $controls->errors .= esc_html($license_data->get_error_message());
+    $error_data = $license_data->get_error_data();
+    if ($error_data) {
+        $controls->errors .= '<textarea style="max-height: 50px; width: 100%">' . esc_html($error_data) . '</textarea>';
+    }
 }
 
 $mailer = Newsletter::instance()->get_mailer();

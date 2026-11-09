@@ -27,6 +27,149 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         }
 
         add_action('wp_ajax_tnpc_test_raw_html', array($this, 'ajax_tnpc_test_raw_html'));
+
+        add_action('wp_ajax_newsletter_emails_ai_prompt', [$this, 'ajax_ai_prompt']);
+            add_action('wp_ajax_newsletter_emails_ai_save', [$this, 'ajax_ai_save']);
+    }
+
+    function wp_loaded() {
+        if (defined('DOING_AJAX') && DOING_AJAX && $this->is_allowed()) {
+
+        }
+    }
+
+    function kses($text) {
+        return $text;
+        $allowed = wp_kses_allowed_html('post');
+        $allowed['input'] = ['class' => true, 'placeholder' => true, 'type' => true, 'style' => true, 'size' => true, 'dir' => true, 'name' => true, 'required' => true, 'value' => true, 'aria-*' => true];
+        $allowed['style'] = [];
+        $allowed['html'] = [];
+        $allowed['head'] = [];
+        $allowed['body'] = ['class' => true, 'style' => true];
+
+        // TODO: remove forms and inputs
+        //$allowed['textarea'] = ['class' => true, 'placeholder' => true, 'dir' => true, 'style' => true, 'name' => true, 'required' => true, 'aria-*' => true];
+        //$allowed['select'] = ['class' => true, 'dir' => true, 'style' => true, 'name' => true, 'required' => true, 'aria-*' => true];
+        //$allowed['option'] = ['value' => true, 'selected' => true];
+        //if (!isset($allowed['button'])) {
+        //    $allowed['button'] = ['class' => true, 'dir' => true, 'name' => true, 'style' => true, 'aria-*' => true];
+        //}
+
+        return wp_kses($text, $allowed);
+    }
+
+    function ajax_ai_save() {
+        check_ajax_referer('tnp-ai');
+
+        $id = (int) $_GET['id'];
+        $email = $this->get_email($id);
+        if (!$email) {
+            wp_send_json_error();
+        }
+
+        $json = json_decode(file_get_contents('php://input'), true);
+        if (!is_array($json) || !isset($json['content'])) {
+            wp_send_json_error();
+        }
+
+        $data = [];
+        $data['id'] = $email->id;
+        $data['message'] = $this->kses($json['content']);
+        $this->save_email($data);
+        wp_send_json_success($data);
+    }
+
+    function ajax_ai_prompt() {
+        check_ajax_referer('tnp-ai');
+
+        $prompt = '';
+        $html = '';
+        $image_data = null;
+        $image_mime = 'image/jpeg';
+        $history = [];
+
+        if (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+            $json = json_decode(file_get_contents('php://input'), true);
+            $prompt = wp_strip_all_tags(wp_unslash($json['message'] ?? ''));
+            $html = $this->kses(wp_unslash($json['html'] ?? ''));
+            $image_data = $json['image'] ?? null;
+            $image_mime = $json['image_mime'] ?? 'image/jpeg';
+            $history = $json['history'] ?? [];
+        }
+
+        if (empty($prompt)) {
+            wp_send_json_success(['html' => $html]);
+        }
+
+        $message = '';
+        if (!empty($history)) {
+            $message .= 'Previous requests, already applied to the current email HTML:' . "\n";
+            foreach ($history as $item) {
+                $message .= '- ' . wp_strip_all_tags($item) . "\n";
+            }
+            $message .= "\n";
+        }
+        if (!empty($html)) {
+            $message .= 'Current email HTML: """' . $html . '"""' . "\n\n" . 'Use it as starting point for the new modifications.' . "\n\n";
+        }
+        $message .= 'New change request: ' . $prompt;
+
+        if ($image_data) {
+            $message .= "\n\n" . 'Use the provided image as design reference.';
+        }
+
+        $this->logger->debug($message);
+
+        $builder = wp_ai_client_prompt($message);
+
+        if ($image_data) {
+            $builder->with_file($image_data, $image_mime);
+        }
+
+        $instructions = file_get_contents(__DIR__ . '/instructions.md');
+        //$instructions = str_replace(['{customfields_max}'], [NEWSLETTER_PROFILE_MAX], $instructions);
+//        if (NEWSLETTER_DEBUG) {
+//            file_put_contents(__DIR__ . '/instructions-generated.md', $instructions);
+//            error_log($instructions);
+//        }
+
+        $builder->using_system_instruction($instructions);
+        $builder->as_json_response(
+                [
+                    'type' => 'object',
+                    'required' => ['html', 'explanation'],
+                    'properties' => [
+                        'html' => [
+                            'type' => 'string',
+                            'description' => 'The email full HTML generated, with all best practices for email clients'
+                        ],
+                        'explanation' => [
+                            'type' => 'string',
+                            'description' => 'Description of what has been done or not done'
+                        ]
+                    ],
+                    'additionalProperties' => false
+                ]
+        );
+
+        $result = $builder->generate_text_result();
+
+        if (is_wp_error($result)) {
+            wp_send_json_success(['html' => $html, 'explanation' => 'Nothing changed, there was an error: ' . wp_strip_all_tags($result->get_error_message())]);
+        }
+
+        $reply = $result->toText();
+        $this->logger->debug('Model: ' . $result->getModelMetadata()->getName());
+        $this->logger->debug($reply);
+
+        $data = json_decode($reply);
+        if (!is_object($data) || !isset($data->html)) {
+            wp_send_json_success(['html' => $html, 'explanation' => 'Nothing changed, the AI returned an invalid answer. Please try again.']);
+        }
+
+        $data->html = $this->kses($data->html);
+        $data->explanation = wp_strip_all_tags($data->explanation ?? '');
+        wp_send_json_success($data);
     }
 
     function admin_menu() {
@@ -39,6 +182,7 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         $this->add_admin_page('theme', 'Newsletter Themes');
         $this->add_admin_page('composer', 'The Composer');
         $this->add_admin_page('editorhtml', 'HTML Editor');
+        $this->add_admin_page('editorhtmlai', 'HTML AI Editor');
         $this->add_admin_page('editortinymce', 'TinyMCE Editor');
         $this->add_admin_page('presets', 'Presets');
         $this->add_admin_page('presets-edit', 'Presets');
@@ -111,7 +255,7 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
             wp_send_json_error('Not allowed', 403);
         }
 
-            require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+        require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
 
         $controls = new NewsletterControls();
 

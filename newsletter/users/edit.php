@@ -302,6 +302,13 @@ function percentValue($value, $total) {
                             </td>
                         </tr>
                         <tr>
+                            <th><?php esc_html_e('Unsub. email ID', 'newsletter') ?></th>
+                            <td>
+                                <?php $controls->value('unsub_email_id'); ?>
+                                <span class="description">The newsletter from where the unsubscribe started.</span>
+                            </td>
+                        </tr>
+                        <tr>
                             <th><?php esc_html_e('IP address', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->value('ip'); ?>

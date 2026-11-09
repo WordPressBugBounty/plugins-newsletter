@@ -1,4 +1,5 @@
 <?php
+
 defined('ABSPATH') || exit;
 
 class NewsletterProfile extends NewsletterModule {
@@ -128,7 +129,7 @@ class NewsletterProfile extends NewsletterModule {
 
     function hook_newsletter_action($action, $user, $email) {
 
-        if (!in_array($action, ['p', 'ps', 'px', 'profile-change', 'pc'])) {
+        if (!in_array($action, ['p', 'ps', 'px', 'profile-change', 'pc', 'ec'])) {
             return;
         }
 
@@ -143,6 +144,21 @@ class NewsletterProfile extends NewsletterModule {
         $this->set_user_cookie($user);
 
         switch ($action) {
+            case 'ec':
+                // Email change? (to be moved to the profile module with a custom action and message)
+                $new_email = get_transient('newsletter_user_' . $user->id . '_email');
+                if ($new_email) {
+                    delete_transient('newsletter_user_' . $user->id . '_email');
+                    $data = ['id' => $user->id, 'email' => $new_email];
+                    $user = $this->save_user($data);
+                    $this->update_user_last_activity($user);
+                }
+
+                $profile_url = $this->get_profile_page_url($user);
+                $profile_url = apply_filters('newsletter_profile_url', $profile_url, $user); // Compatibility
+
+                $this->redirect($profile_url);
+
             case 'p':
 
                 $profile_url = $this->get_profile_page_url($user);
@@ -757,14 +773,14 @@ class NewsletterProfile extends NewsletterModule {
         $posted = stripslashes_deep($_POST);
 
         if ($options['email']) {
-            $email = $this->normalize_email($posted['ne']);
-
-            if ($antispam->is_address_blacklisted($email)) {
-                return new WP_Error('spam', $this->get_text('error'));
-            }
+            $email = $this->sanitize_email($posted['ne']);
 
             if (!$email) {
                 return new WP_Error('email', $this->get_text('error'));
+            }
+
+            if ($antispam->is_address_blacklisted($email)) {
+                return new WP_Error('spam', $this->get_text('error'));
             }
 
             $email_changed = ($email != $user->email);
@@ -846,12 +862,32 @@ class NewsletterProfile extends NewsletterModule {
 
         // Send the activation again only if we use double opt-in, otherwise it has no meaning
         if ($email_changed && $subscription_module->is_double_optin()) {
-            $user->email = $email;
-            $subscription_module->send_activation_email($user);
+            $this->send_email_change_email($user, $email);
             return $this->get_text('email_changed');
         }
 
         return $this->get_text('saved');
+    }
+
+    function send_email_change_email($user, $new_email) {
+
+        $this->switch_language($user->language);
+
+        $message = [];
+        $message['html'] = $this->get_text('email_change_message');
+        //$message['text'] = $this->get_text('confirmation_message_plain_text');
+        $subject = $this->get_text('email_change_subject');
+
+        $message['html'] = str_replace(['{old_email}', '{new_email}', '{email_change_url}'],
+                [esc_html($user->email), esc_html($new_email), $this->build_action_url('ec', $user)],
+                $message['html']);
+
+        $user->email = $new_email; // To send to the new email but not stored
+
+        NewsletterSubscription::instance()->mail($user, $subject, $message['html']);
+
+        $this->restore_language();
+        return true;
     }
 }
 

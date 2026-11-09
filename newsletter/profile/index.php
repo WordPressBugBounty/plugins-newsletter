@@ -22,7 +22,7 @@ if ($controls->is_action()) {
     $controls->data = $this->get_options('', $language);
 }
 
-foreach (['text'] as $key) {
+foreach (['text', 'email_change_message'] as $key) {
     if (!empty($controls->data[$key])) {
         $controls->data[$key . '_custom'] = '1';
     }
@@ -56,6 +56,7 @@ update_option('newsletter_dummy_user_language', $language, false);
                 <ul>
                     <li><a href="#tabs-general"><?php esc_html_e('General', 'newsletter'); ?></a></li>
                     <li><a href="#tabs-fields"><?php esc_html_e('Form', 'newsletter'); ?></a></li>
+                    <li><a href="#tabs-email"><?php esc_html_e('Email change', 'newsletter'); ?></a></li>
                     <li><a href="#tabs-labels"><?php esc_html_e('Labels', 'newsletter'); ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
@@ -209,6 +210,30 @@ update_option('newsletter_dummy_user_language', $language, false);
 
                     <?php } ?>
                 </div>
+
+
+                <div id="tabs-email">
+                    <table class="form-table">
+                        <tr>
+                            <td>
+
+                                <?php $controls->text('email_change_subject', 70, $this->get_default_text('email_change_subject')); ?>
+                                <br><br>
+                                <?php $controls->checkbox2('email_change_message_custom', 'Customize'); ?>
+
+                                <div data-tnpshow="email_change_message_custom=1">
+                                    <?php $controls->wp_editor('email_change_message', ['editor_height' => 150], ['default' => $this->get_default_text('email_change_message')]); ?>
+                                </div>
+
+                                <div data-tnpshow="email_change_message_custom=0" class="tnpc-default-text">
+                                    <?php echo wp_kses_post($this->get_default_text('email_change_message')) ?>
+                                </div>
+
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
 
                 <div id="tabs-labels">
                     <?php $this->language_notice() ?>

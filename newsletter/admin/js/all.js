@@ -635,4 +635,11 @@ jQuery(function ($) {
     // jQuery modal library
     $.modal.defaults.fadeDuration = 250;
     TNP.init_showables();
+
+    jQuery('.tnp-nav a').each(function () {
+        if (location.href.indexOf(this.href) >= 0) {
+            jQuery(this).parent().addClass('active');
+        }
+    });
+
 });

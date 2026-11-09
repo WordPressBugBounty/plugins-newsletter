@@ -21,6 +21,10 @@ class NewsletterModuleBase {
      * @var NewsletterLogger
      */
     var $logger;
+    /**
+     *
+     * @var NewsletterStore
+     */
     var $store;
 
     function __construct($module, $logger = null) {
@@ -551,8 +555,10 @@ class NewsletterModuleBase {
         return $this->store->save(NEWSLETTER_USERS_TABLE, $user, $return_format);
     }
 
-    function save_user_meta($user_id, $key, $value) {
+    function save_user_meta($user, $key, $value) {
         global $wpdb;
+
+        $user_id = $this->to_int_id($user);
 
         $meta = $this->get_user_meta($user_id, $key);
         if ($meta) {

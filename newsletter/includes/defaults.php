@@ -259,6 +259,10 @@ class NewsletterDefaults {
                 case 'save_label': return __('Save', 'newsletter');
                 case 'privacy_label': return __('Read our privacy policy', 'newsletter');
                 case 'saved': return __('Saved.', 'newsletter');
+                case 'email_change_subject': return __("Please confirm your new subscription email", 'newsletter');
+                //case 'confirmation_message_plain_text': return __('To confirm your subscription follow the link below.', 'newsletter') . "\n\n{subscription_confirm_url}";
+                case 'email_change_message': return '<p>' . __('Please confirm the subscription email change from {old_email} to {new_email} by <a href="{email_change_url}">clicking here</a>', 'newsletter') . '</p>';
+
             }
         }
 

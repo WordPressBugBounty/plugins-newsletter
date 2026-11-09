@@ -217,6 +217,17 @@ class NewsletterSubscription extends NewsletterModule {
 
                     $subscription = $this->build_subscription();
 
+                    $form = NewsletterCustomForms::instance()->get_form_by_key($_POST['nfk'] ?? '');
+
+                    if ($form) {
+                        // Check for custom form
+                        // Search the key
+                        // Verify the key
+                        // Get the form
+                        // Call method to populate the subscription
+                        NewsletterCustomForms::instance()->update_subscription($subscription, $form);
+                    }
+
                     $user = $this->subscribe2($subscription);
 
                     if (is_wp_error($user)) {
@@ -682,21 +693,11 @@ class NewsletterSubscription extends NewsletterModule {
         // valid subscriber and, usually, there is a subscription dataset to confirm.
 
         if (!$user) {
-            $this->dienow('Subscriber not found [c01]', 'The confirm procedure has been activated without a valid subscriber', 404);
-        }
-
-        // Email change? (to be moved to the profile module with a custom action and message)
-        $new_email = get_transient('newsletter_user_' . $user->id . '_email');
-        if ($new_email) {
-            delete_transient('newsletter_user_' . $user->id . '_email');
-            $data = ['id' => $user->id, 'email' => $new_email];
-            $user = $this->save_user($data);
-            $this->update_user_last_activity($user);
-            return $user;
+            $this->dienow('Subscriber not found [1]', 'The confirm procedure has been activated without a valid subscriber', 404);
         }
 
         if ($user->status !== TNP_User::STATUS_NOT_CONFIRMED && $user->status !== TNP_User::STATUS_CONFIRMED && $user->status !== 'T' && $user->status !== TNP_User::STATUS_UNSUBSCRIBED) {
-            $this->dienow('Subscriber not found [c02]', 'This subscriber is bounced, complained or unsubscribed, cannot be confirmed', 404);
+            $this->dienow('Subscriber not found [2]', 'This subscriber is bounced, complained or unsubscribed, cannot be confirmed', 404);
         }
 
         // A temporary user?
@@ -2071,6 +2072,14 @@ class NewsletterSubscription extends NewsletterModule {
      */
     function shortcode_newsletter_form($attrs, $content = '') {
 
+        if (isset($attrs['id'])) {
+
+            $form = NewsletterCustomForms::instance()->get_form($attrs['id']);
+            if ($form) {
+                return NewsletterCustomForms::instance()->render($form, $attrs);
+            }
+        }
+
         if (isset($attrs['type']) && $attrs['type'] === 'minimal') {
             return $this->get_subscription_form_minimal($attrs);
         }
@@ -2120,8 +2129,10 @@ class NewsletterSubscription extends NewsletterModule {
         echo $this->get_text($message . '_text');
 
         if ($message === 'confirmed') {
-            echo $this->get_option($message . '_tracking');
+            echo $this->get_option('confirmed_tracking');
         }
+
+
     }
 
     /**

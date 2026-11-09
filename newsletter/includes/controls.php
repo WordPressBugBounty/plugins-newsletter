@@ -2043,9 +2043,7 @@ class NewsletterControls {
 
         if (!$nested) {
             echo '<input name="act" type="hidden" value=""/>' . PHP_EOL;
-            ;
             echo '<input name="btn" type="hidden" value=""/>' . PHP_EOL;
-            ;
             wp_nonce_field('save');
         }
 

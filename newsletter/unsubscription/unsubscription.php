@@ -42,8 +42,8 @@ class NewsletterUnsubscription extends NewsletterModule {
      * @param object $user
      * @return string
      */
-    function get_unsubscribe_url($user) {
-        return $this->build_action_url('u', $user, null, 7 * DAY_IN_SECONDS);
+    function get_unsubscribe_url($user, $email = null) {
+        return $this->build_action_url('u', $user, $email, 7 * DAY_IN_SECONDS);
     }
 
     /**
@@ -203,6 +203,9 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         // It should be moved to the action dispatcher
         $this->set_user_cookie($user);
+        if ($email) {
+            $this->save_user_meta($user->id, 'unsub_email_id', $email->id);
+        }
 
         switch ($action) {
             case 'u':
@@ -217,6 +220,7 @@ class NewsletterUnsubscription extends NewsletterModule {
                 if (!$verified) {
                     $this->redirect($this->build_action_url('u', $user, $email));
                 }
+                $email = $this->get_email($this->get_user_meta_int($user->id, 'unsub_email_id'));
                 $this->unsubscribe($user, $email);
                 //$url = $this->build_message_url(null, 'unsubscribed', $user, $email);
                 // Assume there is a cookie
