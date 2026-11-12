@@ -27,6 +27,7 @@ class NewsletterDefaults {
                 'phpmailer' => 0,
                 'debug' => 0,
                 'track' => 1,
+                'track_without_consent' => 1,
                 'css' => '',
                 'css_disabled' => 0,
                 'ip' => '',

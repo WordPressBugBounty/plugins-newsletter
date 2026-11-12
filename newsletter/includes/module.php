@@ -11,6 +11,7 @@ require_once __DIR__ . '/themes.php';
  */
 class NewsletterModule extends NewsletterModuleBase {
 
+    // Options cache (frontend only)
     static $cache = [];
 
     function __construct($module) {
@@ -492,30 +493,64 @@ class NewsletterModule extends NewsletterModuleBase {
         return apply_filters('newsletter_current_user', $user);
     }
 
+    function analyze_key($key) {
+
+        // Old key
+        if (strpos($key, '.') === false) {
+            return 'Old key format';
+        }
+
+        if (strpos($key, '-') === false) {
+            return 'Invalid key format (missing dash)';
+        }
+
+        list ($id, $token) = explode('-', $key, 2);
+
+        if (strpos($token, '.') === false) {
+            return 'Invalid token format (missing dot)';
+        }
+
+        list($timestamp, $signature) = explode('.', $token, 2);
+
+        if (!ctype_digit($timestamp)) {
+            return 'Invalid timestamp';
+        }
+
+        if ($timestamp < time()) {
+            return 'Key expired';
+        }
+
+        $computed = md5($user->id . $user->token . $timestamp . $action);
+        if (!hash_equals($computed, $signature)) {
+            return 'Invalid signature';
+        }
+
+        return '';
+    }
+
     function analyze_current_user_key() {
         $result = '';
-        if (isset($_REQUEST['nk'])) {
-             $user = $this->get_user_by_key($_REQUEST['nk'] ?? '');
-             if (!$user) {
-                 $result .= 'URL key present, no matching user.';
-             }
+        if (!empty($_REQUEST['nk'])) {
+            $user = $this->get_user_by_key($_REQUEST['nk']);
+            if (!$user) {
+                $result .= 'URL key present, no matching user. ' . $this->analyze_key($_REQUEST['nk']);
+            }
         } else {
             $result .= 'URL key not present.';
         }
 
         $result .= ' ';
 
-        if (isset($_COOKIE[$this->get_user_cookie_name()])) {
-            $user = $this->get_user_by_key($_COOKIE[$this->get_user_cookie_name()] ?? '', 'cookie');
+        if (!empty($_COOKIE[$this->get_user_cookie_name()])) {
+            $user = $this->get_user_by_key($_COOKIE[$this->get_user_cookie_name()], 'cookie');
             if (!$user) {
-                 $result .= 'Cookie present, no matching user.';
-             }
+                $result .= 'Cookie present, no matching user. ' . $this->analyze_key($_COOKIE[$this->get_user_cookie_name()]);
+            }
         } else {
-            $result .= 'Cookie not present.';
+            $result .= 'Cookie not present or empty.';
         }
 
         return $result;
-
     }
 
     function get_user_count($refresh = false) {
@@ -1324,41 +1359,41 @@ class NewsletterModule extends NewsletterModuleBase {
                 Shown only to administrators
             </legend>
             <p style="margin: 0; color: #2d3748; font-size: 0.90rem; line-height: normal;">
-                <?= wp_kses_post($text) ?>
+        <?= wp_kses_post($text) ?>
             </p>
         </fieldset>
-        <?php
-    }
-}
+                <?php
+            }
+        }
 
-/**
- * Kept for compatibility.
- *
- * @param type $post_id
- * @param type $size
- * @param type $alternative
- * @return type
- */
-function nt_post_image($post_id = null, $size = 'thumbnail', $alternative = null) {
-    return NewsletterModule::get_post_image($post_id, $size, $alternative);
-}
+        /**
+         * Kept for compatibility.
+         *
+         * @param type $post_id
+         * @param type $size
+         * @param type $alternative
+         * @return type
+         */
+        function nt_post_image($post_id = null, $size = 'thumbnail', $alternative = null) {
+            return NewsletterModule::get_post_image($post_id, $size, $alternative);
+        }
 
-function newsletter_get_post_image($post_id = null, $size = 'thumbnail', $alternative = null) {
-    echo NewsletterModule::get_post_image($post_id, $size, $alternative);
-}
+        function newsletter_get_post_image($post_id = null, $size = 'thumbnail', $alternative = null) {
+            echo NewsletterModule::get_post_image($post_id, $size, $alternative);
+        }
 
-/**
- * Accepts a post or a post ID.
- *
- * @param WP_Post $post
- */
-function newsletter_the_excerpt($post, $words = 30) {
-    $post = get_post($post);
-    $excerpt = $post->post_excerpt;
-    if (empty($excerpt)) {
-        $excerpt = $post->post_content;
-        $excerpt = strip_shortcodes($excerpt);
-        $excerpt = wp_strip_all_tags($excerpt, true);
-    }
-    echo '<p>', esc_html(wp_trim_words($excerpt, $words)), '</p>';
-}
+        /**
+         * Accepts a post or a post ID.
+         *
+         * @param WP_Post $post
+         */
+        function newsletter_the_excerpt($post, $words = 30) {
+            $post = get_post($post);
+            $excerpt = $post->post_excerpt;
+            if (empty($excerpt)) {
+                $excerpt = $post->post_content;
+                $excerpt = strip_shortcodes($excerpt);
+                $excerpt = wp_strip_all_tags($excerpt, true);
+            }
+            echo '<p>', esc_html(wp_trim_words($excerpt, $words)), '</p>';
+        }

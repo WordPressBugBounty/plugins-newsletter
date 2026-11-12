@@ -518,10 +518,16 @@ class NewsletterStatistics extends NewsletterModule {
         }
 
         $this->relink_tracking_type = $email->track; // 1 or 2
-        // If we have no consent for full subscriber tracking we change to anonymous tracking.
-        // The subscriber cannot control to total tracking removal.
+
+        // If we have no consent for tracking in the subscriber data, we switch to
+        // anonymous tracking or no tracking at all, following the main configuration.
+        // The tracking option on subscriber is only on or off.
         if (!$user->track) {
-            $this->relink_tracking_type = self::TRACKING_ANONYMOUS;
+            if (Newsletter::instance()->get_main_option('track_without_consent')) {
+                $this->relink_tracking_type = self::TRACKING_ANONYMOUS;
+            } else {
+                return $text;
+            }
         }
 
         $this->relink_email_id = $this->to_int_id($email);

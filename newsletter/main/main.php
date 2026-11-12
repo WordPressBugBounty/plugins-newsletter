@@ -451,9 +451,21 @@ if (!empty($controls->data['page'])) {
                                     <?php $controls->label(__('Tracking default', 'newsletter'), '/installation/newsletter-configuration/#tracking') ?>
                                 </th>
                                 <td>
-                                    <?php $controls->enabled('track'); ?>
+                                    <?php $controls->select('track', ['0' => 'Disabled', '1' => 'Enabled', '2' => 'Anonymous']); ?>
                                     <span class="description">
-                                        Applied only to new newsletters.
+                                        Default tracking setggin for new newsletter (can be changed on every newsletter)
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
+                                    <?php $controls->label(__('Tracking without consent', 'newsletter'), '/installation/newsletter-configuration/#tracking') ?>
+                                </th>
+                                <td>
+                                    <?php $controls->select('track_without_consent', ['0' => 'Disabled', '1' => 'Anonymous']); ?>
+                                    <span class="description">
+                                        Tracking type when there is no consent by the subascriber
                                     </span>
                                 </td>
                             </tr>

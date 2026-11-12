@@ -43,7 +43,7 @@ class NewsletterUnsubscription extends NewsletterModule {
      * @return string
      */
     function get_unsubscribe_url($user, $email = null) {
-        return $this->build_action_url('u', $user, $email, 7 * DAY_IN_SECONDS);
+        return $this->build_action_url('u', $user, $email, 21 * DAY_IN_SECONDS);
     }
 
     /**
@@ -356,22 +356,35 @@ class NewsletterUnsubscription extends NewsletterModule {
         return $text;
     }
 
+    function show_edit_notice() {
+        $this->show_admin_notice('<a href="' . admin_url('admin.php?page=newsletter_unsubscription_index') . '" target="_blank">Edit this content</a>.');
+    }
+
     function hook_newsletter_shortcode($message, $user) {
         if (!in_array($message, ['unsubscribe', 'reactivate', 'unsubscribed', 'reactivated'], true)) {
             return;
         }
 
         if (!$user) {
-            $this->show_admin_notice('The link is expired or the subscriber does not exist.');
+            $this->show_admin_notice($this->analyze_current_user_key());
             echo $this->get_text('error_text');
+            $this->show_edit_notice();
             return;
         }
 
-        // User status check?
+        if ($user->status !== TNP_User::STATUS_UNSUBSCRIBED && $user->status !== TNP_User::STATUS_CONFIRMED) {
+            $this->show_admin_notice('Subscriber cannot unsubscribe, status: ' . esc_html(TNP_User::get_status_label($user->status)));
+            echo $this->get_text('error_text');
+            $this->show_edit_notice();
+            return;
+        }
 
-        $this->show_admin_notice('<a href="' . admin_url('admin.php?page=newsletter_unsubscription_index') . '" target="_blank">Edit this content</a>.');
-
+        if ($user->status === TNP_User::STATUS_UNSUBSCRIBED) {
+            $this->show_admin_notice('Subscriber already unsubscribed, showing the goodbye message');
+            $message = 'unsubscribed';
+        }
         echo $this->get_text($message . '_text');
+        $this->show_edit_notice();
     }
 
     function hook_newsletter_shortcode_dummy($message, $user) {

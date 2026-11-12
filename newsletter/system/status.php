@@ -336,13 +336,19 @@ function tnp_describe_table($table) {
                                     if (wp_remote_retrieve_response_code($response) != 200) {
                                         $res = false;
                                         $condition = 0;
-                                        $message = wp_remote_retrieve_response_message($response);
+                                        $message = esc_html(wp_remote_retrieve_response_code($response)
+                                                . ' - ' . wp_remote_retrieve_response_message($response));
+                                        $body = wp_remote_retrieve_body($response);
+                                        $headers = print_r(wp_remote_retrieve_headers($response), true);
+
+                                        $message .= '<pre style="max-width: 600px; max-height: 200px; overflow: auto; padding: 1em; border: 1px solid #ddd; background-color: #fff">' . esc_html($body) . '</pre>';
+                                        $message .= '<pre style="max-width: 600px; max-height: 200px; overflow: auto; padding: 1em; border: 1px solid #ddd; background-color: #fff">' . esc_html($headers) . '</pre>';
                                     }
                                 }
                                 ?>
 
                                 <td>
-                                    Addons version check<br>
+                                    Addons version check with WP<br>
                                 </td>
                                 <td>
                                     <?php $this->condition_flag($condition) ?>
@@ -350,12 +356,123 @@ function tnp_describe_table($table) {
                                 <td>
                                     <?php if ($condition == 0) { ?>
                                         The blog cannot contact www.thenewsletterplugin.com to check the license or the extension versions.<br>
-                                        Error: <?php echo esc_html($message) ?><br>
+                                        <?= $message ?><br>
                                     <?php } else { ?>
 
                                     <?php } ?>
                                 </td>
                             </tr>
+
+                            <?php
+                            $url = 'http://www.thenewsletterplugin.com/wp-content/extensions.json';
+
+                            $ch = curl_init($url);
+
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return the transfer as a string
+                            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects if any
+                            curl_setopt($ch, CURLOPT_TIMEOUT, 10);          // Timeout after 10 seconds
+
+                            $response = curl_exec($ch);
+
+                            $condition = 1;
+                            $message = '';
+
+                            if (curl_errno($ch)) {
+
+                                $condition = 0;
+                                $message = esc_html(curl_error($ch));
+                                curl_close($ch);
+                            } else {
+
+
+                                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                                curl_close($ch);
+
+                                if ($httpCode >= 200 && $httpCode < 300) {
+                                    // Success
+                                } else {
+                                    $condition = 0;
+                                    // Server returned an error status code (e.g., 404, 500)
+                                    $message = esc_html($httpCode) . '<br>';
+                                    $message .= '<pre style="max-width: 600px; max-height: 200px; overflow: auto; padding: 1em; border: 1px solid #ddd; background-color: #fff">' . esc_html($response) . '</pre>';
+                                }
+                            }
+                            ?>
+                            <tr>
+                                <td>
+                                    Addons version check with cURL<br>
+                                </td>
+                                <td>
+                                    <?php $this->condition_flag($condition) ?>
+                                </td>
+                                <td>
+                                    <?php if ($condition == 0) { ?>
+                                        The blog cannot contact www.thenewsletterplugin.com to check the license or the extension versions.<br>
+                                        <?= $message ?><br>
+                                    <?php } else { ?>
+
+                                    <?php } ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    WP_PROXY_HOST
+                                </td>
+                                <td></td>
+                                <td>
+                                    <?php if (defined('WP_PROXY_HOST')) { ?>
+                                        <?= esc_html(WP_PROXY_HOST) ?>
+                                    <?php } else { ?>
+                                        -
+                                    <?php } ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    WP_PROXY_BYPASS_HOSTS
+                                </td>
+                                <td></td>
+                                <td>
+                                    <?php if (defined('WP_PROXY_BYPASS_HOSTS')) { ?>
+                                        <?= esc_html(WP_PROXY_BYPASS_HOSTS) ?>
+                                    <?php } else { ?>
+                                        -
+                                    <?php } ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    WP_HTTP_BLOCK_EXTERNAL
+                                </td>
+                                <td></td>
+                                <td>
+                                    <?php if (defined('WP_HTTP_BLOCK_EXTERNAL')) { ?>
+                                        <?= WP_HTTP_BLOCK_EXTERNAL ? 'true' : 'false' ?>
+                                    <?php } else { ?>
+                                        -
+                                    <?php } ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    WP_ACCESSIBLE_HOSTS
+                                </td>
+                                <td></td>
+                                <td>
+                                    <?php if (defined('WP_ACCESSIBLE_HOSTS')) { ?>
+                                        <?= esc_html(WP_ACCESSIBLE_HOSTS) ?>
+                                    <?php } else { ?>
+                                        -
+                                    <?php } ?>
+                                </td>
+                            </tr>
+
+
 
                             <?php
                             $ip = gethostbyname($_SERVER['HTTP_HOST']);
@@ -889,7 +1006,7 @@ function tnp_describe_table($table) {
 
                             <tr>
                                 <?php
-                                // Problems with some addons die to github.com/openssl/openssl/issues/19589
+// Problems with some addons die to github.com/openssl/openssl/issues/19589
                                 $condition = function_exists('curl_version');
                                 $version = null;
                                 if ($condition) {
